@@ -47,6 +47,11 @@ export function Privacidade({ onFechar }: { onFechar: () => void }) {
                 <b className="text-ink">O que o app calcula:</b> XP, nível e o seu companheiro (espécie, nome e estágio).
               </li>
               <li>
+                <b className="text-ink">Erros do app:</b> se o app falhar com você logado, guardamos os detalhes
+                técnicos da falha (a mensagem do erro, a versão do app e o navegador) para conseguir consertar. Nada do
+                que você escreveu vai junto.
+              </li>
+              <li>
                 <b className="text-ink">No seu aparelho:</b> a sessão de login, um ajuste do relógio para o timer de foco
                 e os arquivos do app (para abrir rápido e sem internet).
               </li>

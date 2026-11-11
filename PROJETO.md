@@ -117,6 +117,8 @@ Precisa do **Node.js (versão LTS)** instalado.
 
 - 0.2: testes automáticos em `src/lib/regras.test.ts` (`npm test`), conferência automática de cada PR no GitHub (`.github/workflows/ci.yml`) e checklist de lançamento/rollback em `docs/RELEASE.md`. **Valor de XP muda nos dois lados: no SQL e no app; o teste avisa se ficarem diferentes.**
 
+- 0.2: registro de erros próprio, sem serviço de terceiros (`src/lib/erros.ts`, `src/components/TelaDeErro.tsx`, `supabase/ciclo11-erros.sql`). Erros que acontecem com a pessoa logada vão para a tabela `app_errors` (só detalhes técnicos, com e-mails e chaves removidos; no máximo 5 por abertura do app e 30 por conta por dia). **Para ver os erros:** Supabase → Table Editor → `app_errors`, ordenar por `created_at`. Se uma tela quebrar, aparece "Algo não saiu como esperado" com o botão Recarregar em vez de tela em branco.
+
 ## Como publicar uma nova versão
 
 Para versões com número, siga o checklist em `docs/RELEASE.md`.
