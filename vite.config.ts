@@ -2,15 +2,22 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
+import pkg from './package.json'
 
 export default defineConfig({
+  // Versão do app (package.json), mostrada no Perfil.
+  define: { __APP_VERSION__: JSON.stringify(pkg.version) },
+  // Expõe ao app o commit que a Vercel está publicando (não é segredo), para saber qual versão está rodando.
+  envPrefix: ['VITE_', 'VERCEL_GIT_COMMIT_SHA'],
   plugins: [
     react(),
     tailwindcss(),
     // PWA: deixa o app instalável no celular e guarda os arquivos para abrir rápido (e sem internet).
     VitePWA({
-      registerType: 'autoUpdate', // versão nova entra sozinha na próxima vez que o app abrir
-      injectRegister: 'auto',
+      // 'prompt': quando sai versão nova, o app AVISA ("Atualização disponível") e a pessoa escolhe a hora
+      // de atualizar (src/components/AvisoAtualizacao.tsx). Se ignorar, ela entra quando o app for fechado.
+      registerType: 'prompt',
+      injectRegister: false, // o registro é feito pelo próprio app (useRegisterSW)
       includeAssets: ['icon.svg', 'apple-touch-icon.png'],
       manifest: {
         name: 'WeUp! — Evolua no seu ritmo',
