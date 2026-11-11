@@ -113,6 +113,8 @@ Precisa do **Node.js (versão LTS)** instalado.
 - 2026-11-11 — Plano 0.2/0.3 do Matheus recebido; diagnóstico do repositório em https://claude.ai/artifact/BTZ8DttEutgPeRmC1WdK49. A partir daqui, o que muda vai para o `CHANGELOG.md`.
 - 0.2 (em andamento, branch `0.2/aviso-atualizacao`): aviso "Atualização disponível" (service worker em modo `prompt`, `src/components/AvisoAtualizacao.tsx`) e versão + commit no fim do Perfil.
 
+- 0.2: teste de isolamento entre contas em `supabase/teste-isolamento.sql` (roda no SQL Editor, cria duas contas falsas e desfaz tudo no fim). Resultado em 11/11/2026: tudo "ok". **Toda tabela nova precisa entrar na lista `tabelas` desse teste.**
+
 ## Como publicar uma nova versão
 
 A Vercel está ligada ao GitHub: **todo envio (`git push`) para a branch `main` publica sozinho** em https://weup-rose.vercel.app (leva ~30 s).

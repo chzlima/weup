@@ -12,6 +12,9 @@ A versão que está rodando aparece no fim da tela **Perfil** (número + commit)
 ### Mudado
 - O service worker deixou de se atualizar sozinho em silêncio: agora espera o "Atualizar" ou o app ser fechado.
 
+### Segurança
+- Teste de isolamento entre contas (`supabase/teste-isolamento.sql`): a conta A tenta ler, alterar, apagar e criar dados da conta B nas 9 tabelas e nas funções do banco. Rodado em produção em 11/11/2026: todas as verificações "ok". Rodar de novo sempre que uma tabela ou regra de segurança mudar.
+
 ## 0.1.0 — V1 (11/11/2026)
 
 Primeira versão completa, publicada em https://weup-rose.vercel.app:
