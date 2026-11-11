@@ -110,6 +110,9 @@ Precisa do **Node.js (versão LTS)** instalado.
 
 - 2026-11-11 — Privacidade e dados (LGPD): página "Privacidade" (`src/screens/Privacidade.tsx`, linkada no login, no cadastro e no Perfil; contato público em `src/lib/config.ts`: contato.weupdisciplina@gmail.com); Perfil → "Baixar meus dados" (arquivo .json com tudo) e "Excluir minha conta" (digitar EXCLUIR; função `excluir_minha_conta` em `supabase/ciclo10-excluir-conta.sql` apaga o usuário e, em cascata, todos os dados). Texto da política escrito por nós, sem revisão jurídica. Exclusão testada com conta descartável em 2026-11-11.
 
+- 2026-11-11 — Plano 0.2/0.3 do Matheus recebido; diagnóstico do repositório em https://claude.ai/artifact/BTZ8DttEutgPeRmC1WdK49. A partir daqui, o que muda vai para o `CHANGELOG.md`.
+- 0.2 (em andamento, branch `0.2/aviso-atualizacao`): aviso "Atualização disponível" (service worker em modo `prompt`, `src/components/AvisoAtualizacao.tsx`) e versão + commit no fim do Perfil.
+
 ## Como publicar uma nova versão
 
 A Vercel está ligada ao GitHub: **todo envio (`git push`) para a branch `main` publica sozinho** em https://weup-rose.vercel.app (leva ~30 s).

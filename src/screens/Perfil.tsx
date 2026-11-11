@@ -211,6 +211,10 @@ export function Perfil() {
       >
         {saindo ? 'Saindo…' : 'Sair da conta'}
       </button>
+
+      <p className="text-center text-xs text-muted">
+        WeUp! versão {__APP_VERSION__} · {import.meta.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) || 'local'}
+      </p>
     </EmBreve>
   )
 }
