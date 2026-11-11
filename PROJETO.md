@@ -5,6 +5,7 @@ App de produtividade com elementos de RPG: tarefas e hábitos geram XP, e um com
 - Blueprint completo (V1.1): https://claude.ai/artifact/RMGguSxouMxSKSYHptUS7k
 - Público inicial: estudantes da área da saúde (a confirmar)
 - Responsável pelo código: Carlos (com o Claude)
+- Código: https://github.com/chzlima/weup (privado) · App no ar: https://weup-rose.vercel.app
 
 ## Stack
 
@@ -106,13 +107,17 @@ Precisa do **Node.js (versão LTS)** instalado.
 
 ## Como publicar uma nova versão
 
-No terminal, dentro desta pasta:
+A Vercel está ligada ao GitHub: **todo envio (`git push`) para a branch `main` publica sozinho** em https://weup-rose.vercel.app (leva ~30 s).
 
 ```
-npx.cmd vercel@latest deploy --prod --yes
+git add -A
+git commit -m "O que mudou"
+git push
 ```
 
-(Use `npx.cmd`, não `npx`: o PowerShell deste PC bloqueia scripts `.ps1`.) O endereço continua o mesmo. O arquivo `.env.local` criado pela Vercel tem uma chave temporária: não compartilhe.
+Plano B (publicar direto do PC, sem passar pelo GitHub): `npx.cmd vercel@latest deploy --prod --yes`. Use `npx.cmd`, não `npx`: o PowerShell deste PC bloqueia scripts `.ps1`.
+
+O arquivo `.env.local` criado pela Vercel tem uma chave temporária: não compartilhe (ele fica fora do Git).
 
 ## Configuração no painel do Supabase
 
