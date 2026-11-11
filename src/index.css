@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+/* Identidade visual do WeUp! — use estas cores pelos nomes (ex.: bg-surface, text-brand) */
+@theme {
+  --color-bg: #121413;        /* grafite quase preto: fundo principal */
+  --color-surface: #1b1e1d;   /* cinza escuro: cartões */
+  --color-surface-2: #242826; /* cinza um pouco mais claro: elementos dentro dos cartões */
+  --color-line: #2e3330;      /* bordas e divisórias */
+  --color-brand: #14b87a;     /* verde esmeralda: cor principal */
+  --color-mint: #7ee8b8;      /* verde menta: destaque */
+  --color-gold: #d8b45a;      /* dourado discreto: recompensas */
+  --color-ink: #ecf1ee;       /* texto principal */
+  --color-muted: #9aa49f;     /* texto secundário */
+
+  --font-sans: "Nunito", ui-rounded, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+html,
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+}
+
+/* Pulinho do pet (ao tocar nele ou ao evoluir) */
+@keyframes pulinho {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  30% { transform: translateY(-14px) scale(0.96, 1.04); }
+  60% { transform: translateY(0) scale(1.05, 0.95); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; }
+}
