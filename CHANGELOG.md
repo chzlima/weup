@@ -11,6 +11,8 @@ A versão que está rodando aparece no fim da tela **Perfil** (número + commit)
 - Testes automáticos das regras do app (`npm test`): níveis, evolução do pet, datas, hábitos, agenda e mensagens de erro. Um deles confere que o XP mostrado no app é o mesmo que o banco concede.
 - O GitHub passa a conferir todo PR sozinho: testes, compilação e dependências com falha de segurança conhecida.
 - Checklist de lançamento e de rollback em `docs/RELEASE.md`.
+- Registro de erros: quando o app falha com a pessoa logada, os detalhes técnicos vão para a tabela `app_errors` (sem serviço de terceiros, sem conteúdo digitado; e-mails e chaves são removidos). Aparece em "Baixar meus dados" e está descrito na Privacidade. Precisa rodar `supabase/ciclo11-erros.sql`.
+- Tela "Algo não saiu como esperado" com botão Recarregar no lugar da tela em branco quando uma tela quebra.
 
 ### Mudado
 - O service worker deixou de se atualizar sozinho em silêncio: agora espera o "Atualizar" ou o app ser fechado.

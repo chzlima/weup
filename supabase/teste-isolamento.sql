@@ -48,7 +48,7 @@ declare
   t text;
   obt text;
   tabelas text[] := array['tasks', 'projects', 'habits', 'habit_logs', 'events',
-                          'xp_transactions', 'user_pets', 'focus_sessions', 'restarts'];
+                          'xp_transactions', 'user_pets', 'focus_sessions', 'restarts', 'app_errors'];
   te text[] := '{}';
   es text[] := '{}';
   ob text[] := '{}';
@@ -75,6 +75,7 @@ begin
     insert into public.focus_sessions (user_id, minutos) values (a, 25);
     insert into public.focus_sessions (user_id, minutos) values (b, 25) returning id into fb;
     insert into public.restarts (user_id, motivo) values (a, 'outro'), (b, 'outro');
+    insert into public.app_errors (user_id, origem, mensagem, versao, commit) values (a, 'erro', 'Erro A', '0', 'teste'), (b, 'erro', 'Erro B', '0', 'teste');
 
     -- 3) A partir daqui, age como a conta A, igual ao app
     perform set_config('role', 'authenticated', true);
@@ -125,6 +126,8 @@ begin
     te := te || 'focus_sessions · A inicia foco em nome de B'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
     obt := pg_temp.tentar(format('insert into public.restarts (user_id, motivo) values (%L, %L)', b, 'outro'));
     te := te || 'restarts · A registra recomeço em nome de B'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
+    obt := pg_temp.tentar(format('insert into public.app_errors (user_id, origem, mensagem, versao, commit) values (%L, %L, %L, %L, %L)', b, 'erro', 'x', '0', 'teste'));
+    te := te || 'app_errors · A registra erro em nome de B'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
 
     -- 6) Usar coisas de B a partir dos próprios dados
     obt := pg_temp.tentar(format('insert into public.habit_logs (user_id, habit_id, dia) values (%L, %L, public.hoje_br() - 1)', a, hb));

@@ -12,6 +12,7 @@ const TABELAS = [
   'user_pets',
   'focus_sessions',
   'restarts',
+  'app_errors',
 ] as const
 
 // Junta tudo o que o WeUp! guarda sobre a pessoa num arquivo .json e baixa.
