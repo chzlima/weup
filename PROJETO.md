@@ -106,7 +106,7 @@ Precisa do **Node.js (versão LTS)** instalado.
   - O navegador embutido do Claude não suporta service workers, então a instalação e o modo offline precisam ser testados no celular.
 
 - 2026-11-11 — Código no GitHub (chzlima/weup) com publicação automática pela Vercel.
-- 2026-11-11 — "Esqueci minha senha": link na tela de login → e-mail do Supabase → ao abrir o link, tela "Criar senha nova" (`src/screens/NovaSenha.tsx`). Link vencido mostra aviso em português. Testado sem enviar e-mail de verdade; falta testar o caminho completo com um e-mail real.
+- 2026-11-11 — "Esqueci minha senha": link na tela de login → e-mail do Supabase → ao abrir o link, tela "Criar senha nova" (`src/screens/NovaSenha.tsx`). Link vencido mostra aviso em português. Caminho completo testado com e-mail real em 2026-11-11.
 
 ## Como publicar uma nova versão
 
