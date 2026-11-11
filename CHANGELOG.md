@@ -12,6 +12,9 @@ A versão que está rodando aparece no fim da tela **Perfil** (número + commit)
 ### Mudado
 - O service worker deixou de se atualizar sozinho em silêncio: agora espera o "Atualizar" ou o app ser fechado.
 
+### Corrigido
+- Botão **Atualizar** do aviso de versão nova não fazia nada quando a versão tinha sido achada ao voltar para o app (a versão nova assumia, mas a tela não recarregava). Agora o app recarrega por conta própria, com uma garantia de 4 segundos.
+
 ### Segurança
 - Teste de isolamento entre contas (`supabase/teste-isolamento.sql`): a conta A tenta ler, alterar, apagar e criar dados da conta B nas 9 tabelas e nas funções do banco. Rodado em produção em 11/11/2026: todas as verificações "ok". Rodar de novo sempre que uma tabela ou regra de segurança mudar.
 
