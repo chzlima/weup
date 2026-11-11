@@ -2,6 +2,8 @@ import { useState, type FormEvent, type ReactNode } from 'react'
 import { linkDoEmailInvalido, supabase } from '../lib/supabase'
 import { traduzErro } from '../lib/auth'
 import { Pet } from '../components/Pet'
+import { acabouDeExcluirConta } from '../lib/conta'
+import { Privacidade } from './Privacidade'
 
 type Modo = 'entrar' | 'cadastrar' | 'confirmar' | 'recuperar' | 'linkEnviado'
 
@@ -17,6 +19,8 @@ export function Entrar() {
     return 'Esse link do e-mail venceu ou já foi usado. Peça um novo (em "Esqueci minha senha") ou entre normalmente.'
   })
   const [enviando, setEnviando] = useState(false)
+  const [contaApagada] = useState(acabouDeExcluirConta)
+  const [vendoPrivacidade, setVendoPrivacidade] = useState(false)
 
   const cadastro = modo === 'cadastrar'
 
@@ -145,6 +149,11 @@ export function Entrar() {
 
   return (
     <Moldura>
+      {contaApagada && (
+        <p role="status" className="rounded-2xl border border-line bg-surface px-4 py-3 text-center text-sm text-muted">
+          Sua conta e todos os seus dados foram apagados. Obrigado por ter usado o WeUp!.
+        </p>
+      )}
       <form onSubmit={enviar} className="space-y-3 rounded-3xl border border-line bg-surface p-5" noValidate>
         <h2 className="text-lg font-extrabold">{cadastro ? 'Criar sua conta' : 'Entrar'}</h2>
 
@@ -175,6 +184,16 @@ export function Entrar() {
           {enviando ? 'Aguarde…' : cadastro ? 'Criar conta' : 'Entrar'}
         </button>
 
+        {cadastro && (
+          <p className="text-center text-xs text-muted">
+            Ao criar a conta, você concorda com a nossa{' '}
+            <button type="button" onClick={() => setVendoPrivacidade(true)} className="font-semibold text-mint underline">
+              política de privacidade
+            </button>
+            .
+          </p>
+        )}
+
         {!cadastro && (
           <button
             type="button"
@@ -196,6 +215,16 @@ export function Entrar() {
           {cadastro ? 'Entrar' : 'Criar conta'}
         </button>
       </p>
+
+      <button
+        type="button"
+        onClick={() => setVendoPrivacidade(true)}
+        className="mx-auto text-xs font-semibold text-muted underline-offset-4 hover:text-ink hover:underline"
+      >
+        Privacidade
+      </button>
+
+      {vendoPrivacidade && <Privacidade onFechar={() => setVendoPrivacidade(false)} />}
     </Moldura>
   )
 }
