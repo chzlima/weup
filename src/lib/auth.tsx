@@ -76,6 +76,8 @@ export function traduzErro(msg: string): string {
   if (m.includes('unable to validate email') || m.includes('invalid format') || m.includes('is invalid'))
     return 'Este e-mail não parece válido.'
   if (m.includes('rate limit') || m.includes('too many')) return 'Muitas tentativas seguidas. Espere um pouco e tente de novo.'
+  if (m.includes('error sending'))
+    return 'Não conseguimos enviar o e-mail agora. Tente de novo em alguns minutos; se continuar, fale com a gente pelo e-mail da página de Privacidade.'
   if (m.includes('failed to fetch') || m.includes('network')) return 'Sem conexão com o servidor. Verifique sua internet.'
   return 'Algo deu errado. Tente novamente.'
 }
