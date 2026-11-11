@@ -73,6 +73,10 @@ export function Privacidade({ onFechar }: { onFechar: () => void }) {
                 <b className="text-ink">Vercel:</b> hospedagem do site do app.
               </li>
               <li>
+                <b className="text-ink">GitHub:</b> guarda uma cópia de segurança semanal do banco, criptografada, por
+                até 90 dias (para recuperar os dados se algo der errado).
+              </li>
+              <li>
                 <b className="text-ink">Google Fonts:</b> a fonte do app é carregada do Google, que recebe o acesso
                 (como acontece em muitos sites).
               </li>
@@ -95,7 +99,8 @@ export function Privacidade({ onFechar }: { onFechar: () => void }) {
               </li>
               <li>
                 <b className="text-ink">Apagar tudo:</b> em Perfil → <i>Excluir minha conta</i>. A conta e todos os
-                dados são apagados na hora e não dá para recuperar.
+                dados são apagados do app na hora e não dá para recuperar. As cópias de segurança criptografadas que
+                ainda os contenham somem sozinhas em até 90 dias.
               </li>
               <li>
                 <b className="text-ink">Tirar dúvidas ou fazer outros pedidos:</b> pelo e-mail acima.
