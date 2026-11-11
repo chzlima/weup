@@ -108,7 +108,7 @@ Precisa do **Node.js (versão LTS)** instalado.
 - 2026-11-11 — Código no GitHub (chzlima/weup) com publicação automática pela Vercel.
 - 2026-11-11 — "Esqueci minha senha": link na tela de login → e-mail do Supabase → ao abrir o link, tela "Criar senha nova" (`src/screens/NovaSenha.tsx`). Link vencido mostra aviso em português. Caminho completo testado com e-mail real em 2026-11-11.
 
-- 2026-11-11 — Privacidade e dados (LGPD): página "Privacidade" (`src/screens/Privacidade.tsx`, linkada no login, no cadastro e no Perfil; contato público em `src/lib/config.ts`: contato.weupdisciplina@gmail.com); Perfil → "Baixar meus dados" (arquivo .json com tudo) e "Excluir minha conta" (digitar EXCLUIR; função `excluir_minha_conta` em `supabase/ciclo10-excluir-conta.sql` apaga o usuário e, em cascata, todos os dados). Texto da política escrito por nós, sem revisão jurídica.
+- 2026-11-11 — Privacidade e dados (LGPD): página "Privacidade" (`src/screens/Privacidade.tsx`, linkada no login, no cadastro e no Perfil; contato público em `src/lib/config.ts`: contato.weupdisciplina@gmail.com); Perfil → "Baixar meus dados" (arquivo .json com tudo) e "Excluir minha conta" (digitar EXCLUIR; função `excluir_minha_conta` em `supabase/ciclo10-excluir-conta.sql` apaga o usuário e, em cascata, todos os dados). Texto da política escrito por nós, sem revisão jurídica. Exclusão testada com conta descartável em 2026-11-11.
 
 ## Como publicar uma nova versão
 
