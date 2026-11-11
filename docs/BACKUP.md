@@ -24,7 +24,7 @@ New repository secret**.
 
 | Nome | O que colocar |
 |---|---|
-| `SUPABASE_DB_URL` | Supabase → botão **Connect** (topo) → **Session pooler** → copie o endereço e troque `[YOUR-PASSWORD]` pela senha do banco. Precisa ser o *Session pooler*: o endereço "Direct" não funciona a partir do GitHub. |
+| `SUPABASE_DB_URL` | Supabase → botão **Connect** (topo) → aba **Direct** → método **Session pooler** → copie o endereço e troque `[YOUR-PASSWORD]` (com os colchetes) pela senha do banco, de preferência só com letras e números. Precisa ser o *Session pooler*: o endereço "Direct" não funciona a partir do GitHub. |
 | `BACKUP_PASSPHRASE` | Uma senha longa inventada por você (4 ou 5 palavras aleatórias servem). |
 
 - **Não lembra a senha do banco?** Supabase → Project Settings → Database → *Reset database password*. O app não usa
