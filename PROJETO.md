@@ -56,7 +56,7 @@ Precisa do **Node.js (versão LTS)** instalado.
 - 2026-11-10 — Ciclo 2: login e cadastro com e-mail e senha (Supabase Auth). O app só abre para quem está logado; o nome digitado no cadastro aparece na tela Hoje; o Perfil mostra a conta e tem o botão "Sair". O nome fica salvo nos dados do usuário (`user_metadata.nome`); a tabela `profiles` entra no Ciclo 3, junto com as outras tabelas.
   - Arquivos novos: `src/lib/auth.tsx` (quem está logado + erros em português) e `src/screens/Entrar.tsx` (tela de entrada).
   - Corrigido: `src/lib/supabase.ts` agora usa os valores de `config.ts` (antes exigia um `.env` que não existe).
-  - Ainda não tem "esqueci minha senha".
+  - "Esqueci minha senha" adicionado em 2026-11-11 (ver abaixo).
 - 2026-11-10 — Publicação adiantada (parte do Ciclo 9): app no ar em https://weup-rose.vercel.app (projeto `weup` no time `weup4` da Vercel). Ainda falta a parte de instalar como app no celular.
 
 - 2026-11-10 — Ciclo 3: tarefas e projetos salvos no Supabase (tabelas `tasks` e `projects`, criadas por `supabase/ciclo3.sql`, com RLS: cada usuário só vê os próprios dados).
@@ -104,6 +104,9 @@ Precisa do **Node.js (versão LTS)** instalado.
   - Service worker guarda os arquivos do app e a fonte (abre rápido e sem internet); dados do Supabase nunca são guardados. Versão nova entra sozinha na próxima abertura.
   - Aviso dourado "Sem internet" no topo; seção "App no celular" no Perfil (botão de instalar no Android/Chrome; passo a passo no iPhone).
   - O navegador embutido do Claude não suporta service workers, então a instalação e o modo offline precisam ser testados no celular.
+
+- 2026-11-11 — Código no GitHub (chzlima/weup) com publicação automática pela Vercel.
+- 2026-11-11 — "Esqueci minha senha": link na tela de login → e-mail do Supabase → ao abrir o link, tela "Criar senha nova" (`src/screens/NovaSenha.tsx`). Link vencido mostra aviso em português. Testado sem enviar e-mail de verdade; falta testar o caminho completo com um e-mail real.
 
 ## Como publicar uma nova versão
 

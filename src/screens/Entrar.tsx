@@ -1,9 +1,9 @@
 import { useState, type FormEvent, type ReactNode } from 'react'
-import { supabase } from '../lib/supabase'
+import { linkDoEmailInvalido, supabase } from '../lib/supabase'
 import { traduzErro } from '../lib/auth'
 import { Pet } from '../components/Pet'
 
-type Modo = 'entrar' | 'cadastrar' | 'confirmar'
+type Modo = 'entrar' | 'cadastrar' | 'confirmar' | 'recuperar' | 'linkEnviado'
 
 // Tela de entrada: login e cadastro com e-mail e senha.
 export function Entrar() {
@@ -11,7 +11,11 @@ export function Entrar() {
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
-  const [erro, setErro] = useState('')
+  const [erro, setErro] = useState(() => {
+    if (!linkDoEmailInvalido) return ''
+    history.replaceState(null, '', window.location.pathname) // tira o erro do endereço
+    return 'Esse link do e-mail venceu ou já foi usado. Peça um novo (em "Esqueci minha senha") ou entre normalmente.'
+  })
   const [enviando, setEnviando] = useState(false)
 
   const cadastro = modo === 'cadastrar'
@@ -49,6 +53,77 @@ export function Entrar() {
     } finally {
       setEnviando(false)
     }
+  }
+
+  // Esqueci a senha: o Supabase manda um link; ao abrir, o app mostra a tela de nova senha.
+  const pedirLink = async (e: FormEvent) => {
+    e.preventDefault()
+    setErro('')
+    if (!/^\S+@\S+\.\S+$/.test(email.trim())) return setErro('Digite o e-mail da sua conta.')
+    setEnviando(true)
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: window.location.origin,
+      })
+      // Por segurança, a resposta é a mesma exista ou não uma conta com esse e-mail.
+      if (error && !/not.*found/i.test(error.message)) return setErro(traduzErro(error.message))
+      setModo('linkEnviado')
+    } catch (err) {
+      setErro(traduzErro(err instanceof Error ? err.message : String(err)))
+    } finally {
+      setEnviando(false)
+    }
+  }
+
+  if (modo === 'recuperar') {
+    return (
+      <Moldura>
+        <form onSubmit={pedirLink} className="space-y-3 rounded-3xl border border-line bg-surface p-5" noValidate>
+          <h2 className="text-lg font-extrabold">Esqueci minha senha</h2>
+          <p className="text-sm text-muted">Digite o e-mail da sua conta. Vamos mandar um link para criar uma senha nova.</p>
+          <Campo label="E-mail" type="email" value={email} onChange={setEmail} autoComplete="email" />
+          {erro && (
+            <p role="alert" className="rounded-xl bg-red-500/10 px-3 py-2 text-sm text-red-300">
+              {erro}
+            </p>
+          )}
+          <button
+            type="submit"
+            disabled={enviando}
+            className="w-full rounded-2xl bg-brand py-3 font-bold text-bg transition-opacity disabled:opacity-60"
+          >
+            {enviando ? 'Enviando…' : 'Mandar link'}
+          </button>
+        </form>
+        <p className="text-center text-sm text-muted">
+          Lembrou?{' '}
+          <button
+            type="button"
+            onClick={() => trocarModo('entrar')}
+            className="font-bold text-mint underline-offset-4 hover:underline"
+          >
+            Voltar para o login
+          </button>
+        </p>
+      </Moldura>
+    )
+  }
+
+  if (modo === 'linkEnviado') {
+    return (
+      <Moldura>
+        <div className="space-y-4 rounded-3xl border border-line bg-surface p-6 text-center">
+          <h2 className="text-xl font-extrabold">Confira seu e-mail</h2>
+          <p className="text-sm text-muted">
+            Se existir uma conta com <span className="font-semibold text-ink">{email.trim()}</span>, o link para criar
+            uma senha nova já está a caminho. Olhe também a caixa de spam.
+          </p>
+          <button onClick={() => trocarModo('entrar')} className="w-full rounded-2xl bg-brand py-3 font-bold text-bg">
+            Voltar para o login
+          </button>
+        </div>
+      </Moldura>
+    )
   }
 
   if (modo === 'confirmar') {
@@ -99,6 +174,16 @@ export function Entrar() {
         >
           {enviando ? 'Aguarde…' : cadastro ? 'Criar conta' : 'Entrar'}
         </button>
+
+        {!cadastro && (
+          <button
+            type="button"
+            onClick={() => trocarModo('recuperar')}
+            className="w-full py-1 text-center text-sm font-semibold text-muted hover:text-ink"
+          >
+            Esqueci minha senha
+          </button>
+        )}
       </form>
 
       <p className="text-center text-sm text-muted">
@@ -115,7 +200,7 @@ export function Entrar() {
   )
 }
 
-function Moldura({ children }: { children: ReactNode }) {
+export function Moldura({ children }: { children: ReactNode }) {
   return (
     <div className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-5 px-4 py-10">
       <div className="flex flex-col items-center text-center">
@@ -130,7 +215,7 @@ function Moldura({ children }: { children: ReactNode }) {
   )
 }
 
-function Campo(props: {
+export function Campo(props: {
   label: string
   value: string
   onChange: (v: string) => void

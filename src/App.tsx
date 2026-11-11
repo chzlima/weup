@@ -5,6 +5,7 @@ import { useAuth } from './lib/auth'
 import { PetProvider, usePet } from './lib/pet'
 import { useOnline } from './lib/instalar'
 import { Entrar } from './screens/Entrar'
+import { NovaSenha } from './screens/NovaSenha'
 import { EscolherPet } from './screens/EscolherPet'
 import { Hoje } from './screens/Hoje'
 import { Planejar } from './screens/Planejar'
@@ -13,7 +14,7 @@ import { Pets } from './screens/Pets'
 import { Perfil } from './screens/Perfil'
 
 export default function App() {
-  const { session, carregando } = useAuth()
+  const { session, carregando, recuperandoSenha } = useAuth()
   const online = useOnline()
 
   const aviso = !online && (
@@ -33,6 +34,15 @@ export default function App() {
       <>
         {aviso}
         <Entrar />
+      </>
+    )
+
+  // Abriu pelo link de "Esqueci minha senha": primeiro cria a senha nova.
+  if (recuperandoSenha)
+    return (
+      <>
+        {aviso}
+        <NovaSenha />
       </>
     )
 
