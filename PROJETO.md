@@ -129,3 +129,7 @@ O arquivo `.env.local` criado pela Vercel tem uma chave temporária: não compar
 - **Authentication → URL Configuration → Site URL:** `https://weup-rose.vercel.app`. É para onde o link de confirmação do e-mail leva.
 - **Redirect URLs:** `http://localhost:5173` (para testar no PC) e `https://weup-rose.vercel.app`.
 - A confirmação por e-mail vem ligada por padrão (Authentication → Sign In / Providers → Email → "Confirm email").
+- **E-mails (SMTP próprio, desde 2026-11-11):** saem pelo Gmail `contato.weupdisciplina@gmail.com` (Authentication → Emails → SMTP Settings: host `smtp.gmail.com`, porta 587, usuário = o próprio e-mail, senha = **senha de app** do Google, criada com a verificação em 2 etapas ligada nessa conta). A senha de app NÃO fica no projeto. Limite de envio: Authentication → Rate Limits → 100/hora.
+  - Se der "Error sending … email": ver Logs → **Auth** (não "Edge"); `535 BadCredentials` = senha de app errada ou criada na conta errada.
+  - Os primeiros e-mails podem cair no spam (e o Gmail desativa os links lá). Avisar quem for testar para olhar o spam e marcar "Não é spam".
+  - Futuro: domínio próprio + serviço como Resend para entregar melhor.
