@@ -1,0 +1,29 @@
+name: Conferir
+
+# Roda em todo PR e em todo envio para a main: se o app não compila ou um teste falha, aparece um X vermelho no PR.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  conferir:
+    runs-on: ubuntu-latest
+    env:
+      TZ: America/Sao_Paulo
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Testes das regras
+        run: npm test
+      - name: Compilar o app
+        run: npm run build
+      - name: Dependências com falha de segurança conhecida
+        run: npm audit --omit=dev --audit-level=high

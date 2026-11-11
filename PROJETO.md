@@ -115,7 +115,11 @@ Precisa do **Node.js (versão LTS)** instalado.
 
 - 0.2: teste de isolamento entre contas em `supabase/teste-isolamento.sql` (roda no SQL Editor, cria duas contas falsas e desfaz tudo no fim). Resultado em 11/11/2026: tudo "ok". **Toda tabela nova precisa entrar na lista `tabelas` desse teste.**
 
+- 0.2: testes automáticos em `src/lib/regras.test.ts` (`npm test`), conferência automática de cada PR no GitHub (`.github/workflows/ci.yml`) e checklist de lançamento/rollback em `docs/RELEASE.md`. **Valor de XP muda nos dois lados: no SQL e no app; o teste avisa se ficarem diferentes.**
+
 ## Como publicar uma nova versão
+
+Para versões com número, siga o checklist em `docs/RELEASE.md`.
 
 A Vercel está ligada ao GitHub: **todo envio (`git push`) para a branch `main` publica sozinho** em https://weup-rose.vercel.app (leva ~30 s).
 

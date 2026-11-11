@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite --host",
     "build": "tsc --noEmit && vite build",
-    "preview": "vite preview --host"
+    "preview": "vite preview --host",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.0",
@@ -22,6 +24,7 @@
     "tailwindcss": "^4.1.0",
     "typescript": "~5.8.3",
     "vite": "^6.3.5",
-    "vite-plugin-pwa": "^2.0.0"
+    "vite-plugin-pwa": "^2.0.0",
+    "vitest": "^3.2.7"
   }
 }

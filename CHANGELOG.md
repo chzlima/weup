@@ -8,6 +8,9 @@ A versão que está rodando aparece no fim da tela **Perfil** (número + commit)
 ### Adicionado
 - Aviso **"Atualização disponível"** quando sai uma versão nova: a pessoa escolhe a hora de atualizar ("Atualizar" ou "Depois"). O app procura versão nova sempre que volta para a tela e a cada hora.
 - Versão do app e commit publicado no fim da tela Perfil.
+- Testes automáticos das regras do app (`npm test`): níveis, evolução do pet, datas, hábitos, agenda e mensagens de erro. Um deles confere que o XP mostrado no app é o mesmo que o banco concede.
+- O GitHub passa a conferir todo PR sozinho: testes, compilação e dependências com falha de segurança conhecida.
+- Checklist de lançamento e de rollback em `docs/RELEASE.md`.
 
 ### Mudado
 - O service worker deixou de se atualizar sozinho em silêncio: agora espera o "Atualizar" ou o app ser fechado.
