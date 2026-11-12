@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { IconCheck, IconMais } from './Icons'
+import { IconCheck, IconEstrela, IconMais } from './Icons'
 import { descreverPrazo, formatarData, nomeCategoria, xpDaTarefa, type Tarefa } from '../lib/tarefas'
 import { XP_HABITO, type Habito } from '../lib/habitos'
 
@@ -12,6 +12,7 @@ export function ItemLinha(props: {
   onAlternar: () => void
   onEditar: () => void
   acoes?: ReactNode
+  extra?: ReactNode // botão ao lado do "…" (ex.: a estrela de prioridade)
 }) {
   const { titulo, feito } = props
   return (
@@ -35,6 +36,7 @@ export function ItemLinha(props: {
         </span>
         <span className="shrink-0 text-xs font-bold text-gold">+{props.xp} XP</span>
       </button>
+      {props.extra}
       <button
         onClick={props.onEditar}
         aria-label={`Editar "${titulo}"`}
@@ -53,6 +55,9 @@ export function TarefaItem(props: {
   projeto?: string
   mostrarData?: boolean
   nota?: string // texto extra nos detalhes (ex.: "de ontem")
+  prioridade?: boolean // está entre as prioridades do dia
+  podeMarcar?: boolean // ainda cabe mais uma prioridade
+  onPrioridade?: () => void // tocar na estrela
   acoes?: ReactNode
   onAlternar: () => void
   onEditar: () => void
@@ -71,6 +76,18 @@ export function TarefaItem(props: {
       onAlternar={props.onAlternar}
       onEditar={props.onEditar}
       acoes={props.acoes}
+      extra={
+        props.onPrioridade && (props.prioridade || props.podeMarcar) ? (
+          <button
+            onClick={props.onPrioridade}
+            aria-label={props.prioridade ? `Tirar "${t.titulo}" das prioridades` : `Marcar "${t.titulo}" como prioridade`}
+            aria-pressed={!!props.prioridade}
+            className={`rounded-xl p-2 transition-colors ${props.prioridade ? 'text-gold' : 'text-muted hover:text-gold'}`}
+          >
+            <IconEstrela className="h-5 w-5" cheia={props.prioridade} />
+          </button>
+        ) : undefined
+      }
     />
   )
 }
