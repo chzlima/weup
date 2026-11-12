@@ -29,6 +29,11 @@ A versão que está rodando aparece no fim da tela **Perfil** (número + commit)
 - **Nova cena de evolução:** a forma antiga brilha, um clarão, e a nova aparece com o nome.
 - Precisa rodar `supabase/ciclo21-caminhos.sql` **antes** do merge (o app passa a ler a coluna `caminho`).
 
+### Pet Rework — ciclo 6 (diário de memórias)
+- **Aba Diário** em Pets: os marcos da jornada com a data real, do mais recente para o mais antigo, agrupados por mês. Entram o dia em que vocês se conheceram, as primeiras vezes (tarefa, hábito, foco, projeto), os marcos de 1.000, 5.000, 10.000 e 25.000 XP, os níveis 5 a 25, cada evolução (com a forma do pet), a primeira revisão da semana, o primeiro recomeço, cada nível de laço e o caminho escolhido.
+- As memórias são criadas só pelo banco, a partir do histórico, uma vez cada; quem já usava o app ganha o passado reconstruído. O diário é privado.
+- Política de privacidade: passa a citar o diário. Precisa rodar `supabase/ciclo22-memorias.sql`.
+
 - **Corrigido:** o teste de isolamento (`supabase/teste-isolamento.sql`) tinha sido esvaziado sem querer na revisão semanal; foi restaurado, com as verificações da revisão semanal e do pet.
 
 ### Adicionado

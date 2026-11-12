@@ -46,7 +46,7 @@ export function Privacidade({ onFechar }: { onFechar: () => void }) {
                 check-in de energia de cada dia (baixa, normal ou alta) e as respostas da revisão semanal.
               </li>
               <li>
-                <b className="text-ink">O que o app calcula:</b> XP, nível e o seu companheiro (espécie, nome, estágio e o laço com você, que conta os dias em que vocês interagiram).
+                <b className="text-ink">O que o app calcula:</b> XP, nível e o seu companheiro (espécie, nome, estágio e o laço com você, que conta os dias em que vocês interagiram) e o diário de memórias, montado a partir dos seus marcos (primeiras vezes, níveis, evoluções).
               </li>
               <li>
                 <b className="text-ink">Erros do app:</b> se o app falhar com você logado, guardamos os detalhes
