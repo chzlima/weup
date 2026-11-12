@@ -3,6 +3,15 @@
 O que mudou em cada versão. A mais nova fica no topo.
 A versão que está rodando aparece no fim da tela **Perfil** (número + commit).
 
+## Não lançado (a caminho da 0.3.0)
+
+### Adicionado
+- Seção **"De dias anteriores"** na tela Hoje: as tarefas que ficaram para trás aparecem separadas, com de quando são ("de ontem", "de 3 dias atrás") e botões para trazer para **Hoje**, deixar para **Amanhã** ou tirar a data (**Sem data**). Com mais de uma, há o atalho "Trazer tudo para hoje".
+- O mesmo grupo "De dias anteriores" na lista de tarefas do Planejar.
+
+### Mudado
+- Tarefas de dias anteriores deixaram de contar no "Progresso de hoje": só entram quando a pessoa traz para hoje. O dia não começa mais devendo.
+
 ## 0.2.0 — Stability & Trust (11/11/2026)
 
 Versão de segurança e estabilidade: nada muda no jeito de usar o app, mas agora ele avisa quando há atualização,

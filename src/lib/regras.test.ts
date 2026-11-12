@@ -11,7 +11,8 @@ import { descreverDias, XP_HABITO } from './habitos'
 import { formatarHora, ordemCompromisso, type Compromisso } from './agenda'
 import { XP_FOCO } from './foco'
 import {
-  XP_DIFICULDADE, XP_ETAPA, checar, concluidaHoje, diaDaSemana, diaISO, formatarData, somarDias, xpDaTarefa,
+  XP_DIFICULDADE, XP_ETAPA, checar, concluidaHoje, descreverAnterior, diaDaSemana, diaISO, diasEntre, formatarData,
+  separarPendentes, somarDias, xpDaTarefa,
   type Tarefa,
 } from './tarefas'
 import regrasDoBanco from '../../supabase/ciclo7.sql?raw'
@@ -117,6 +118,36 @@ describe('datas', () => {
     expect(concluidaHoje(tarefa(new Date().toISOString()))).toBe(true)
     expect(concluidaHoje(tarefa(ontem.toISOString()))).toBe(false)
     expect(concluidaHoje(tarefa(null))).toBe(false)
+  })
+})
+
+describe('tarefas de dias anteriores', () => {
+  const t = (id: string, data: string | null, concluida_em: string | null = null) => ({ id, data, concluida_em }) as Tarefa
+  const hoje = '2026-11-11'
+
+  it('separa o que é de hoje do que ficou para trás, sem misturar feitas, futuras e sem data', () => {
+    const { deHoje, anteriores } = separarPendentes(
+      [
+        t('hoje', hoje), t('ontem', '2026-11-10'), t('antiga', '2026-10-01'), t('amanha', '2026-11-12'),
+        t('sem-data', null), t('feita', '2026-11-09', '2026-11-09T12:00:00Z'),
+      ],
+      hoje,
+    )
+    expect(deHoje.map((x) => x.id)).toEqual(['hoje'])
+    expect(anteriores.map((x) => x.id)).toEqual(['antiga', 'ontem']) // a mais antiga primeiro
+  })
+
+  it('conta os dias entre duas datas, atravessando mês e ano', () => {
+    expect(diasEntre('2026-11-10', '2026-11-11')).toBe(1)
+    expect(diasEntre('2026-10-31', '2026-11-02')).toBe(2)
+    expect(diasEntre('2025-12-31', '2026-01-01')).toBe(1)
+    expect(diasEntre('2026-11-11', '2026-11-11')).toBe(0)
+  })
+
+  it('diz de quando é a tarefa, sem tom de cobrança', () => {
+    expect(descreverAnterior('2026-11-10', hoje)).toBe('de ontem')
+    expect(descreverAnterior('2026-11-08', hoje)).toBe('de 3 dias atrás')
+    expect(descreverAnterior('2026-10-01', hoje)).toMatch(/^de 1 de out/)
   })
 })
 

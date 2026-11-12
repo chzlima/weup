@@ -1,8 +1,9 @@
+import type { ReactNode } from 'react'
 import { IconCheck, IconMais } from './Icons'
 import { formatarData, nomeCategoria, xpDaTarefa, type Tarefa } from '../lib/tarefas'
 import { XP_HABITO, type Habito } from '../lib/habitos'
 
-// Linha genérica: círculo para concluir + botão "…" para editar.
+// Linha genérica: círculo para concluir + botão "…" para editar. "acoes" são botões extras embaixo da linha.
 export function ItemLinha(props: {
   titulo: string
   detalhes: string
@@ -10,10 +11,12 @@ export function ItemLinha(props: {
   feito: boolean
   onAlternar: () => void
   onEditar: () => void
+  acoes?: ReactNode
 }) {
   const { titulo, feito } = props
   return (
-    <li className="flex items-center gap-1 rounded-2xl border border-line bg-surface pr-1 transition-colors hover:bg-surface-2">
+    <li className="rounded-2xl border border-line bg-surface transition-colors hover:bg-surface-2">
+      <div className="flex items-center gap-1 pr-1">
       <button
         onClick={props.onAlternar}
         aria-label={feito ? `Desmarcar "${titulo}"` : `Concluir "${titulo}"`}
@@ -39,6 +42,8 @@ export function ItemLinha(props: {
       >
         <IconMais className="h-5 w-5" />
       </button>
+      </div>
+      {props.acoes && <div className="flex flex-wrap gap-2 px-4 pb-3">{props.acoes}</div>}
     </li>
   )
 }
@@ -47,11 +52,13 @@ export function TarefaItem(props: {
   tarefa: Tarefa
   projeto?: string
   mostrarData?: boolean
+  nota?: string // texto extra nos detalhes (ex.: "de ontem")
+  acoes?: ReactNode
   onAlternar: () => void
   onEditar: () => void
 }) {
   const t = props.tarefa
-  const detalhes = [props.projeto ?? nomeCategoria(t.categoria), props.mostrarData ? formatarData(t.data) : null]
+  const detalhes = [props.projeto ?? nomeCategoria(t.categoria), props.mostrarData ? formatarData(t.data) : null, props.nota]
     .filter(Boolean)
     .join(' · ')
   return (
@@ -62,6 +69,7 @@ export function TarefaItem(props: {
       feito={!!t.concluida_em}
       onAlternar={props.onAlternar}
       onEditar={props.onEditar}
+      acoes={props.acoes}
     />
   )
 }

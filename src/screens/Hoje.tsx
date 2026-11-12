@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { Pet } from '../components/Pet'
 import { HabitoItem, TarefaItem } from '../components/TarefaItem'
 import { TarefaForm } from '../components/TarefaForm'
@@ -10,12 +10,25 @@ import { IconPlus, IconRecomecar } from '../components/Icons'
 import { useAuth } from '../lib/auth'
 import { usePet } from '../lib/pet'
 import { useDados } from '../lib/useDados'
-import { concluidaHoje, diaDaSemana, hojeISO, somarDias, type Tarefa } from '../lib/tarefas'
+import {
+  amanhaISO, concluidaHoje, descreverAnterior, diaDaSemana, hojeISO, separarPendentes, somarDias, type Tarefa,
+} from '../lib/tarefas'
 import type { Habito } from '../lib/habitos'
 import { calcularNivel } from '../lib/xp'
 import { ordemCompromisso, type Compromisso } from '../lib/agenda'
 import { Aviso } from './planejar/Vazio'
 import { LinhaCompromisso } from './planejar/Agenda'
+
+function BotaoReagendar({ onClick, children }: { onClick: () => void; children: ReactNode }) {
+  return (
+    <button
+      onClick={onClick}
+      className="rounded-full border border-line px-3 py-1 text-xs font-semibold text-muted transition-colors hover:border-brand hover:text-ink"
+    >
+      {children}
+    </button>
+  )
+}
 
 function saudacao() {
   const h = new Date().getHours()
@@ -35,12 +48,12 @@ export function Hoje() {
   const [recomecando, setRecomecando] = useState(false)
 
   const hoje = hojeISO()
-  // Para hoje = o que está planejado até hoje e ainda não foi feito + o que foi concluído hoje.
-  const pendentes = dados.tarefas
-    .filter((t) => !t.concluida_em && t.data && t.data <= hoje)
-    .sort((a, b) => a.data!.localeCompare(b.data!))
+  // Para hoje = o que está planejado para hoje + o que foi concluído hoje.
+  // O que ficou de dias anteriores aparece numa seção própria e não pesa no progresso do dia.
+  const { deHoje, anteriores } = separarPendentes(dados.tarefas, hoje)
+  const pendentes = [...deHoje, ...anteriores]
   const feitasHoje = dados.tarefas.filter(concluidaHoje)
-  const lista = [...pendentes, ...feitasHoje]
+  const lista = [...deHoje, ...feitasHoje]
 
   // Hábitos programados para hoje (os já feitos vão para o fim).
   const habitosHoje = dados.habitos
@@ -176,6 +189,43 @@ export function Hoje() {
           </ul>
         )}
       </section>
+
+      {/* O que ficou de dias anteriores: a pessoa decide o que fazer, sem cobrança */}
+      {!dados.carregando && anteriores.length > 0 && (
+        <section>
+          <div className="mb-1 flex items-baseline justify-between gap-3">
+            <h2 className="text-sm font-bold text-muted">De dias anteriores · {anteriores.length}</h2>
+            {anteriores.length > 1 && (
+              <button
+                onClick={() => dados.reagendarTarefas(anteriores.map((t) => t.id), hoje)}
+                className="text-xs font-bold text-mint"
+              >
+                Trazer tudo para hoje
+              </button>
+            )}
+          </div>
+          <p className="mb-2 text-xs text-muted">Sem pressa: traga para hoje, deixe para amanhã ou conclua direto.</p>
+          <ul className="space-y-2">
+            {anteriores.map((t) => (
+              <TarefaItem
+                key={t.id}
+                tarefa={t}
+                projeto={nomeProjeto(t.project_id)}
+                nota={descreverAnterior(t.data!, hoje)}
+                onAlternar={() => dados.alternarTarefa(t)}
+                onEditar={() => setEditando(t)}
+                acoes={
+                  <>
+                    <BotaoReagendar onClick={() => dados.reagendarTarefas([t.id], hoje)}>Hoje</BotaoReagendar>
+                    <BotaoReagendar onClick={() => dados.reagendarTarefas([t.id], amanhaISO())}>Amanhã</BotaoReagendar>
+                    <BotaoReagendar onClick={() => dados.reagendarTarefas([t.id], null)}>Sem data</BotaoReagendar>
+                  </>
+                }
+              />
+            ))}
+          </ul>
+        </section>
+      )}
 
       {/* Timer de foco */}
       {!dados.carregando && (
