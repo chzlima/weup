@@ -1,8 +1,8 @@
 // Versão da política de privacidade. A política promete: "se mudar, avisamos no app".
 // SEMPRE que o texto de src/screens/Privacidade.tsx mudar, atualize as duas linhas abaixo:
 // quem criou a conta antes dessa data vê o aviso uma vez em cada aparelho.
-export const POLITICA_VERSAO = '2026-11-11T21:00:00-03:00'
-export const POLITICA_ATUALIZADA_EM = '11 de novembro de 2026'
+export const POLITICA_VERSAO = '2026-11-12T23:59:00-03:00'
+export const POLITICA_ATUALIZADA_EM = '12 de novembro de 2026'
 
 const CHAVE = 'weup-politica-vista'
 

@@ -7,6 +7,8 @@ import { CompromissoForm } from '../components/CompromissoForm'
 import { Foco } from '../components/Foco'
 import { Recomecar } from '../components/Recomecar'
 import { OfertaRevisao } from '../components/OfertaRevisao'
+import { CheckinEnergia } from '../components/CheckinEnergia'
+import { META_DIA_LEVE, ordenarPorEnergia, progressoDoDia, separarDiaLeve, useEnergiaDeHoje } from '../lib/energia'
 import { descreverRevisao } from '../lib/revisoes'
 import { IconPlus, IconRecomecar } from '../components/Icons'
 import { useAuth } from '../lib/auth'
@@ -48,6 +50,10 @@ export function Hoje() {
   const [compromissoEditando, setCompromissoEditando] = useState<Compromisso | null>(null)
   const [rapida, setRapida] = useState('')
   const [recomecando, setRecomecando] = useState(false)
+  const energiaDia = useEnergiaDeHoje()
+  const energia = energiaDia.energia
+  const [verTodas, setVerTodas] = useState(false) // dia leve: mostrar também as tarefas guardadas
+  const [verAnteriores, setVerAnteriores] = useState(false) // dia leve: abrir "De dias anteriores"
 
   const hoje = hojeISO()
   // Para hoje = o que está planejado para hoje + o que foi concluído hoje.
@@ -55,7 +61,6 @@ export function Hoje() {
   const { deHoje, anteriores } = separarPendentes(dados.tarefas, hoje)
   const pendentes = [...deHoje, ...anteriores]
   const feitasHoje = dados.tarefas.filter(concluidaHoje)
-  const lista = [...deHoje, ...feitasHoje]
 
   // Hábitos programados para hoje (os já feitos vão para o fim).
   const habitosHoje = dados.habitos
@@ -68,9 +73,16 @@ export function Hoje() {
   // Compromissos de hoje e amanhã.
   const proximos = dados.compromissos.filter((c) => c.data <= somarDias(1)).sort(ordemCompromisso).slice(0, 4)
 
-  const total = lista.length + habitosHoje.length
+  const total = deHoje.length + feitasHoje.length + habitosHoje.length
   const feitos = feitasHoje.length + habitosFeitos
-  const pct = total ? Math.round((feitos / total) * 100) : 0
+
+  // Check-in de energia: baixa = dia leve (só 3 coisas, menores primeiro); alta = maiores primeiro.
+  const ordenadas = ordenarPorEnergia(deHoje, energia)
+  const { visiveis, guardadas } = separarDiaLeve(ordenadas, energia, feitos)
+  const lista = [...(verTodas ? ordenadas : visiveis), ...feitasHoje]
+  const escondidas = verTodas ? [] : guardadas
+  const progresso = progressoDoDia(feitos, total, energia)
+  const anterioresRecolhidas = energia === 'baixa' && !verAnteriores
   const nomeProjeto = (id: string | null) => dados.projetos.find((p) => p.id === id)?.titulo
 
   // XP de verdade, vindo do registro do banco.
@@ -134,10 +146,10 @@ export function Hoje() {
         <div className="flex-1">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted">Progresso de hoje</p>
           <p className="mt-1 text-lg font-bold">
-            {total === 0 ? 'Dia livre por enquanto' : `${feitos} de ${total} concluídos`}
+            {progresso.texto}
           </p>
           <div className="mt-2 h-2 overflow-hidden rounded-full bg-surface-2">
-            <div className="h-full rounded-full bg-brand transition-all duration-500" style={{ width: `${pct}%` }} />
+            <div className="h-full rounded-full bg-brand transition-all duration-500" style={{ width: `${progresso.pct}%` }} />
           </div>
           <p className="mt-2 text-sm text-mint">+{xpHoje} XP hoje</p>
           {bateuLimite && (
@@ -147,6 +159,12 @@ export function Hoje() {
       </section>
 
       {dados.erro && <Aviso>{dados.erro}</Aviso>}
+
+      {/* Check-in de energia (opcional, um toque por dia) */}
+      {energiaDia.disponivel && !dados.carregando && (
+        <CheckinEnergia energia={energia} onEscolher={energiaDia.escolher} />
+      )}
+      {energiaDia.erro && <Aviso>{energiaDia.erro}</Aviso>}
 
       {/* Tarefas do dia */}
       <section>
@@ -173,11 +191,11 @@ export function Hoje() {
 
         {dados.carregando ? (
           <p className="py-6 text-center text-sm text-muted">Carregando…</p>
-        ) : lista.length === 0 ? (
+        ) : lista.length === 0 && escondidas.length === 0 ? (
           <p className="rounded-2xl border border-dashed border-line p-5 text-center text-sm text-muted">
             Nada planejado para hoje. Que tal uma tarefa pequena?
           </p>
-        ) : (
+        ) : lista.length === 0 ? null : (
           <ul className="space-y-2">
             {lista.map((t) => (
               <TarefaItem
@@ -191,10 +209,34 @@ export function Hoje() {
             ))}
           </ul>
         )}
+
+        {/* Dia leve: o resto fica guardado, nunca some */}
+        {!dados.carregando && escondidas.length > 0 && (
+          <button
+            onClick={() => setVerTodas(true)}
+            className="mt-2 w-full rounded-2xl border border-dashed border-line px-4 py-3 text-sm text-muted transition-colors hover:text-ink"
+          >
+            {feitos >= META_DIA_LEVE ? 'Dia leve cumprido. Quer fazer mais? ' : 'O dia leve guardou o resto. '}
+            <span className="font-bold text-mint">
+              Ver mais {escondidas.length} {escondidas.length === 1 ? 'tarefa' : 'tarefas'}
+            </span>
+          </button>
+        )}
       </section>
 
       {/* O que ficou de dias anteriores: a pessoa decide o que fazer, sem cobrança */}
-      {!dados.carregando && anteriores.length > 0 && (
+      {!dados.carregando && anteriores.length > 0 && anterioresRecolhidas && (
+        <section className="flex items-center justify-between gap-3 rounded-2xl border border-dashed border-line px-4 py-3">
+          <p className="text-sm text-muted">
+            {anteriores.length} {anteriores.length === 1 ? 'tarefa' : 'tarefas'} de dias anteriores. Hoje é dia leve:
+            pode esperar.
+          </p>
+          <button onClick={() => setVerAnteriores(true)} className="shrink-0 text-xs font-bold text-mint">
+            Ver
+          </button>
+        </section>
+      )}
+      {!dados.carregando && anteriores.length > 0 && !anterioresRecolhidas && (
         <section>
           <div className="mb-1 flex items-baseline justify-between gap-3">
             <h2 className="text-sm font-bold text-muted">De dias anteriores · {anteriores.length}</h2>

@@ -135,6 +135,10 @@ Precisa do **Node.js (versão LTS)** instalado.
 
 - **Próximas etapas (decididas em 12/11/2026), antes do teste com estudantes:** revisão espaçada automática → check-in de energia e dia leve → atalhos no ícone e compartilhar para o WeUp. Ideias para depois (modo prova, semana de plantão, carta semanal do pet, estudar junto, retrospectiva do semestre, funcionar sem internet) e onde cada uma entra no plano: nota "Ideias de inovação" no cofre do Obsidian.
 
+- Revisão espaçada (`supabase/ciclo13-revisoes.sql`, `src/lib/revisoes.ts`): colunas `revisao_de`/`revisao_n` em `tasks` com índice único; a regra de segurança usa a função `tarefa_e_minha` (uma regra de `tasks` não pode consultar a própria `tasks`). Revisão de etapa de projeto sai avulsa e pequena.
+
+- Check-in de energia (`supabase/ciclo14-energia.sql`, `src/lib/energia.ts`, `src/components/CheckinEnergia.tsx`): tabela `daily_checkins`, uma linha por pessoa por dia. Energia baixa = dia leve (meta de 3, menores primeiro); alta = maiores primeiro. Não vale XP. Decisões: respostas "Baixa / Normal / Alta" (sem flexão de gênero) e dado opcional, citado na Privacidade por ser próximo de dado de bem-estar.
+
 ## Como publicar uma nova versão
 
 Para versões com número, siga o checklist em `docs/RELEASE.md`.
