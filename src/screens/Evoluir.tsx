@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { contarRecomecos } from '../lib/recomecar'
 import { useDados } from '../lib/useDados'
+import { useAuth } from '../lib/auth'
 import { ATRIBUTOS, NOME_TIPO, calcularNivel, tituloDoNivel, type Lancamento } from '../lib/xp'
 import { diaDaSemana, formatarData, hojeISO, somarDias } from '../lib/tarefas'
 import { DIAS_SEMANA } from '../lib/habitos'
@@ -11,6 +12,7 @@ const fmt = (n: number) => n.toLocaleString('pt-BR')
 
 export function Evoluir() {
   const dados = useDados()
+  const { modoSimples } = useAuth()
   const { resumoXP: r, lancamentos } = dados
   const [recomecos, setRecomecos] = useState(0)
   useEffect(() => {
@@ -46,8 +48,8 @@ export function Evoluir() {
         <p className="py-10 text-center text-sm text-muted">Carregando…</p>
       ) : (
         <>
-          {/* Nível */}
-          <section className="rounded-3xl border border-line bg-surface p-5">
+          {/* Nível (escondido no modo simples) */}
+          {!modoSimples && <section className="rounded-3xl border border-line bg-surface p-5">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted">
               Nível {nivel} · {tituloDoNivel(nivel)}
             </p>
@@ -67,11 +69,11 @@ export function Evoluir() {
             <p className="mt-2 text-xs text-muted">
               {fmt(xpDoNivel - xpNoNivel)} XP para o nível {nivel + 1}
             </p>
-          </section>
+          </section>}
 
           {/* Números rápidos */}
           <section className="grid grid-cols-2 gap-2">
-            <Numero rotulo="XP nos últimos 7 dias" valor={xpSemana} largo />
+            {!modoSimples && <Numero rotulo="XP nos últimos 7 dias" valor={xpSemana} largo />}
             <Numero rotulo="Tarefas concluídas" valor={tarefasFeitas} />
             <Numero rotulo="Projetos concluídos" valor={projetosFeitos} />
             <Numero rotulo="Hábitos feitos (7 dias)" valor={habitosSemana} />

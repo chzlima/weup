@@ -155,6 +155,26 @@ Precisa do **Node.js (versão LTS)** instalado.
 
 - 0.4: calendário na aba Agenda (`src/screens/planejar/Agenda.tsx`, regras em `src/lib/calendario.ts`): semana de segunda a domingo + dia em detalhe. Repetições aparecem como "previstas" nos dias futuros, calculadas por `serieCaiEm` (não são criadas no banco). Compromissos passam a ser lidos desde 14 dias atrás. Formulário de compromisso liga o bloco a uma tarefa (`task_id`). Modo prova e semana de plantão ficam para a próxima etapa.
 
+- **Pet Rework** (proposta completa no cofre: "Pet Rework — proposta"). Ciclo 1 (`supabase/ciclo19-pet-fundacao.sql`): o banco calcula o nível (`nivel_do_xp`, mesma curva de `xp.ts`, com teste de paridade) e o estágio (`estagio_do_nivel`: 1/5/10/15/25). O app só pode gravar `especie` e `nome` em `user_pets` (permissão por coluna); a evolução passa por `sincronizar_pet()`. **Toda mudança na curva de XP precisa ser feita nos dois lados.**
+
+- **Atenção (12/11/2026):** o `teste-isolamento.sql` foi esvaziado sem querer antes do commit da revisão semanal e foi restaurado no ciclo 1 do Pet Rework. Antes de commitar, conferir o `git diff --stat`: arquivo que perde centenas de linhas sem motivo é sinal de problema.
+
+- Pet Rework, ciclo 2: arte em camadas em `src/pets/arte.tsx` (corpos por espécie e estágio, `RostoPet` com 6 expressões, `encaixes()` para os cosméticos). `src/components/Pet.tsx` só monta as camadas (props novas: `expressao`, `parado`). Animações em `index.css` (`pet-parado-*`, `pet-piscar`, `pet-aura`). **Galeria de desenvolvimento:** `npm run dev` e abrir `/?galeria` mostra todas as formas e expressões (não vai para o app publicado).
+
+- Pet Rework, ciclo 3: humor do pet em `src/pets/humor.ts` (`expressaoDoMomento`, `contextoDoMomento`, falas por espécie em `FALAS`) e `src/pets/momento.ts` (`momentoDoDia`, usado pela tela Hoje e pela aba Pets). Nova `src/screens/Pets.tsx` com palco + abas Companheiro e Evolução (as abas Visual e Diário entram nos ciclos 6 e 7).
+
+- Pet Rework, ciclo 4: laço (`supabase/ciclo20-laco.sql`, `src/pets/laco.ts`). `laco_do_pet()` (security invoker) soma por dia: dia com ação no livro-razão, dia com 3+ ações e `daily_checkins.cuidou_do_pet`. Níveis em `MINIMOS_LACO` = `nivel_do_laco` no banco (teste de paridade). Interações em `INTERACOES` (Acariciar 1, Conversar 2, Observar 3); a conversa usa `assuntosDoDia` (só fatos do dia).
+
+- Pet Rework, ciclo 5: caminhos (`supabase/ciclo21-caminhos.sql`, `src/pets/caminhos.ts`). `user_pets.caminho` só muda por `escolher_caminho()` (estágio 4+, uma vez). Nomes em `FORMAS`, sugestão em `caminhoSugerido` (atributo com mais XP). Cenas: `src/pets/EscolherCaminho.tsx` e `src/pets/Transformacao.tsx` (substituiu a comemoração antiga). A galeria (`/?galeria`) tem prévias das duas cenas. **Decisão:** a pessoa escolhe o caminho, com sugestão (recomendado no plano; não houve objeção).
+
+- Pet Rework, ciclo 6: diário (`supabase/ciclo22-memorias.sql`, `src/pets/memorias.ts`, `src/pets/Diario.tsx`). Tabela `pet_memories` (só leitura para o app; única por pessoa e `chave`). `registrar_memorias()` (security definer) reconstrói os marcos a partir do livro-razão, das revisões, dos recomeços e do laço, com a data real; `escolher_caminho` passou a gravar a memória na hora. **Toda tabela nova entra no isolamento, no backup e em Baixar meus dados** (feito para `pet_memories`).
+
+- Pet Rework, ciclo 7: visual (`supabase/ciclo23-visual.sql`, `src/pets/visual.ts`, `src/pets/itens.tsx`, `src/pets/Visual.tsx`). `user_pets.chapeu/acessorio/efeito`; desbloqueio **derivado das memórias** (sem tabela de inventário): `item_do_pet()` no banco = `ITENS` no app (teste de paridade), e o gatilho `conferir_visual_do_pet` recusa item bloqueado ou no espaço errado. Pontos de encaixe por espécie/estágio em `pontosDoCorpo`.
+
+- Pet Rework, ciclo 8: habitat (`src/pets/habitat.ts`: `periodoDoDia`, `nivelDoHabitat`, `DECORACOES` por memória; cena em `src/pets/CenaHabitat.tsx`). Sem SQL: as decorações vêm das memórias do diário. Arquivos de componente e de regra não podem ter o mesmo nome com maiúscula diferente (Windows não distingue): por isso `CenaHabitat.tsx` e `AbaVisual.tsx`.
+
+- Pet Rework, ciclo 9 (último): Brincar e Surpresa (`src/pets/brincar.ts`, interações de laço 4 e 5) e **Modo simples** (`modo_simples` nos metadados da conta, lido por `useAuth().modoSimples`; esconde aba Pets, pet, nível, XP e comemorações; o pet evolui sem cena). **Pet Rework concluído nos 9 ciclos.**
+
 ## Como publicar uma nova versão
 
 Para versões com número, siga o checklist em `docs/RELEASE.md`.

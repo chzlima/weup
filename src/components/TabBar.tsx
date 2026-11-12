@@ -11,14 +11,14 @@ const TABS: { id: Tab; label: string; Icon: ComponentType<{ className?: string }
   { id: 'perfil', label: 'Perfil', Icon: IconPerfil },
 ]
 
-export function TabBar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void }) {
+export function TabBar({ active, onChange, semPets }: { active: Tab; onChange: (t: Tab) => void; semPets?: boolean }) {
   return (
     <nav
       className="fixed inset-x-0 bottom-0 z-10 border-t border-line bg-bg/95 backdrop-blur"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       <ul className="mx-auto flex max-w-md">
-        {TABS.map(({ id, label, Icon }) => {
+        {TABS.filter((t) => !(semPets && t.id === 'pets')).map(({ id, label, Icon }) => {
           const on = id === active
           return (
             <li key={id} className="flex-1">

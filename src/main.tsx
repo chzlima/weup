@@ -8,10 +8,15 @@ import './lib/atalhos' // lê "Nova tarefa", "Iniciar foco" ou algo compartilhad
 import { escutarErros } from './lib/erros'
 import { AvisoAtualizacao } from './components/AvisoAtualizacao'
 import { TelaDeErro } from './components/TelaDeErro'
+import { Galeria } from './pets/Galeria'
 
 escutarErros() // registra os erros que acontecerem no aparelho, para dar para consertar
 
+// Só em desenvolvimento: ?galeria mostra todas as artes dos pets.
+const galeria = import.meta.env.DEV && new URLSearchParams(window.location.search).has('galeria')
+
 createRoot(document.getElementById('root')!).render(
+  galeria ? <Galeria /> : (
   <StrictMode>
     <TelaDeErro>
       <AuthProvider>
@@ -20,5 +25,6 @@ createRoot(document.getElementById('root')!).render(
     </TelaDeErro>
     {/* Fora do login: até na tela de entrar o app avisa que há versão nova. */}
     <AvisoAtualizacao />
-  </StrictMode>,
+  </StrictMode>
+  ),
 )

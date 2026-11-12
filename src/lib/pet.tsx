@@ -1,13 +1,18 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 import * as api from './pets'
-import { especie, estagioDoNivel, type Especie, type MeuPet } from './pets'
-import { Pet } from '../components/Pet'
+import { useAuth } from './auth'
+import { estagioDoNivel, type Especie, type MeuPet } from './pets'
+import { Transformacao } from '../pets/Transformacao'
+import { escolherCaminho as escolherCaminhoNoBanco, type Caminho } from '../pets/caminhos'
+import { salvarVisual, type Visual } from '../pets/visual'
 
 type PetState = {
   pet: MeuPet | null
   carregando: boolean
   erro: string
   escolher: (especie: Especie, nome: string) => Promise<void>
+  escolherCaminho: (c: Caminho) => Promise<void>
+  vestir: (v: Visual) => Promise<void>
   renomear: (nome: string) => Promise<void>
   // Chamado pelas telas que conhecem o nível: se o pet já pode evoluir, evolui.
   acompanharNivel: (nivel: number) => void
@@ -20,8 +25,9 @@ export function PetProvider({ children }: { children: ReactNode }) {
   const [pet, setPet] = useState<MeuPet | null>(null)
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
-  const [evoluiu, setEvoluiu] = useState<MeuPet | null>(null)
+  const [evoluiu, setEvoluiu] = useState<{ antes: MeuPet; depois: MeuPet } | null>(null)
   const subindo = useRef(false)
+  const { modoSimples } = useAuth()
 
   const recarregar = useCallback(async () => {
     setCarregando(true)
@@ -43,32 +49,47 @@ export function PetProvider({ children }: { children: ReactNode }) {
     setPet(await api.salvarPet({ especie: esp, nome }))
   }
 
+  // Caminho do estágio 4: o banco confere e grava uma vez só.
+  const escolherCaminho = async (c: Caminho) => {
+    const gravado = await escolherCaminhoNoBanco(c)
+    setPet((p) => (p ? { ...p, caminho: gravado } : p))
+  }
+
+  // Visual: o banco recusa item bloqueado; se der certo, o pet aparece vestido em todo o app.
+  const vestir = async (v: Visual) => {
+    const salvo = await salvarVisual(v)
+    setPet((p) => (p ? { ...p, ...salvo } : p))
+  }
+
   const renomear = async (nome: string) => {
     setPet(await api.renomearPet(nome))
   }
 
+  // O nível vem do XP mostrado na tela; se já dá para evoluir, pede ao banco (que confere o XP de verdade).
   const acompanharNivel = useCallback(
     (nivel: number) => {
       if (!pet || subindo.current) return
-      const alvo = estagioDoNivel(nivel)
-      if (alvo <= pet.estagio) return // nunca regride
+      if (estagioDoNivel(nivel) <= pet.estagio) return // nada a fazer (e nunca regride)
       subindo.current = true
       api
-        .subirEstagio(alvo)
-        .then((novo) => {
-          setPet(novo)
-          setEvoluiu(novo)
+        .sincronizarPet()
+        .then((estagio) => {
+          if (estagio && estagio > pet.estagio) {
+            const novo = { ...pet, estagio }
+            setPet(novo)
+            if (!modoSimples) setEvoluiu({ antes: pet, depois: novo }) // no modo simples, evolui sem cena
+          }
         })
         .catch(() => {})
         .finally(() => (subindo.current = false))
     },
-    [pet],
+    [pet, modoSimples],
   )
 
   return (
-    <PetContext.Provider value={{ pet, carregando, erro, escolher, renomear, acompanharNivel, recarregar }}>
+    <PetContext.Provider value={{ pet, carregando, erro, escolher, escolherCaminho, vestir, renomear, acompanharNivel, recarregar }}>
       {children}
-      {evoluiu && <Evolucao pet={evoluiu} onFechar={() => setEvoluiu(null)} />}
+      {evoluiu && <Transformacao antes={evoluiu.antes} depois={evoluiu.depois} onFechar={() => setEvoluiu(null)} />}
     </PetContext.Provider>
   )
 }
@@ -77,32 +98,4 @@ export function usePet() {
   const ctx = useContext(PetContext)
   if (!ctx) throw new Error('usePet precisa estar dentro de <PetProvider>')
   return ctx
-}
-
-// Comemoração de evolução.
-function Evolucao({ pet, onFechar }: { pet: MeuPet; onFechar: () => void }) {
-  const nomeEstagio = especie(pet.especie).estagios[pet.estagio - 1]
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-6" onClick={onFechar}>
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label="Seu companheiro evoluiu"
-        className="w-full max-w-sm rounded-3xl border border-gold/40 bg-surface p-6 text-center"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <p className="text-xs font-bold uppercase tracking-wider text-gold">Evolução!</p>
-        <div className="mx-auto my-3 w-fit animate-[pulinho_0.8s_ease-in-out_3]">
-          <Pet especie={pet.especie} estagio={pet.estagio} feliz size={140} nome={pet.nome} />
-        </div>
-        <p className="text-xl font-extrabold">
-          {pet.nome} virou {nomeEstagio}!
-        </p>
-        <p className="mt-1 text-sm text-muted">Vocês cresceram juntos. Isso é evolução de verdade.</p>
-        <button onClick={onFechar} className="mt-5 w-full rounded-2xl bg-brand py-3 font-bold text-bg">
-          Que demais!
-        </button>
-      </div>
-    </div>
-  )
 }

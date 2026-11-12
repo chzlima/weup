@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { Opcoes, Rotulo, Sheet } from './Sheet'
 import { Pet } from './Pet'
 import { usePet } from '../lib/pet'
+import { useAuth } from '../lib/auth'
 import {
   DURACOES, INTERVALO_MIN, MAX_MINUTOS, MIN_MINUTOS, MIN_MINUTOS_XP, XP_FOCO, buscarFocoAtivo, concluirFoco,
   desistirFoco, iniciarFoco, lerDuracao, pausarFoco, retomarFoco, tempoRestanteMs, type SessaoFoco,
@@ -13,6 +14,7 @@ type Estado = 'parado' | 'rodando' | 'pausado' | 'concluindo' | 'fim' | 'interva
 // Cartão "Foco" da tela Hoje + a tela cheia com a contagem regressiva.
 export function Foco(props: { tarefas: Tarefa[]; sessoesHoje: number; onConcluiu: () => void; abrir?: boolean }) {
   const { pet } = usePet()
+  const { modoSimples } = useAuth()
   const [estado, setEstado] = useState<Estado>('parado')
   const [sessao, setSessao] = useState<SessaoFoco | null>(null)
   const [fim, setFim] = useState(0) // horário (no relógio do celular) em que a sessão termina
@@ -173,8 +175,8 @@ export function Foco(props: { tarefas: Tarefa[]; sessoesHoje: number; onConcluiu
           <span className="block font-bold">Sessão de foco</span>
           <span className="text-xs text-muted">
             {props.sessoesHoje === 0
-              ? `Concentre-se por um tempo · +${XP_FOCO} XP`
-              : `${props.sessoesHoje} ${props.sessoesHoje === 1 ? 'sessão' : 'sessões'} hoje · +${XP_FOCO} XP cada`}
+              ? `Concentre-se por um tempo${modoSimples ? '' : ` · +${XP_FOCO} XP`}`
+              : `${props.sessoesHoje} ${props.sessoesHoje === 1 ? 'sessão' : 'sessões'} hoje${modoSimples ? '' : ` · +${XP_FOCO} XP cada`}`}
           </span>
         </span>
         <span className="text-sm font-bold text-mint">Iniciar</span>
@@ -202,7 +204,7 @@ export function Foco(props: { tarefas: Tarefa[]; sessoesHoje: number; onConcluiu
             </p>
           </div>
           <Anel fracao={estado === 'pausado' || Number.isFinite(fim) ? 1 - restante / (sessao.minutos * 60) : 0}>
-            <Pet especie={pet?.especie} estagio={pet?.estagio} size={110} nome={pet?.nome} />
+            <Pet especie={pet?.especie} estagio={pet?.estagio} caminho={pet?.caminho} visual={pet ?? undefined} size={110} nome={pet?.nome} />
             <p className="mt-1 text-4xl font-extrabold tabular-nums" aria-live="off">
               {estado === 'concluindo'
                 ? '00:00'
@@ -247,7 +249,7 @@ export function Foco(props: { tarefas: Tarefa[]; sessoesHoje: number; onConcluiu
       {estado === 'fim' && (
         <TelaCheia>
           <div className="animate-[pulinho_0.8s_ease-in-out_2]">
-            <Pet especie={pet?.especie} estagio={pet?.estagio} feliz size={140} nome={pet?.nome} />
+            <Pet especie={pet?.especie} estagio={pet?.estagio} caminho={pet?.caminho} visual={pet ?? undefined} feliz size={140} nome={pet?.nome} />
           </div>
           <p className="text-2xl font-extrabold">Sessão concluída!</p>
           {xpGanho ? (
@@ -283,7 +285,7 @@ export function Foco(props: { tarefas: Tarefa[]; sessoesHoje: number; onConcluiu
 
       {estado === 'intervalo' && (
         <TelaCheia>
-          <Pet especie={pet?.especie} estagio={pet?.estagio} feliz size={110} nome={pet?.nome} />
+          <Pet especie={pet?.especie} estagio={pet?.estagio} caminho={pet?.caminho} visual={pet ?? undefined} feliz size={110} nome={pet?.nome} />
           <p className="text-xl font-extrabold">Pausa</p>
           <p className="text-4xl font-extrabold tabular-nums">
             {formatar(Math.max(0, Math.ceil((fimIntervalo - agora) / 1000)))}

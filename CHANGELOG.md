@@ -5,6 +5,51 @@ A versão que está rodando aparece no fim da tela **Perfil** (número + commit)
 
 ## Não lançado (a caminho da 0.4.0 — Smart Planning)
 
+### Pet Rework — ciclo 1 (fundação)
+- O pet passa a ter **5 estágios**: níveis 1, 5 e 10 (como antes), **15** e **25**. Os estágios 4 e 5 usam por enquanto o desenho do 3 com uma aura dourada; a arte nova vem no próximo ciclo.
+- **Segurança:** o estágio do pet passa a ser decidido só pelo banco, a partir do XP de verdade (função `sincronizar_pet`). Antes o app gravava o estágio direto. Precisa rodar `supabase/ciclo19-pet-fundacao.sql`.
+### Pet Rework — ciclo 2 (arte em camadas)
+- **Formas novas** para os estágios 4 e 5 das três espécies (Bosque e Árvore Lendária, Fênix Real e Fênix Lendária, Tempestade e Céu Lendário), com aura dourada.
+- **6 expressões**: feliz, animado, curioso, tranquilo, orgulhoso e pensativo (as telas passam a usá-las no próximo ciclo).
+- **O pet se mexe parado:** o Broto balança, a Faísca tremula, a Gota flutua, e todos piscam. Quem ativa "reduzir movimento" no aparelho vê o pet parado.
+- A arte agora é feita em camadas (corpo, rosto e pontos de encaixe para acessórios), pronta para chapéus e acessórios e para trocar por arte de ilustrador no futuro.
+
+### Pet Rework — ciclo 3 (nova aba Pets)
+- **Aba Pets redesenhada:** o pet em destaque num palco com a cor da espécie, o balão de fala e duas abas, **Companheiro** e **Evolução**. A Evolução mostra as 5 formas em linha do tempo, com o progresso até a próxima.
+- **O pet reage ao seu dia**, aqui e na tela Hoje: curioso quando o dia ainda não começou, feliz e animado conforme você faz coisas, orgulhoso quando termina tudo ou as prioridades, tranquilo no dia leve e à noite, pensativo no domingo e na segunda. Nunca triste.
+- **Cada espécie fala do seu jeito**: o Broto fala devagar sobre crescer, a Faísca é intensa, a Gota observa e pergunta. 45 falas, nenhuma de cobrança (um teste confere).
+
+### Pet Rework — ciclo 4 (laço e interações)
+- **Laço com o pet** (aba Pets → Companheiro): cresce com os **dias** em que vocês caminham juntos (dia com alguma ação, dia com 3 ou mais ações e dia em que você interagiu com o pet). Até 3 pontos por dia, então não dá para farmar. Nunca diminui por descansar e não dá XP. Níveis de 1 a 10.
+- **Interações:** Acariciar (como antes, e o primeiro carinho do dia conta para o laço); **Conversar** (laço 2): o pet comenta o seu dia de verdade, como o compromisso de hoje, a prioridade aberta, um prazo ou o que você já fez; **Observar** (laço 3): só o pet, em tela cheia, num momento de calma.
+- Política de privacidade: passa a citar o laço com o pet. Precisa rodar `supabase/ciclo20-laco.sql`.
+
+### Pet Rework — ciclo 5 (caminhos e transformação)
+- **Caminhos de evolução:** no estágio 4 (nível 15) o pet segue um de três caminhos (conhecimento, saúde ou organização), cada um com forma própria e forma lendária. São 18 formas nas três espécies, como Árvore do Saber, Fênix Vital e Cristal de Gelo. A pessoa escolhe numa cena especial; o app marca "Combina com você" no atributo em que ela mais evoluiu. A escolha é uma vez só e o banco confere.
+- **Nova cena de evolução:** a forma antiga brilha, um clarão, e a nova aparece com o nome.
+- Precisa rodar `supabase/ciclo21-caminhos.sql` **antes** do merge (o app passa a ler a coluna `caminho`).
+
+### Pet Rework — ciclo 6 (diário de memórias)
+- **Aba Diário** em Pets: os marcos da jornada com a data real, do mais recente para o mais antigo, agrupados por mês. Entram o dia em que vocês se conheceram, as primeiras vezes (tarefa, hábito, foco, projeto), os marcos de 1.000, 5.000, 10.000 e 25.000 XP, os níveis 5 a 25, cada evolução (com a forma do pet), a primeira revisão da semana, o primeiro recomeço, cada nível de laço e o caminho escolhido.
+- As memórias são criadas só pelo banco, a partir do histórico, uma vez cada; quem já usava o app ganha o passado reconstruído. O diário é privado.
+- Política de privacidade: passa a citar o diário. Precisa rodar `supabase/ciclo22-memorias.sql`.
+
+### Pet Rework — ciclo 7 (visual)
+- **Aba Visual** em Pets: 12 itens em três espaços. **Chapéu:** boina, coroa de folhas, capelo e coroa. **Acessório:** estetoscópio, flor, laço de fita e medalha. **Efeito:** brilhos, vaga-lumes, estrelas e corações, que flutuam em volta do pet. Dá para experimentar no pet antes de usar.
+- Cada item se desbloqueia por uma memória do diário (laço, nível, primeira tarefa, primeiro hábito, primeira revisão…). Sem loja, sem moeda e sem vantagem de produtividade. O banco recusa item bloqueado ou no lugar errado.
+- O pet aparece vestido em todo o app. Precisa rodar `supabase/ciclo23-visual.sql` **antes** do merge.
+
+### Pet Rework — ciclo 8 (habitat)
+- **Habitat atrás do pet** na aba Pets e no Observar: clareira para o Broto, acampamento para a Faísca, lago para a Gota. A cena ganha mais elementos no estágio 3 e nos estágios 4–5 (árvores e flores, barraca e varal de luzes, pedras, juncos e um arco-íris).
+- A luz muda com a hora: manhã, tarde e noite (com lua e estrelas).
+- **Decorações das conquistas** aparecem sozinhas: vaso de flor (primeiro hábito), lanterna (primeira revisão), troféu (1.000 XP) e almofada (laço 2). Sem montar nada e sem SQL novo.
+
+### Pet Rework — ciclo 9 (brincar, surpresa e modo simples)
+- **Brincar** (laço 4): o pet corre atrás do brinquedo da espécie (folha, faísca ou bolha) por alguns segundos. **Surpresa** (laço 5): uma vez por dia, o pet lembra um momento do diário. Nenhuma das duas dá XP.
+- **Modo simples** (Perfil): esconde o pet, o XP, o nível e as comemorações em todo o app, deixando só a produtividade. Fica na conta e vale em todo aparelho; nada é apagado e, ao desligar, tudo volta. Quem liga o modo simples logo no início nem precisa escolher um pet.
+
+- **Corrigido:** o teste de isolamento (`supabase/teste-isolamento.sql`) tinha sido esvaziado sem querer na revisão semanal; foi restaurado, com as verificações da revisão semanal e do pet.
+
 ### Adicionado
 - **Prazo nas tarefas** (opcional): "até quando precisa estar pronta", separado do dia em que você planeja fazer. Aparece na lista como "prazo hoje", "prazo amanhã", "prazo em 3 dias"; prazo passado vira só "o prazo era 10 de nov.", sem cobrança.
 - **Horário de fim nos compromissos** (opcional): "das 08:00 até 10:00". Fim antes do início atravessa a meia-noite ("até 07:00 do dia seguinte"), para plantões noturnos.

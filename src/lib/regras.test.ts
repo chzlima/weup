@@ -16,6 +16,7 @@ import {
   type Tarefa,
 } from './tarefas'
 import regrasDoBanco from '../../supabase/ciclo7.sql?raw'
+import fundacaoPet from '../../supabase/ciclo19-pet-fundacao.sql?raw'
 
 describe('níveis', () => {
   it('segue a curva combinada (30, 85, 155, 240, 335 … 950 no nível 10)', () => {
@@ -57,8 +58,15 @@ describe('níveis', () => {
 })
 
 describe('pet', () => {
-  it('evolui nos níveis 5 e 10', () => {
-    expect([1, 4, 5, 9, 10, 99].map(estagioDoNivel)).toEqual([1, 1, 2, 2, 3, 3])
+  it('evolui nos níveis 5, 10, 15 e 25 (os três primeiros iguais aos de antes)', () => {
+    expect([1, 4, 5, 9, 10, 14, 15, 24, 25, 99].map(estagioDoNivel)).toEqual([1, 1, 2, 2, 3, 3, 4, 4, 5, 5])
+  })
+
+  it('o banco usa a mesma curva de nível e os mesmos níveis de evolução', () => {
+    // Quem decide o estágio é o banco: se a curva ou os níveis mudarem só de um lado, este teste avisa.
+    expect(fundacaoPet).toContain('round((30 * power(n, 1.5) / 5)::numeric)::integer * 5')
+    for (const [estagio, nivel] of [[5, 25], [4, 15], [3, 10], [2, 5]])
+      expect(fundacaoPet).toContain(`when p_nivel >= ${nivel} then ${estagio}`)
   })
 })
 

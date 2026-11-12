@@ -11,6 +11,9 @@ type AuthState = {
   // true quando a pessoa abriu o link de "Esqueci minha senha" e precisa criar a senha nova.
   recuperandoSenha: boolean
   terminarRecuperacao: () => void
+  // Modo simples: esconde pet, XP e comemorações (gamificação opcional). Fica na conta, vale em todo aparelho.
+  modoSimples: boolean
+  definirModoSimples: (ligado: boolean) => Promise<void>
 }
 
 const AuthContext = createContext<AuthState | null>(null)
@@ -36,6 +39,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const user = session?.user ?? null
   const nome = (user?.user_metadata?.nome as string | undefined)?.trim() || user?.email?.split('@')[0] || ''
 
+  const modoSimples = user?.user_metadata?.modo_simples === true
+  const definirModoSimples = async (ligado: boolean) => {
+    const { error } = await supabase.auth.updateUser({ data: { modo_simples: ligado } })
+    if (error) throw new Error('Não foi possível salvar. Tente de novo.')
+  }
+
   const sair = async () => {
     await supabase.auth.signOut()
   }
@@ -50,6 +59,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         sair,
         recuperandoSenha,
         terminarRecuperacao: () => setRecuperandoSenha(false),
+        modoSimples,
+        definirModoSimples,
       }}
     >
       {children}
