@@ -121,6 +121,12 @@ Precisa do **Node.js (versão LTS)** instalado.
 
 - 0.2: backup semanal automático pelo GitHub (`.github/workflows/backup.yml`, `scripts/backup/`), criptografado e com teste de restauração. Depende dos segredos `SUPABASE_DB_URL` e `BACKUP_PASSPHRASE` no repositório. Tudo em `docs/BACKUP.md`. **Toda tabela nova precisa entrar também em `scripts/backup/tabelas.sh`.**
 
+- 0.2: aviso "Atualizamos a política de privacidade" (`src/lib/privacidade.ts`, `src/components/AvisoPrivacidade.tsx`). **Mudou o texto da Privacidade → atualizar `POLITICA_VERSAO`.**
+
+- 0.2: **proteção da `main` não está disponível**: o GitHub só oferece regras de proteção em repositório privado no plano pago (conferido em 11/11/2026). Fica valendo a regra combinada: nada vai direto para a `main`; toda mudança passa por PR com as verificações verdes e o OK do Carlos.
+
+- **0.2.0 lançada em 11/11/2026** (tag `v0.2.0`). Próxima: 0.3 (Productivity Core).
+
 ## Como publicar uma nova versão
 
 Para versões com número, siga o checklist em `docs/RELEASE.md`.

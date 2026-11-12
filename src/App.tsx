@@ -12,6 +12,7 @@ import { Planejar } from './screens/Planejar'
 import { Evoluir } from './screens/Evoluir'
 import { Pets } from './screens/Pets'
 import { Perfil } from './screens/Perfil'
+import { AvisoPrivacidade } from './components/AvisoPrivacidade'
 
 export default function App() {
   const { session, carregando, recuperandoSenha } = useAuth()
@@ -77,6 +78,7 @@ function AppLogado() {
 
   return (
     <div className="mx-auto min-h-dvh max-w-md px-4 pt-6 pb-28">
+      {tab === 'hoje' && <AvisoPrivacidade />}
       {tab === 'hoje' && <Hoje />}
       {tab === 'planejar' && <Planejar />}
       {tab === 'evoluir' && <Evoluir />}

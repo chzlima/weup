@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react'
 import { CONTATO_PRIVACIDADE } from '../lib/config'
+import { POLITICA_ATUALIZADA_EM } from '../lib/privacidade'
 
-const ATUALIZADA_EM = '11 de novembro de 2026'
+
 
 // Política de privacidade em linguagem simples (LGPD). Abre por cima da tela atual.
 export function Privacidade({ onFechar }: { onFechar: () => void }) {
@@ -11,7 +12,7 @@ export function Privacidade({ onFechar }: { onFechar: () => void }) {
         <header className="mb-5 flex items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-extrabold">Privacidade</h1>
-            <p className="text-xs text-muted">Atualizada em {ATUALIZADA_EM}</p>
+            <p className="text-xs text-muted">Atualizada em {POLITICA_ATUALIZADA_EM}</p>
           </div>
           <button onClick={onFechar} className="rounded-xl px-3 py-1.5 text-sm font-semibold text-muted hover:text-ink">
             Fechar
