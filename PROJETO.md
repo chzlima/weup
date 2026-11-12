@@ -165,6 +165,8 @@ Precisa do **Node.js (versão LTS)** instalado.
 
 - Pet Rework, ciclo 5: caminhos (`supabase/ciclo21-caminhos.sql`, `src/pets/caminhos.ts`). `user_pets.caminho` só muda por `escolher_caminho()` (estágio 4+, uma vez). Nomes em `FORMAS`, sugestão em `caminhoSugerido` (atributo com mais XP). Cenas: `src/pets/EscolherCaminho.tsx` e `src/pets/Transformacao.tsx` (substituiu a comemoração antiga). A galeria (`/?galeria`) tem prévias das duas cenas. **Decisão:** a pessoa escolhe o caminho, com sugestão (recomendado no plano; não houve objeção).
 
+- Pet Rework, ciclo 6: diário (`supabase/ciclo22-memorias.sql`, `src/pets/memorias.ts`, `src/pets/Diario.tsx`). Tabela `pet_memories` (só leitura para o app; única por pessoa e `chave`). `registrar_memorias()` (security definer) reconstrói os marcos a partir do livro-razão, das revisões, dos recomeços e do laço, com a data real; `escolher_caminho` passou a gravar a memória na hora. **Toda tabela nova entra no isolamento, no backup e em Baixar meus dados** (feito para `pet_memories`).
+
 ## Como publicar uma nova versão
 
 Para versões com número, siga o checklist em `docs/RELEASE.md`.

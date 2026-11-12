@@ -10,13 +10,14 @@ import { contextoDoMomento, escolherFala, expressaoDoMomento, NOME_EXPRESSAO } f
 import { momentoDoDia } from '../pets/momento'
 import { EscolherPet } from './EscolherPet'
 import { EscolherCaminho } from '../pets/EscolherCaminho'
+import { Diario } from '../pets/Diario'
 import { caminhoSugerido, nomeDaForma, type Caminho } from '../pets/caminhos'
 import { useAuth } from '../lib/auth'
 import { hojeISO, somarDias } from '../lib/tarefas'
 import { ordemCompromisso } from '../lib/agenda'
 import { INTERACOES, assuntosDoDia, progressoDoLaco, useLaco } from '../pets/laco'
 
-type Aba = 'companheiro' | 'evolucao'
+type Aba = 'companheiro' | 'evolucao' | 'diario'
 
 // Cor do "palco" de cada espécie (o habitat de verdade chega num ciclo próprio).
 const PALCO: Record<Especie, string> = { broto: '#14b87a', faisca: '#f0a35e', gota: '#5cb8e4' }
@@ -157,6 +158,7 @@ export function Pets() {
           [
             ['companheiro', 'Companheiro'],
             ['evolucao', 'Evolução'],
+            ['diario', 'Diário'],
           ] as [Aba, string][]
         ).map(([id, nome]) => (
           <button
@@ -230,11 +232,13 @@ export function Pets() {
             </button>
           </div>
           <p className="text-center text-xs text-muted">
-            Em breve: brincar, visual de {pet.nome} e diário de memórias.
+            Em breve: brincar e o visual de {pet.nome}.
           </p>
         </section>
-      ) : (
+      ) : aba === 'evolucao' ? (
         <Evolucao especie={pet.especie} estagio={pet.estagio} caminho={pet.caminho} total={total} />
+      ) : (
+        <Diario pet={pet} />
       )}
 
       {/* Observar: um momento de calma, só o pet, sem texto. Toque para sair. */}

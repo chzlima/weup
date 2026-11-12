@@ -48,7 +48,7 @@ declare
   t text;
   obt text;
   tabelas text[] := array['tasks', 'projects', 'habits', 'habit_logs', 'events',
-                          'xp_transactions', 'user_pets', 'focus_sessions', 'restarts', 'app_errors', 'task_series', 'daily_checkins', 'weekly_reviews'];
+                          'xp_transactions', 'user_pets', 'focus_sessions', 'restarts', 'app_errors', 'task_series', 'daily_checkins', 'weekly_reviews', 'pet_memories'];
   te text[] := '{}';
   es text[] := '{}';
   ob text[] := '{}';
@@ -80,6 +80,7 @@ begin
     insert into public.daily_checkins (user_id, dia, energia) values (a, public.hoje_br(), 'normal'), (b, public.hoje_br(), 'baixa');
     insert into public.weekly_reviews (user_id, semana, avancou)
       values (a, date_trunc('week', public.hoje_br())::date, 'A'), (b, date_trunc('week', public.hoje_br())::date, 'B');
+    insert into public.pet_memories (user_id, chave, tipo, dia) values (a, 'teste', 'pet', public.hoje_br()), (b, 'teste', 'pet', public.hoje_br());
     insert into public.app_errors (user_id, origem, mensagem, versao, commit) values (a, 'erro', 'Erro A', '0', 'teste'), (b, 'erro', 'Erro B', '0', 'teste');
 
     -- 3) A partir daqui, age como a conta A, igual ao app
@@ -140,6 +141,10 @@ begin
     te := te || 'daily_checkins · A responde o check-in em nome de B'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
     obt := pg_temp.tentar(format('insert into public.weekly_reviews (user_id, semana) values (%L, date_trunc(%L, public.hoje_br())::date - 7)', b, 'week'));
     te := te || 'weekly_reviews · A escreve revisão em nome de B'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
+    obt := pg_temp.tentar(format('insert into public.pet_memories (user_id, chave, tipo, dia) values (%L, %L, %L, public.hoje_br())', a, 'inventada', 'nivel'));
+    te := te || 'pet_memories · A inventa uma memória para si'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
+    obt := pg_temp.contar('select public.registrar_memorias()');
+    te := te || 'registrar_memorias · A registra as próprias memórias'::text; es := es || 'um número'::text; ob := ob || obt; ok := ok || (obt ~ '^[0-9]+$');
     -- Pet: o estágio só muda pelo banco (ciclo19)
     obt := pg_temp.tentar(format('update public.user_pets set estagio = 5 where user_id = %L', a));
     te := te || 'user_pets · A sobe o próprio estágio direto'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
