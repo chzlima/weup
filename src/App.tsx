@@ -58,6 +58,7 @@ export default function App() {
 function AppLogado() {
   const { pet, carregando, erro, escolher, recarregar } = usePet()
   const [tab, setTab] = useState<Tab>('hoje')
+  const { modoSimples } = useAuth()
 
   if (carregando) return <Abertura />
 
@@ -73,8 +74,8 @@ function AppLogado() {
     )
   }
 
-  // Primeiro acesso: escolher o companheiro.
-  if (!pet) return <EscolherPet onEscolher={escolher} />
+  // Primeiro acesso: escolher o companheiro (no modo simples, não há pet).
+  if (!pet && !modoSimples) return <EscolherPet onEscolher={escolher} />
 
   return (
     <div className="mx-auto min-h-dvh max-w-md px-4 pt-6 pb-28">
@@ -82,9 +83,9 @@ function AppLogado() {
       {tab === 'hoje' && <Hoje />}
       {tab === 'planejar' && <Planejar />}
       {tab === 'evoluir' && <Evoluir />}
-      {tab === 'pets' && <Pets />}
+      {tab === 'pets' && !modoSimples && <Pets />}
       {tab === 'perfil' && <Perfil />}
-      <TabBar active={tab} onChange={setTab} />
+      <TabBar active={tab} onChange={setTab} semPets={modoSimples} />
     </div>
   )
 }

@@ -50,7 +50,7 @@ function saudacao() {
 }
 
 export function Hoje() {
-  const { nome } = useAuth()
+  const { nome, modoSimples } = useAuth()
   const { pet, acompanharNivel } = usePet()
   const dados = useDados()
   const [editando, setEditando] = useState<Tarefa | null>(null)
@@ -159,12 +159,14 @@ export function Hoje() {
           <p className="text-sm text-muted">{saudacao()},</p>
           <h1 className="text-2xl font-extrabold">{nome}</h1>
         </div>
-        <span className="rounded-full border border-line bg-surface px-3 py-1 text-xs font-bold text-gold">
-          Nível {nivel}
-        </span>
+        {!modoSimples && (
+          <span className="rounded-full border border-line bg-surface px-3 py-1 text-xs font-bold text-gold">
+            Nível {nivel}
+          </span>
+        )}
       </header>
 
-      {subiu && (
+      {subiu && !modoSimples && (
         <div
           role="status"
           className="fixed inset-x-4 top-4 z-40 mx-auto max-w-sm rounded-2xl border border-gold/40 bg-surface px-4 py-3 text-center shadow-lg"
@@ -176,7 +178,7 @@ export function Hoje() {
 
       {/* Pet ativo + progresso do dia */}
       <section className="flex items-center gap-4 rounded-3xl border border-line bg-surface p-4">
-        <Pet
+        {!modoSimples && <Pet
           especie={pet?.especie}
           estagio={pet?.estagio}
           caminho={pet?.caminho}
@@ -184,7 +186,7 @@ export function Hoje() {
           expressao={dados.carregando ? 'feliz' : expressaoDoMomento(momentoDoDia(dados, plano))}
           size={88}
           nome={pet?.nome}
-        />
+        />}
         <div className="flex-1">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted">Progresso de hoje</p>
           <p className="mt-1 text-lg font-bold">
@@ -193,8 +195,8 @@ export function Hoje() {
           <div className="mt-2 h-2 overflow-hidden rounded-full bg-surface-2">
             <div className="h-full rounded-full bg-brand transition-all duration-500" style={{ width: `${progresso.pct}%` }} />
           </div>
-          <p className="mt-2 text-sm text-mint">+{xpHoje} XP hoje</p>
-          {bateuLimite && (
+          {!modoSimples && <p className="mt-2 text-sm text-mint">+{xpHoje} XP hoje</p>}
+          {bateuLimite && !modoSimples && (
             <p className="mt-1 text-[11px] text-muted">Algumas conclusões passaram do limite diário de XP.</p>
           )}
         </div>

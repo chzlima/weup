@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { IconCheck, IconEstrela, IconMais } from './Icons'
+import { useAuth } from '../lib/auth'
 import { descreverPrazo, formatarData, nomeCategoria, xpDaTarefa, type Tarefa } from '../lib/tarefas'
 import { XP_HABITO, type Habito } from '../lib/habitos'
 
@@ -15,6 +16,7 @@ export function ItemLinha(props: {
   extra?: ReactNode // botão ao lado do "…" (ex.: a estrela de prioridade)
 }) {
   const { titulo, feito } = props
+  const { modoSimples } = useAuth()
   return (
     <li className="rounded-2xl border border-line bg-surface transition-colors hover:bg-surface-2">
       <div className="flex items-center gap-1 pr-1">
@@ -34,7 +36,7 @@ export function ItemLinha(props: {
           <span className={`block truncate font-semibold ${feito ? 'text-muted line-through' : ''}`}>{titulo}</span>
           <span className="block truncate text-xs text-muted">{props.detalhes}</span>
         </span>
-        <span className="shrink-0 text-xs font-bold text-gold">+{props.xp} XP</span>
+        {!modoSimples && <span className="shrink-0 text-xs font-bold text-gold">+{props.xp} XP</span>}
       </button>
       {props.extra}
       <button

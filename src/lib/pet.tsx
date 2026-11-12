@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 import * as api from './pets'
+import { useAuth } from './auth'
 import { estagioDoNivel, type Especie, type MeuPet } from './pets'
 import { Transformacao } from '../pets/Transformacao'
 import { escolherCaminho as escolherCaminhoNoBanco, type Caminho } from '../pets/caminhos'
@@ -26,6 +27,7 @@ export function PetProvider({ children }: { children: ReactNode }) {
   const [erro, setErro] = useState('')
   const [evoluiu, setEvoluiu] = useState<{ antes: MeuPet; depois: MeuPet } | null>(null)
   const subindo = useRef(false)
+  const { modoSimples } = useAuth()
 
   const recarregar = useCallback(async () => {
     setCarregando(true)
@@ -75,13 +77,13 @@ export function PetProvider({ children }: { children: ReactNode }) {
           if (estagio && estagio > pet.estagio) {
             const novo = { ...pet, estagio }
             setPet(novo)
-            setEvoluiu({ antes: pet, depois: novo })
+            if (!modoSimples) setEvoluiu({ antes: pet, depois: novo }) // no modo simples, evolui sem cena
           }
         })
         .catch(() => {})
         .finally(() => (subindo.current = false))
     },
-    [pet],
+    [pet, modoSimples],
   )
 
   return (
