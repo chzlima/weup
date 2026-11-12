@@ -44,11 +44,11 @@ language plpgsql as $$
 declare
   a uuid := gen_random_uuid();
   b uuid := gen_random_uuid();
-  pa uuid; pb uuid; ta uuid; tb uuid; ha uuid; hb uuid; fb uuid; sb uuid;
+  pa uuid; pb uuid; ta uuid; tb uuid; ha uuid; hb uuid; fb uuid; sb uuid; ea uuid; eb uuid;
   t text;
   obt text;
   tabelas text[] := array['tasks', 'projects', 'habits', 'habit_logs', 'events',
-                          'xp_transactions', 'user_pets', 'focus_sessions', 'restarts', 'app_errors', 'task_series', 'daily_checkins', 'weekly_reviews', 'pet_memories'];
+                          'xp_transactions', 'user_pets', 'focus_sessions', 'restarts', 'app_errors', 'task_series', 'daily_checkins', 'weekly_reviews', 'pet_memories', 'exams'];
   te text[] := '{}';
   es text[] := '{}';
   ob text[] := '{}';
@@ -81,6 +81,8 @@ begin
     insert into public.weekly_reviews (user_id, semana, avancou)
       values (a, date_trunc('week', public.hoje_br())::date, 'A'), (b, date_trunc('week', public.hoje_br())::date, 'B');
     insert into public.pet_memories (user_id, chave, tipo, dia) values (a, 'teste', 'pet', public.hoje_br()), (b, 'teste', 'pet', public.hoje_br());
+    insert into public.exams (user_id, titulo, data) values (a, 'Prova A', public.hoje_br() + 7) returning id into ea;
+    insert into public.exams (user_id, titulo, data) values (b, 'Prova B', public.hoje_br() + 7) returning id into eb;
     insert into public.app_errors (user_id, origem, mensagem, versao, commit) values (a, 'erro', 'Erro A', '0', 'teste'), (b, 'erro', 'Erro B', '0', 'teste');
 
     -- 3) A partir daqui, age como a conta A, igual ao app
@@ -141,6 +143,8 @@ begin
     te := te || 'daily_checkins · A responde o check-in em nome de B'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
     obt := pg_temp.tentar(format('insert into public.weekly_reviews (user_id, semana) values (%L, date_trunc(%L, public.hoje_br())::date - 7)', b, 'week'));
     te := te || 'weekly_reviews · A escreve revisão em nome de B'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
+    obt := pg_temp.tentar(format('insert into public.exams (user_id, titulo, data) values (%L, %L, public.hoje_br() + 3)', b, 'x'));
+    te := te || 'exams · A cria prova em nome de B'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
     obt := pg_temp.tentar(format('insert into public.pet_memories (user_id, chave, tipo, dia) values (%L, %L, %L, public.hoje_br())', a, 'inventada', 'nivel'));
     te := te || 'pet_memories · A inventa uma memória para si'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
     obt := pg_temp.contar('select public.registrar_memorias()');
@@ -175,6 +179,12 @@ begin
     te := te || 'tasks · A cria revisão de uma tarefa de B'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
     obt := pg_temp.tentar(format('insert into public.events (user_id, titulo, data, task_id) values (%L, %L, public.hoje_br(), %L)', a, 'x', tb));
     te := te || 'events · A liga um compromisso a uma tarefa de B'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
+    obt := pg_temp.tentar(format('insert into public.tasks (user_id, titulo, exam_id) values (%L, %L, %L)', a, 'x', eb));
+    te := te || 'tasks · A cria tarefa de estudo na prova de B'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
+    obt := pg_temp.tentar(format('update public.tasks set exam_id = %L where id = %L', eb, ta));
+    te := te || 'tasks · A liga a própria tarefa à prova de B'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
+    obt := pg_temp.tentar(format('insert into public.tasks (user_id, titulo, exam_id) values (%L, %L, %L)', a, 'x', ea));
+    te := te || 'tasks · A cria tarefa de estudo na própria prova'::text; es := es || 'passou (1 linhas)'::text; ob := ob || obt; ok := ok || (obt = 'passou (1 linhas)');
     obt := pg_temp.tentar(format('insert into public.tasks (user_id, titulo, revisao_de, revisao_n) values (%L, %L, %L, 1)', a, 'x', ta));
     te := te || 'tasks · A cria revisão da própria tarefa'::text; es := es || 'passou (1 linhas)'::text; ob := ob || obt; ok := ok || (obt = 'passou (1 linhas)');
     obt := pg_temp.tentar(format('insert into public.tasks (user_id, titulo, revisao_de, revisao_n) values (%L, %L, %L, 1)', a, 'x', ta));

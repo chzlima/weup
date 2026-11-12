@@ -10,6 +10,8 @@ import { OfertaRevisao } from '../components/OfertaRevisao'
 import { acaoPendente, limparAcaoPendente } from '../lib/atalhos'
 import { CheckinEnergia } from '../components/CheckinEnergia'
 import { progressoDoPlantao, separarPlantao, usePlantoes } from '../lib/plantao'
+import { contagemRegressiva, progressoDaProva, proximasProvas, type Prova } from '../lib/provas'
+import { ProvaForm } from '../components/ProvaForm'
 import { EntradaRevisao } from '../components/RevisaoSemanal'
 import { expressaoDoMomento } from '../pets/humor'
 import { momentoDoDia } from '../pets/momento'
@@ -70,6 +72,7 @@ export function Hoje() {
   const [verTodas, setVerTodas] = useState(false) // dia leve: mostrar também as tarefas guardadas
   const [verAnteriores, setVerAnteriores] = useState(false) // dia leve: abrir "De dias anteriores"
   const [verHabitos, setVerHabitos] = useState(false) // plantão: abrir os hábitos
+  const [provaAberta, setProvaAberta] = useState<Prova | null>(null)
 
   const hoje = hojeISO()
   // Dia de plantão (marcado na Agenda): só tarefas pequenas, até 3, e os hábitos podem esperar.
@@ -134,6 +137,8 @@ export function Hoje() {
   const anterioresRecolhidas = diaAliviado && !verAnteriores
   const habitosRecolhidos = ehPlantao && !verHabitos
   const nomeProjeto = (id: string | null) => dados.projetos.find((p) => p.id === id)?.titulo
+  // Modo prova: contagem regressiva das 2 próximas provas.
+  const provas = proximasProvas(dados.provas, hoje).slice(0, 2)
 
   // XP de verdade, vindo do registro do banco.
   const lancHoje = dados.lancamentos.filter((l) => l.dia === hoje)
@@ -242,6 +247,35 @@ export function Hoje() {
       {plano.erro && <Aviso>{plano.erro}</Aviso>}
 
       {/* Prioridades do dia: até 3, na ordem escolhida */}
+      {/* Modo prova: contagem regressiva e quanto do estudo já foi feito */}
+      {!dados.carregando &&
+        provas.map((p) => {
+          const { feitas, total } = progressoDaProva(p, dados.tarefas)
+          return (
+            <button
+              key={p.id}
+              onClick={() => setProvaAberta(p)}
+              className="flex w-full items-center gap-3 rounded-2xl border border-gold/40 bg-surface px-4 py-3 text-left transition-colors hover:bg-surface-2"
+            >
+              <span aria-hidden className="text-xl">
+                📝
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-bold">{p.titulo}</span>
+                <span className="block text-xs text-muted">
+                  {contagemRegressiva(p.data, hoje)}
+                  {total > 0 && ` · estudo ${feitas} de ${total}`}
+                </span>
+              </span>
+              {total > 0 && (
+                <span className="h-1.5 w-14 shrink-0 overflow-hidden rounded-full bg-surface-2" aria-hidden>
+                  <span className="block h-full rounded-full bg-gold" style={{ width: `${Math.round((feitas / total) * 100)}%` }} />
+                </span>
+              )}
+            </button>
+          )
+        })}
+
       {plano.temPrioridades && !dados.carregando && doDia.length > 0 && (
         <section>
           <h2 className="mb-2 text-sm font-bold text-muted">
@@ -500,6 +534,16 @@ export function Hoje() {
           onExcluir={() => dados.excluirTarefa(editando.id)}
           onFechar={() => setEditando(null)}
           serie={dados.series.find((s) => s.id === editando.series_id)}
+        />
+      )}
+
+      {provaAberta && (
+        <ProvaForm
+          prova={provaAberta}
+          tarefas={dados.tarefas}
+          onCriar={dados.criarProva}
+          onExcluir={() => dados.excluirProva(provaAberta.id)}
+          onFechar={() => setProvaAberta(null)}
         />
       )}
 

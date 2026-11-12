@@ -63,6 +63,7 @@ A versão que está rodando aparece no fim da tela **Perfil** (número + commit)
 - Política de privacidade: passa a citar as respostas da revisão semanal.
 - **Calendário** na aba Planejar → Agenda: a semana de segunda a domingo (com setas para navegar e um ponto nos dias que têm algo) e o dia escolhido em detalhe: compromissos do dia todo, blocos de horário, tarefas e as **repetições previstas** para os próximos dias. "+ Compromisso" já vem com o dia escolhido.
 - **Semana de plantão:** na Agenda, um toque marca o dia como plantão ou estágio (de hoje em diante; aparece um 🩺 na semana). Nesse dia a tela Hoje mostra só tarefas pequenas, até 3, e os hábitos ficam recolhidos ("podem esperar"); o resto fica atrás de um "ver mais". Não vale XP. Precisa rodar `supabase/ciclo24-plantao.sql`.
+- **Modo prova:** na Agenda, "+ Prova" pede o nome, a data e os assuntos (um por linha, até 15) e mostra o plano antes de salvar: uma tarefa de estudo por assunto, espalhadas de hoje até a antevéspera, e uma revisão geral na véspera. As tarefas são comuns (XP normal, prazo na data da prova). A tela Hoje mostra a contagem regressiva das 2 próximas provas e quanto do estudo já foi feito. Excluir a prova apaga só as tarefas de estudo ainda abertas. Precisa rodar `supabase/ciclo25-provas.sql`.
 - **Compromisso ligado a uma tarefa:** no formulário, "O que vai fazer nesse horário?" liga o bloco a uma tarefa aberta (ex.: "Estudo · 14:00 até 16:00 · tarefa: Revisar renal").
 
 ## 0.3.1 — Pronto para o teste (12/11/2026)

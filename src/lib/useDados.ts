@@ -6,6 +6,8 @@ import * as xp from './xp'
 import * as sr from './series'
 import type { DadosSerie, Serie } from './series'
 import * as rv from './revisoes'
+import * as pv from './provas'
+import type { Prova } from './provas'
 import type { DadosTarefa, Projeto, Tarefa } from './tarefas'
 import type { Lancamento, ResumoXP } from './xp'
 import type { DadosHabito, Habito, Registro } from './habitos'
@@ -21,6 +23,8 @@ export function useDados() {
   const [compromissos, setCompromissos] = useState<Compromisso[]>([])
   const [series, setSeries] = useState<Serie[]>([])
   const [temRepeticoes, setTemRepeticoes] = useState(false) // false enquanto o SQL da recorrência não foi rodado
+  const [provas, setProvas] = useState<Prova[]>([])
+  const [temProvas, setTemProvas] = useState(false) // false enquanto o SQL do modo prova não foi rodado
   const [resumoXP, setResumoXP] = useState<ResumoXP>(xp.RESUMO_VAZIO)
   const [lancamentos, setLancamentos] = useState<Lancamento[]>([])
   const [carregando, setCarregando] = useState(true)
@@ -31,13 +35,16 @@ export function useDados() {
     try {
       // Primeiro o banco cria as tarefas de hoje das séries; depois tudo é lido. Se isso falhar, o resto carrega igual.
       await sr.gerarOcorrencias().catch(() => 0)
-      const [t, h, c, x, s] = await Promise.all([
+      const [t, h, c, x, s, p] = await Promise.all([
         db.buscarTudo(),
         hb.buscarHabitos(),
         ag.buscarCompromissos(),
         xp.buscarXP(),
         sr.buscarSeries(),
+        pv.buscarProvas().catch(() => ({ provas: [] as Prova[], disponivel: false })),
       ])
+      setProvas(p.provas)
+      setTemProvas(p.disponivel)
       setSeries(s.series)
       setTemRepeticoes(s.disponivel)
       setTarefas(t.tarefas)
@@ -89,6 +96,8 @@ export function useDados() {
     compromissos,
     series,
     temRepeticoes,
+    provas,
+    temProvas,
     resumoXP,
     lancamentos,
     carregando,
@@ -176,6 +185,29 @@ export function useDados() {
         setSeries((l) => l.filter((x) => x.id !== id))
         setTarefas((l) => l.map((t) => (t.series_id === id ? { ...t, series_id: null } : t)))
         await sr.apagarSerie(id)
+      }),
+
+    // ---- Modo prova ----
+    // Cria a prova e as tarefas de estudo de uma vez. Devolve a mensagem de erro ('' = deu certo).
+    criarProva: async (titulo: string, data: string, assuntos: string[]) => {
+      try {
+        const r = await pv.criarProva(titulo, data, assuntos, db.hojeISO())
+        setProvas((l) => [...l, r.prova])
+        setTarefas((l) => [...l, ...r.tarefas])
+        setErro('')
+        return ''
+      } catch (e) {
+        return (e as Error).message
+      }
+    },
+
+    excluirProva: (id: string) =>
+      tentar(async () => {
+        setProvas((l) => l.filter((x) => x.id !== id))
+        setTarefas((l) =>
+          l.filter((t) => !(t.exam_id === id && !t.concluida_em)).map((t) => (t.exam_id === id ? { ...t, exam_id: null } : t)),
+        )
+        await pv.apagarProva(id)
       }),
 
     // ---- Projetos ----

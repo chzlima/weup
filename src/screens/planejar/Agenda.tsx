@@ -8,6 +8,7 @@ import { descreverSemana, segundaDaSemana } from '../../lib/revisaoSemanal'
 import { TarefaItem } from '../../components/TarefaItem'
 import { IconChevron, IconMais } from '../../components/Icons'
 import { usePlantoes } from '../../lib/plantao'
+import { contagemRegressiva, progressoDaProva, type Prova } from '../../lib/provas'
 import { Aviso } from './Vazio'
 
 const LETRAS = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S']
@@ -29,6 +30,8 @@ export function Agenda(props: {
   onEditarTarefa: (t: Tarefa) => void
   onEditarSerie: (s: Serie) => void
   onNovo: (data: string) => void
+  onNovaProva: (data: string) => void
+  onVerProva: (p: Prova) => void
 }) {
   const { dados } = props
   const hoje = hojeISO()
@@ -37,6 +40,8 @@ export function Agenda(props: {
   const dias = diasDaSemana(semana)
   const fonte = { compromissos: dados.compromissos, tarefas: dados.tarefas, series: dados.series }
   const itens = itensDoDia(dia, hoje, fonte)
+  const provasDo = (d: string) => dados.provas.filter((p) => p.data === d)
+  const provasDoDia = provasDo(dia)
   const nomeProjeto = (id: string | null) => dados.projetos.find((p) => p.id === id)?.titulo
   const nomeTarefa = (id?: string | null) => (id ? dados.tarefas.find((t) => t.id === id)?.titulo : undefined)
   // Dias de plantão ou estágio da semana à vista (só dá para marcar de hoje em diante).
@@ -72,7 +77,7 @@ export function Agenda(props: {
         </div>
         <div className="grid grid-cols-7 gap-1">
           {dias.map((d) => {
-            const n = totalDoDia(itensDoDia(d, hoje, fonte))
+            const n = totalDoDia(itensDoDia(d, hoje, fonte)) + provasDo(d).length
             const escolhido = d === dia
             const [, , dd] = d.split('-').map(Number)
             const letra = LETRAS[new Date(`${d}T12:00`).getDay()]
@@ -104,10 +109,40 @@ export function Agenda(props: {
       <section>
         <div className="mb-2 flex items-baseline justify-between gap-3">
           <h2 className="text-sm font-bold text-muted">{nomeDoDia(dia)}</h2>
-          <button onClick={() => props.onNovo(dia)} className="text-xs font-bold text-mint">
-            + Compromisso
-          </button>
+          <div className="flex gap-3">
+            {dados.temProvas && (
+              <button onClick={() => props.onNovaProva(dia)} className="text-xs font-bold text-mint">
+                + Prova
+              </button>
+            )}
+            <button onClick={() => props.onNovo(dia)} className="text-xs font-bold text-mint">
+              + Compromisso
+            </button>
+          </div>
         </div>
+
+        {/* Provas deste dia */}
+        {provasDoDia.map((p) => {
+          const { feitas, total } = progressoDaProva(p, dados.tarefas)
+          return (
+            <button
+              key={p.id}
+              onClick={() => props.onVerProva(p)}
+              className="mb-2 flex w-full items-center gap-3 rounded-2xl border border-gold/40 bg-surface px-4 py-3 text-left transition-colors hover:bg-surface-2"
+            >
+              <span aria-hidden className="text-lg">
+                📝
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate font-bold">{p.titulo}</span>
+                <span className="block text-xs text-muted">
+                  {contagemRegressiva(p.data, hoje)}
+                  {total > 0 && ` · estudo ${feitas} de ${total}`}
+                </span>
+              </span>
+            </button>
+          )
+        })}
 
         {/* Plantão ou estágio: nesse dia a tela Hoje pede só tarefas pequenas e não espera os hábitos */}
         {plantao.disponivel && dia >= hoje && (
