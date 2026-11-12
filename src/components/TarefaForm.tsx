@@ -32,6 +32,7 @@ export function TarefaForm(props: {
     project_id: null,
     data: hojeISO(),
     prazo: null,
+    lembrete: null,
     ...props.inicial,
     ...(props.tarefa && {
       titulo: props.tarefa.titulo,
@@ -40,6 +41,7 @@ export function TarefaForm(props: {
       project_id: props.tarefa.project_id,
       data: props.tarefa.data,
       prazo: props.tarefa.prazo ?? null,
+      lembrete: props.tarefa.lembrete?.slice(0, 5) ?? null,
     }),
   }
   const [d, setD] = useState<DadosTarefa>(base)
@@ -55,6 +57,9 @@ export function TarefaForm(props: {
     const dados: DadosTarefa = { ...d, titulo }
     // Sem prazo numa tarefa nova: não manda o campo (assim funciona mesmo antes do ciclo15-agenda.sql).
     if (!dados.prazo && !(props.tarefa && 'prazo' in props.tarefa)) delete dados.prazo
+    // Lembrete só faz sentido com dia. Sem lembrete numa tarefa nova, o campo não vai (funciona antes do ciclo26).
+    if (!dados.data) dados.lembrete = null
+    if (!dados.lembrete && !(props.tarefa && 'lembrete' in props.tarefa)) delete dados.lembrete
     props.onSalvar(dados)
     props.onFechar()
   }
@@ -93,6 +98,26 @@ export function TarefaForm(props: {
             )}
           </div>
         </label>
+
+        {d.data && (
+          <label className="block">
+            <Rotulo>Lembrar às (opcional)</Rotulo>
+            <div className="flex gap-2">
+              <input
+                type="time"
+                value={d.lembrete ?? ''}
+                onChange={(e) => set('lembrete', e.target.value || null)}
+                aria-label="Lembrar às"
+                className="min-w-0 flex-1 rounded-xl border border-line bg-surface-2 px-3 py-2.5 outline-none [color-scheme:dark] focus:border-brand"
+              />
+              {d.lembrete && (
+                <button type="button" onClick={() => set('lembrete', null)} className="rounded-xl px-3 text-sm font-semibold text-muted">
+                  Sem lembrete
+                </button>
+              )}
+            </div>
+          </label>
+        )}
 
         {props.serie && (
           <p className="rounded-xl bg-surface-2 px-3 py-2 text-sm text-muted">

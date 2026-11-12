@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { Dados } from '../../lib/useDados'
 import { descreverFim, formatarHora, type Compromisso } from '../../lib/agenda'
+import { descreverAviso } from '../../lib/lembretes'
 import { hojeISO, somarDias, type Tarefa } from '../../lib/tarefas'
 import { descreverRegra, type Serie } from '../../lib/series'
 import { diasDaSemana, itensDoDia, outraSemana, totalDoDia } from '../../lib/calendario'
@@ -237,7 +238,7 @@ export function LinhaCompromisso({
         <span className="min-w-0 flex-1">
           <span className="block truncate font-semibold">{c.titulo}</span>
           <span className="block truncate text-xs text-muted">
-            {[mostrarData ? nomeDoDia(c.data) : 'Compromisso', descreverFim(c), tarefa && `tarefa: ${tarefa}`]
+            {[mostrarData ? nomeDoDia(c.data) : 'Compromisso', descreverFim(c), tarefa && `tarefa: ${tarefa}`, c.hora && descreverAviso(c.lembrete_min) && `🔔 ${descreverAviso(c.lembrete_min)}`]
               .filter(Boolean)
               .join(' · ')}
           </span>

@@ -8,10 +8,11 @@ export type Compromisso = {
   hora: string | null // 'HH:MM:SS' (vazio = dia todo)
   hora_fim?: string | null // fim do bloco; menor que "hora" = termina no dia seguinte (existe depois do ciclo15)
   task_id?: string | null // tarefa que vai ser feita neste bloco (opcional)
+  lembrete_min?: number | null // avisar quantos minutos antes (0 = na hora; vazio = sem aviso)
   created_at: string
 }
 
-export type DadosCompromisso = Pick<Compromisso, 'titulo' | 'data' | 'hora' | 'hora_fim' | 'task_id'>
+export type DadosCompromisso = Pick<Compromisso, 'titulo' | 'data' | 'hora' | 'hora_fim' | 'task_id' | 'lembrete_min'>
 
 export const formatarHora = (h: string | null) => (h ? h.slice(0, 5) : 'Dia todo')
 

@@ -18,6 +18,7 @@ export type Tarefa = {
   revisao_de?: string | null // é uma revisão desta tarefa (ver revisoes.ts)
   revisao_n?: number | null // revisão 1, 2 ou 3
   exam_id?: string | null // tarefa de estudo de uma prova (ver provas.ts)
+  lembrete?: string | null // 'HH:MM:SS': lembrar nesse horário, no dia da tarefa (ver lembretes.ts)
 }
 
 export type Projeto = {
@@ -27,7 +28,7 @@ export type Projeto = {
   created_at: string
 }
 
-export type DadosTarefa = Pick<Tarefa, 'titulo' | 'dificuldade' | 'categoria' | 'project_id' | 'data' | 'prazo'>
+export type DadosTarefa = Pick<Tarefa, 'titulo' | 'dificuldade' | 'categoria' | 'project_id' | 'data' | 'prazo' | 'lembrete'>
 
 // XP sugerido no blueprint (ainda só exibido; passa a valer de verdade no Ciclo 5).
 export const XP_DIFICULDADE: Record<Dificuldade, number> = { pequena: 5, media: 15, complexa: 30 }

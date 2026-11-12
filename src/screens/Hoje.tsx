@@ -12,6 +12,7 @@ import { CheckinEnergia } from '../components/CheckinEnergia'
 import { progressoDoPlantao, separarPlantao, usePlantoes } from '../lib/plantao'
 import { contagemRegressiva, progressoDaProva, proximasProvas, type Prova } from '../lib/provas'
 import { ProvaForm } from '../components/ProvaForm'
+import { Lembretes } from '../components/Lembretes'
 import { EntradaRevisao } from '../components/RevisaoSemanal'
 import { expressaoDoMomento } from '../pets/humor'
 import { momentoDoDia } from '../pets/momento'
@@ -224,6 +225,9 @@ export function Hoje() {
       </section>
 
       {dados.erro && <Aviso>{dados.erro}</Aviso>}
+
+      {/* Lembretes que já chegaram hoje */}
+      {!dados.carregando && <Lembretes compromissos={dados.compromissos} tarefas={dados.tarefas} hoje={hoje} />}
 
       {/* Check-in de energia (opcional, um toque por dia) */}
       {/* Domingo e segunda: lembrete da revisão da semana (some depois de feita) */}
