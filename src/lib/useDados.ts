@@ -5,6 +5,7 @@ import * as ag from './agenda'
 import * as xp from './xp'
 import * as sr from './series'
 import type { DadosSerie, Serie } from './series'
+import * as rv from './revisoes'
 import type { DadosTarefa, Projeto, Tarefa } from './tarefas'
 import type { Lancamento, ResumoXP } from './xp'
 import type { DadosHabito, Habito, Registro } from './habitos'
@@ -24,6 +25,7 @@ export function useDados() {
   const [lancamentos, setLancamentos] = useState<Lancamento[]>([])
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
+  const [ofertaRevisao, setOfertaRevisao] = useState<Tarefa | null>(null) // tarefa de estudo recém-concluída
 
   const recarregar = useCallback(async () => {
     try {
@@ -98,6 +100,9 @@ export function useDados() {
     alternarTarefa: (t: Tarefa) =>
       tentar(async () => {
         const concluida_em = t.concluida_em ? null : new Date().toISOString()
+        // Concluiu uma tarefa de estudo: oferece agendar as revisões. Desmarcou: a oferta some.
+        if (concluida_em && rv.podeOferecerRevisao(t, tarefas)) setOfertaRevisao(t)
+        else if (!concluida_em) setOfertaRevisao((o) => (o?.id === t.id ? null : o))
         trocar(setTarefas, { ...t, concluida_em })
         trocar(setTarefas, await db.editarTarefa(t.id, { concluida_em }))
         await atualizarXP()
@@ -136,6 +141,25 @@ export function useDados() {
         setTarefas((l) => l.filter((x) => x.id !== id))
         await db.apagarTarefa(id)
       }),
+
+    // ---- Revisão espaçada ----
+    ofertaRevisao,
+    dispensarRevisao: () => setOfertaRevisao(null),
+    // Devolve true se agendou (a oferta mostra a confirmação).
+    agendarRevisoes: async () => {
+      const t = ofertaRevisao
+      if (!t) return false
+      setOfertaRevisao(null)
+      try {
+        const novas = await rv.agendarRevisoes(t)
+        setTarefas((l) => [...l, ...novas])
+        setErro('')
+        return true
+      } catch (e) {
+        setErro((e as Error).message)
+        return false
+      }
+    },
 
     // ---- Tarefas que se repetem ----
     // Depois de criar ou mudar uma série, o banco confere hoje de novo e a lista de tarefas é relida.

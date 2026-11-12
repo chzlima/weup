@@ -133,6 +133,8 @@ Precisa do **Node.js (versão LTS)** instalado.
 
 - **0.3.0 lançada em 11/11/2026** (tag `v0.3.0`). Próximo passo: teste com 10 a 15 estudantes da saúde (portão antes da 0.4). Depois, 0.4 (Smart Planning).
 
+- **Próximas etapas (decididas em 12/11/2026), antes do teste com estudantes:** revisão espaçada automática → check-in de energia e dia leve → atalhos no ícone e compartilhar para o WeUp. Ideias para depois (modo prova, semana de plantão, carta semanal do pet, estudar junto, retrospectiva do semestre, funcionar sem internet) e onde cada uma entra no plano: nota "Ideias de inovação" no cofre do Obsidian.
+
 ## Como publicar uma nova versão
 
 Para versões com número, siga o checklist em `docs/RELEASE.md`.
