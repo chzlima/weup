@@ -12,6 +12,8 @@ export type Tarefa = {
   data: string | null // 'AAAA-MM-DD'
   concluida_em: string | null
   created_at: string
+  series_id?: string | null // veio de uma tarefa que se repete (ver series.ts)
+  ocorrencia?: string | null // de qual dia da série ela é
 }
 
 export type Projeto = {

@@ -182,6 +182,7 @@ export function Hoje() {
                 key={t.id}
                 tarefa={t}
                 projeto={nomeProjeto(t.project_id)}
+                nota={t.series_id ? 'repete' : undefined}
                 onAlternar={() => dados.alternarTarefa(t)}
                 onEditar={() => setEditando(t)}
               />
@@ -289,6 +290,7 @@ export function Hoje() {
           onSalvar={(d) => dados.salvarTarefa(d, editando.id)}
           onExcluir={() => dados.excluirTarefa(editando.id)}
           onFechar={() => setEditando(null)}
+          serie={dados.series.find((s) => s.id === editando.series_id)}
         />
       )}
 

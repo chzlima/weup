@@ -3,6 +3,8 @@ import * as db from './tarefas'
 import * as hb from './habitos'
 import * as ag from './agenda'
 import * as xp from './xp'
+import * as sr from './series'
+import type { DadosSerie, Serie } from './series'
 import type { DadosTarefa, Projeto, Tarefa } from './tarefas'
 import type { Lancamento, ResumoXP } from './xp'
 import type { DadosHabito, Habito, Registro } from './habitos'
@@ -16,6 +18,8 @@ export function useDados() {
   const [habitos, setHabitos] = useState<Habito[]>([])
   const [registros, setRegistros] = useState<Registro[]>([])
   const [compromissos, setCompromissos] = useState<Compromisso[]>([])
+  const [series, setSeries] = useState<Serie[]>([])
+  const [temRepeticoes, setTemRepeticoes] = useState(false) // false enquanto o SQL da recorrência não foi rodado
   const [resumoXP, setResumoXP] = useState<ResumoXP>(xp.RESUMO_VAZIO)
   const [lancamentos, setLancamentos] = useState<Lancamento[]>([])
   const [carregando, setCarregando] = useState(true)
@@ -23,12 +27,17 @@ export function useDados() {
 
   const recarregar = useCallback(async () => {
     try {
-      const [t, h, c, x] = await Promise.all([
+      // Primeiro o banco cria as tarefas de hoje das séries; depois tudo é lido. Se isso falhar, o resto carrega igual.
+      await sr.gerarOcorrencias().catch(() => 0)
+      const [t, h, c, x, s] = await Promise.all([
         db.buscarTudo(),
         hb.buscarHabitos(),
         ag.buscarCompromissos(),
         xp.buscarXP(),
+        sr.buscarSeries(),
       ])
+      setSeries(s.series)
+      setTemRepeticoes(s.disponivel)
       setTarefas(t.tarefas)
       setProjetos(t.projetos)
       setHabitos(h.habitos)
@@ -76,6 +85,8 @@ export function useDados() {
     habitos,
     registros,
     compromissos,
+    series,
+    temRepeticoes,
     resumoXP,
     lancamentos,
     carregando,
@@ -124,6 +135,23 @@ export function useDados() {
       tentar(async () => {
         setTarefas((l) => l.filter((x) => x.id !== id))
         await db.apagarTarefa(id)
+      }),
+
+    // ---- Tarefas que se repetem ----
+    // Depois de criar ou mudar uma série, o banco confere hoje de novo e a lista de tarefas é relida.
+    salvarSerie: (dados: DadosSerie, id?: string) =>
+      tentar(async () => {
+        const salva = id ? await sr.editarSerie(id, dados) : await sr.inserirSerie(dados)
+        setSeries((l) => (id ? l.map((x) => (x.id === id ? salva : x)) : [...l, salva]))
+        await sr.gerarOcorrencias()
+        setTarefas((await db.buscarTudo()).tarefas)
+      }),
+
+    excluirSerie: (id: string) =>
+      tentar(async () => {
+        setSeries((l) => l.filter((x) => x.id !== id))
+        setTarefas((l) => l.map((t) => (t.series_id === id ? { ...t, series_id: null } : t)))
+        await sr.apagarSerie(id)
       }),
 
     // ---- Projetos ----

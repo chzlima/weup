@@ -1,8 +1,10 @@
 import { useState, type FormEvent } from 'react'
 import { useDados, type Dados } from '../lib/useDados'
-import { hojeISO, type DadosTarefa, type Projeto, type Tarefa } from '../lib/tarefas'
+import { amanhaISO, formatarData, hojeISO, type DadosTarefa, type Projeto, type Tarefa } from '../lib/tarefas'
 import type { Habito } from '../lib/habitos'
 import type { Compromisso } from '../lib/agenda'
+import { descreverRegra, proximaOcorrencia, type DadosSerie, type Serie } from '../lib/series'
+import { SerieForm } from '../components/SerieForm'
 import { TarefaItem } from '../components/TarefaItem'
 import { TarefaForm } from '../components/TarefaForm'
 import { HabitoForm } from '../components/HabitoForm'
@@ -15,6 +17,7 @@ import { Aviso, Vazio } from './planejar/Vazio'
 
 type Aba = 'tarefas' | 'projetos' | 'habitos' | 'agenda'
 type Editor = { tarefa?: Tarefa; inicial?: Partial<DadosTarefa> }
+type EditorSerie = { serie?: Serie; inicial?: Partial<DadosSerie> }
 
 const BOTAO_NOVO: Record<Aba, string> = {
   tarefas: 'Tarefa',
@@ -28,6 +31,7 @@ export function Planejar() {
   const [aba, setAba] = useState<Aba>('tarefas')
   const [editor, setEditor] = useState<Editor | null>(null)
   const [novoProjeto, setNovoProjeto] = useState(false)
+  const [editorSerie, setEditorSerie] = useState<EditorSerie | null>(null)
   // undefined = fechado · null = criando um novo · objeto = editando
   const [habito, setHabito] = useState<Habito | null | undefined>(undefined)
   const [compromisso, setCompromisso] = useState<Compromisso | null | undefined>(undefined)
@@ -71,7 +75,7 @@ export function Planejar() {
       {dados.carregando ? (
         <p className="py-10 text-center text-sm text-muted">Carregando…</p>
       ) : aba === 'tarefas' ? (
-        <ListaTarefas dados={dados} onEditar={setEditor} />
+        <ListaTarefas dados={dados} onEditar={setEditor} onEditarSerie={setEditorSerie} />
       ) : aba === 'projetos' ? (
         <ListaProjetos dados={dados} onEditar={setEditor} />
       ) : aba === 'habitos' ? (
@@ -93,6 +97,23 @@ export function Planejar() {
           onSalvar={(d) => dados.salvarTarefa(d, editor.tarefa?.id)}
           onExcluir={editor.tarefa ? () => dados.excluirTarefa(editor.tarefa!.id) : undefined}
           onFechar={() => setEditor(null)}
+          serie={dados.series.find((s) => s.id === editor.tarefa?.series_id)}
+          onEditarSerie={() => setEditorSerie({ serie: dados.series.find((s) => s.id === editor.tarefa?.series_id) })}
+          onRepetir={
+            dados.temRepeticoes && !editor.tarefa
+              ? (d) => setEditorSerie({ inicial: { titulo: d.titulo, categoria: d.categoria, dificuldade: d.dificuldade } })
+              : undefined
+          }
+        />
+      )}
+
+      {editorSerie && (
+        <SerieForm
+          serie={editorSerie.serie}
+          inicial={editorSerie.inicial}
+          onSalvar={(d) => dados.salvarSerie(d, editorSerie.serie?.id)}
+          onExcluir={editorSerie.serie ? () => dados.excluirSerie(editorSerie.serie!.id) : undefined}
+          onFechar={() => setEditorSerie(null)}
         />
       )}
 
@@ -121,7 +142,8 @@ export function Planejar() {
 
 // ---------- Aba Tarefas ----------
 
-function ListaTarefas({ dados, onEditar }: { dados: Dados; onEditar: (e: Editor) => void }) {
+function ListaTarefas(props: { dados: Dados; onEditar: (e: Editor) => void; onEditarSerie: (e: EditorSerie) => void }) {
+  const { dados, onEditar, onEditarSerie } = props
   const [verFeitas, setVerFeitas] = useState(false)
   const hoje = hojeISO()
   const nomeProjeto = (id: string | null) => dados.projetos.find((p) => p.id === id)?.titulo
@@ -138,14 +160,56 @@ function ListaTarefas({ dados, onEditar }: { dados: Dados; onEditar: (e: Editor)
     .filter((t) => t.concluida_em)
     .sort((a, b) => b.concluida_em!.localeCompare(a.concluida_em!))
 
+  // Tarefas que se repetem: a regra de cada uma e quando aparece a próxima.
+  const repeticoes = dados.temRepeticoes && (
+    <section>
+      <div className="mb-2 flex items-baseline justify-between gap-3">
+        <h2 className="text-sm font-bold text-muted">Repetições{dados.series.length > 0 && ` · ${dados.series.length}`}</h2>
+        <button onClick={() => onEditarSerie({})} className="text-xs font-bold text-mint">
+          Nova repetição
+        </button>
+      </div>
+      {dados.series.length === 0 ? (
+        <p className="rounded-2xl border border-dashed border-line p-4 text-center text-sm text-muted">
+          Tem algo que você faz toda semana ou todo mês? Crie uma repetição e a tarefa aparece sozinha no dia certo.
+        </p>
+      ) : (
+        <ul className="space-y-2">
+          {dados.series.map((s) => {
+            // Se o banco já conferiu hoje, a tarefa de hoje já foi criada (ou apagada): a próxima é de amanhã em diante.
+            const proxima = proximaOcorrencia(s, s.gerado_ate && s.gerado_ate >= hoje ? amanhaISO() : hoje)
+            return (
+              <li key={s.id}>
+                <button
+                  onClick={() => onEditarSerie({ serie: s })}
+                  aria-label={`Editar repetição "${s.titulo}"`}
+                  className="w-full rounded-2xl border border-line bg-surface px-4 py-3 text-left transition-colors hover:bg-surface-2"
+                >
+                  <span className="block truncate font-semibold">{s.titulo}</span>
+                  <span className="block truncate text-xs text-muted">
+                    {descreverRegra(s)}
+                    {proxima && ` · próxima: ${formatarData(proxima).toLowerCase()}`}
+                  </span>
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </section>
+  )
+
   if (dados.tarefas.length === 0) {
     return (
-      <Vazio>
-        Nenhuma tarefa ainda. Comece com algo pequeno, como <i>"Revisar 10 páginas"</i>.
-        <button onClick={() => onEditar({})} className="mt-3 block w-full font-bold text-mint">
-          Criar primeira tarefa
-        </button>
-      </Vazio>
+      <div className="space-y-5">
+        <Vazio>
+          Nenhuma tarefa ainda. Comece com algo pequeno, como <i>"Revisar 10 páginas"</i>.
+          <button onClick={() => onEditar({})} className="mt-3 block w-full font-bold text-mint">
+            Criar primeira tarefa
+          </button>
+        </Vazio>
+        {repeticoes}
+      </div>
     )
   }
 
@@ -155,6 +219,7 @@ function ListaTarefas({ dados, onEditar }: { dados: Dados; onEditar: (e: Editor)
       tarefa={t}
       projeto={nomeProjeto(t.project_id)}
       mostrarData
+      nota={t.series_id ? 'repete' : undefined}
       onAlternar={() => dados.alternarTarefa(t)}
       onEditar={() => onEditar({ tarefa: t })}
     />
@@ -172,6 +237,8 @@ function ListaTarefas({ dados, onEditar }: { dados: Dados; onEditar: (e: Editor)
         ))}
 
       {abertas.length === 0 && <Vazio>Tudo feito por aqui. Bom trabalho! 🌱</Vazio>}
+
+      {repeticoes}
 
       {feitas.length > 0 && (
         <section>
