@@ -5,6 +5,7 @@ import { ATRIBUTOS, NOME_TIPO, calcularNivel, tituloDoNivel, type Lancamento } f
 import { diaDaSemana, formatarData, hojeISO, somarDias } from '../lib/tarefas'
 import { DIAS_SEMANA } from '../lib/habitos'
 import { Aviso } from './planejar/Vazio'
+import { EntradaRevisao } from '../components/RevisaoSemanal'
 
 const fmt = (n: number) => n.toLocaleString('pt-BR')
 
@@ -38,6 +39,8 @@ export function Evoluir() {
       </header>
 
       {dados.erro && <Aviso>{dados.erro}</Aviso>}
+
+      <EntradaRevisao sempre />
 
       {dados.carregando ? (
         <p className="py-10 text-center text-sm text-muted">Carregando…</p>
