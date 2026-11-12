@@ -293,7 +293,7 @@ function Titulo(props: { pet: ReturnType<typeof usePet>['pet']; feliz: boolean; 
   return (
     <div className="flex flex-col items-center text-center">
       <div className={props.feliz ? 'animate-[pulinho_0.8s_ease-in-out]' : ''}>
-        <Pet especie={props.pet?.especie} estagio={props.pet?.estagio} caminho={props.pet?.caminho} feliz={props.feliz} size={110} nome={props.pet?.nome} />
+        <Pet especie={props.pet?.especie} estagio={props.pet?.estagio} caminho={props.pet?.caminho} visual={props.pet ?? undefined} feliz={props.feliz} size={110} nome={props.pet?.nome} />
       </div>
       <h2 className="mt-2 text-2xl font-extrabold">{props.titulo}</h2>
       <p className="mt-1 text-sm text-muted">{props.sub}</p>

@@ -3,6 +3,7 @@ import * as api from './pets'
 import { estagioDoNivel, type Especie, type MeuPet } from './pets'
 import { Transformacao } from '../pets/Transformacao'
 import { escolherCaminho as escolherCaminhoNoBanco, type Caminho } from '../pets/caminhos'
+import { salvarVisual, type Visual } from '../pets/visual'
 
 type PetState = {
   pet: MeuPet | null
@@ -10,6 +11,7 @@ type PetState = {
   erro: string
   escolher: (especie: Especie, nome: string) => Promise<void>
   escolherCaminho: (c: Caminho) => Promise<void>
+  vestir: (v: Visual) => Promise<void>
   renomear: (nome: string) => Promise<void>
   // Chamado pelas telas que conhecem o nível: se o pet já pode evoluir, evolui.
   acompanharNivel: (nivel: number) => void
@@ -51,6 +53,12 @@ export function PetProvider({ children }: { children: ReactNode }) {
     setPet((p) => (p ? { ...p, caminho: gravado } : p))
   }
 
+  // Visual: o banco recusa item bloqueado; se der certo, o pet aparece vestido em todo o app.
+  const vestir = async (v: Visual) => {
+    const salvo = await salvarVisual(v)
+    setPet((p) => (p ? { ...p, ...salvo } : p))
+  }
+
   const renomear = async (nome: string) => {
     setPet(await api.renomearPet(nome))
   }
@@ -77,7 +85,7 @@ export function PetProvider({ children }: { children: ReactNode }) {
   )
 
   return (
-    <PetContext.Provider value={{ pet, carregando, erro, escolher, escolherCaminho, renomear, acompanharNivel, recarregar }}>
+    <PetContext.Provider value={{ pet, carregando, erro, escolher, escolherCaminho, vestir, renomear, acompanharNivel, recarregar }}>
       {children}
       {evoluiu && <Transformacao antes={evoluiu.antes} depois={evoluiu.depois} onFechar={() => setEvoluiu(null)} />}
     </PetContext.Provider>

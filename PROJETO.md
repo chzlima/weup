@@ -167,6 +167,8 @@ Precisa do **Node.js (versão LTS)** instalado.
 
 - Pet Rework, ciclo 6: diário (`supabase/ciclo22-memorias.sql`, `src/pets/memorias.ts`, `src/pets/Diario.tsx`). Tabela `pet_memories` (só leitura para o app; única por pessoa e `chave`). `registrar_memorias()` (security definer) reconstrói os marcos a partir do livro-razão, das revisões, dos recomeços e do laço, com a data real; `escolher_caminho` passou a gravar a memória na hora. **Toda tabela nova entra no isolamento, no backup e em Baixar meus dados** (feito para `pet_memories`).
 
+- Pet Rework, ciclo 7: visual (`supabase/ciclo23-visual.sql`, `src/pets/visual.ts`, `src/pets/itens.tsx`, `src/pets/Visual.tsx`). `user_pets.chapeu/acessorio/efeito`; desbloqueio **derivado das memórias** (sem tabela de inventário): `item_do_pet()` no banco = `ITENS` no app (teste de paridade), e o gatilho `conferir_visual_do_pet` recusa item bloqueado ou no espaço errado. Pontos de encaixe por espécie/estágio em `pontosDoCorpo`.
+
 ## Como publicar uma nova versão
 
 Para versões com número, siga o checklist em `docs/RELEASE.md`.

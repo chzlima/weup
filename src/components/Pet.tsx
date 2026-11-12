@@ -4,6 +4,8 @@ import {
   ALTURA_ROSTO, CHAO, CorpoBroto, CorpoFaisca, CorpoGota, DetalheCaminho, ESCALA, RostoPet, type Expressao, type Rosto,
 } from '../pets/arte'
 
+import { Acessorio, Chapeu, Efeito, pontosDoCorpo } from '../pets/itens'
+
 const COR_DO_CAMINHO = { conhecimento: '#9b8cff', saude: '#ff8fa3', organizacao: '#7fd6e8' } as const
 
 // O pet desenhado em camadas (ver src/pets/arte.tsx): aura, sombra, corpo da espécie e rosto da expressão.
@@ -14,6 +16,7 @@ export function Pet(props: {
   estagio?: Estagio
   expressao?: Expressao
   caminho?: 'conhecimento' | 'saude' | 'organizacao' | null // estágios 4 e 5
+  visual?: { chapeu?: string | null; acessorio?: string | null; efeito?: string | null } // itens que o pet está usando
   feliz?: boolean // atalho antigo: feliz = expressão "feliz"; sem nada, o rosto neutro
   silhueta?: boolean // estágio ainda bloqueado: só a sombra
   parado?: boolean // sem animação (miniaturas e silhuetas)
@@ -25,6 +28,8 @@ export function Pet(props: {
   const s = ESCALA[estagio]
   const animado = !props.parado && !silhueta
   const id = useId().replace(/:/g, '')
+  const v = silhueta ? undefined : props.visual
+  const pontos = pontosDoCorpo(especie, estagio)
   const corAura = props.caminho && estagio >= 4 ? COR_DO_CAMINHO[props.caminho] : '#d8b45a'
 
   return (
@@ -56,8 +61,11 @@ export function Pet(props: {
           {especie === 'gota' && <CorpoGota estagio={estagio} />}
           {props.caminho && estagio >= 4 && !silhueta && <DetalheCaminho caminho={props.caminho} estagio={estagio} />}
           <RostoPet y={ALTURA_ROSTO[especie]} rosto={rosto} />
+          {v?.acessorio && <Acessorio id={v.acessorio} {...pontos.lado} />}
+          {v?.chapeu && <Chapeu id={v.chapeu} {...pontos.cabeca} />}
         </g>
       </g>
+      {v?.efeito && animado && <Efeito id={v.efeito} />}
     </svg>
   )
 }
