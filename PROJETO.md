@@ -141,7 +141,9 @@ Precisa do **Node.js (versão LTS)** instalado.
 
 - Atalhos e compartilhar (`src/lib/atalhos.ts`, `shortcuts` e `share_target` no `vite.config.ts`): o atalho ou o compartilhamento chega como `/?acao=...` ou `/?title=&text=&url=`; o app lê uma vez, guarda na sessão (sobrevive ao login), limpa o endereço e a tela Hoje abre o formulário ou o foco. Só funciona no app instalado; "Compartilhar" só no Android. O Android pode levar até um dia para atualizar os atalhos de um app já instalado.
 
-- **0.3.1 lançada em 12/11/2026** (tag `v0.3.1`): mostrar a senha, revisão espaçada, check-in de energia e atalhos/compartilhar. Próximo passo: teste com 10 a 15 estudantes da saúde, com as perguntas da nota "Ideias de inovação" do cofre. Depois, 0.4.
+- **0.3.1 lançada em 12/11/2026** (tag `v0.3.1`): mostrar a senha, revisão espaçada, check-in de energia e atalhos/compartilhar. Próximo passo: 0.4 (Smart Planning).
+
+- **Teste com estudantes cancelado em 12/11/2026** (decisão do Carlos e do Matheus). A 0.4 começa direto; as decisões de produto ficam com a dupla.
 
 ## Como publicar uma nova versão
 
