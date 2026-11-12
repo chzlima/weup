@@ -127,9 +127,11 @@ Precisa do **Node.js (versão LTS)** instalado.
 
 - **0.2.0 lançada em 11/11/2026** (tag `v0.2.0`). Próxima: 0.3 (Productivity Core).
 
-- 0.3 (em andamento): seção "De dias anteriores" na tela Hoje e no Planejar, com reagendar em um toque (`separarPendentes` e `descreverAnterior` em `src/lib/tarefas.ts`). Decisão de produto: o nome é "De dias anteriores", não "Atrasadas", e essas tarefas não pesam no progresso do dia (princípio 1: sem punição).
+- 0.3: seção "De dias anteriores" na tela Hoje e no Planejar, com reagendar em um toque (`separarPendentes` e `descreverAnterior` em `src/lib/tarefas.ts`). Decisão de produto: o nome é "De dias anteriores", não "Atrasadas", e essas tarefas não pesam no progresso do dia (princípio 1: sem punição).
 
-- 0.3 (em andamento): tarefas que se repetem (`supabase/ciclo12-recorrencia.sql`, `src/lib/series.ts`, `src/components/SerieForm.tsx`). A tabela `task_series` guarda a regra; a função `gerar_ocorrencias()` do banco cria a tarefa do dia quando o app carrega (uma por série por dia, sem duplicar entre aparelhos; `gerado_ate` impede que uma tarefa apagada volte). Decisões: dias sem abrir o app não geram tarefa (sem acúmulo); mudar a série vale só para as próximas; a regra existe nos dois lados (`serie_cai_em` no SQL e `serieCaiEm` no app) e o calendário da 0.4 deve usar `ocorrenciasEntre` para mostrar as futuras sem criá-las no banco.
+- 0.3: tarefas que se repetem (`supabase/ciclo12-recorrencia.sql`, `src/lib/series.ts`, `src/components/SerieForm.tsx`). A tabela `task_series` guarda a regra; a função `gerar_ocorrencias()` do banco cria a tarefa do dia quando o app carrega (uma por série por dia, sem duplicar entre aparelhos; `gerado_ate` impede que uma tarefa apagada volte). Decisões: dias sem abrir o app não geram tarefa (sem acúmulo); mudar a série vale só para as próximas; a regra existe nos dois lados (`serie_cai_em` no SQL e `serieCaiEm` no app) e o calendário da 0.4 deve usar `ocorrenciasEntre` para mostrar as futuras sem criá-las no banco.
+
+- **0.3.0 lançada em 11/11/2026** (tag `v0.3.0`). Próximo passo: teste com 10 a 15 estudantes da saúde (portão antes da 0.4). Depois, 0.4 (Smart Planning).
 
 ## Como publicar uma nova versão
 

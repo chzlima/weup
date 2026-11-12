@@ -3,7 +3,9 @@
 O que mudou em cada versão. A mais nova fica no topo.
 A versão que está rodando aparece no fim da tela **Perfil** (número + commit).
 
-## Não lançado (a caminho da 0.3.0)
+## 0.3.0 — Productivity Core (11/11/2026)
+
+Tarefas mais fáceis de manter em dia: o que ficou para trás aparece separado e sem cobrança, e o que é rotina se repete sozinho.
 
 ### Adicionado
 - Seção **"De dias anteriores"** na tela Hoje: as tarefas que ficaram para trás aparecem separadas, com de quando são ("de ontem", "de 3 dias atrás") e botões para trazer para **Hoje**, deixar para **Amanhã** ou tirar a data (**Sem data**). Com mais de uma, há o atalho "Trazer tudo para hoje".
