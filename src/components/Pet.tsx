@@ -1,9 +1,10 @@
 import type { Especie, Estagio } from '../lib/pets'
 
 // Arte PROVISÓRIA dos pets (formas simples em SVG) até a arte oficial ficar pronta.
-// Cada espécie tem 3 estágios: o corpo cresce e ganha detalhes a cada evolução.
+// Cada espécie tem 5 estágios. Por enquanto os estágios 4 e 5 usam o desenho do 3 com uma aura
+// (a arte nova em camadas chega no ciclo 2 do Pet Rework).
 
-const ESCALA: Record<Estagio, number> = { 1: 0.72, 2: 0.86, 3: 1 }
+const ESCALA: Record<Estagio, number> = { 1: 0.72, 2: 0.86, 3: 1, 4: 1, 5: 1 }
 const CHAO = 108
 
 export function Pet(props: {
@@ -14,8 +15,9 @@ export function Pet(props: {
   size?: number
   nome?: string
 }) {
-  const { especie = 'broto', estagio = 2, feliz = false, silhueta = false, size = 96 } = props
-  const s = ESCALA[estagio]
+  const { especie = 'broto', estagio: estagioReal = 2, feliz = false, silhueta = false, size = 96 } = props
+  const s = ESCALA[estagioReal]
+  const estagio = Math.min(estagioReal, 3) as Estagio // desenho disponível
 
   return (
     <svg
@@ -26,6 +28,9 @@ export function Pet(props: {
       aria-label={props.nome ? `Seu companheiro, ${props.nome}` : 'Companheiro'}
       style={silhueta ? { filter: 'brightness(0)', opacity: 0.25 } : undefined}
     >
+      {estagioReal >= 4 && (
+        <circle cx="60" cy="64" r={estagioReal === 5 ? 56 : 50} fill="none" stroke="#d8b45a" strokeWidth="2" opacity=".55" strokeDasharray={estagioReal === 5 ? undefined : '4 6'} />
+      )}
       <ellipse cx="60" cy={CHAO} rx={30 * s} ry="5" fill="#000" opacity=".25" />
       <g transform={`translate(60 ${CHAO}) scale(${s}) translate(-60 ${-CHAO})`}>
         {especie === 'broto' && <Broto estagio={estagio} />}

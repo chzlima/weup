@@ -5,6 +5,11 @@ A versão que está rodando aparece no fim da tela **Perfil** (número + commit)
 
 ## Não lançado (a caminho da 0.4.0 — Smart Planning)
 
+### Pet Rework — ciclo 1 (fundação)
+- O pet passa a ter **5 estágios**: níveis 1, 5 e 10 (como antes), **15** e **25**. Os estágios 4 e 5 usam por enquanto o desenho do 3 com uma aura dourada; a arte nova vem no próximo ciclo.
+- **Segurança:** o estágio do pet passa a ser decidido só pelo banco, a partir do XP de verdade (função `sincronizar_pet`). Antes o app gravava o estágio direto. Precisa rodar `supabase/ciclo19-pet-fundacao.sql`.
+- **Corrigido:** o teste de isolamento (`supabase/teste-isolamento.sql`) tinha sido esvaziado sem querer na revisão semanal; foi restaurado, com as verificações da revisão semanal e do pet.
+
 ### Adicionado
 - **Prazo nas tarefas** (opcional): "até quando precisa estar pronta", separado do dia em que você planeja fazer. Aparece na lista como "prazo hoje", "prazo amanhã", "prazo em 3 dias"; prazo passado vira só "o prazo era 10 de nov.", sem cobrança.
 - **Horário de fim nos compromissos** (opcional): "das 08:00 até 10:00". Fim antes do início atravessa a meia-noite ("até 07:00 do dia seguinte"), para plantões noturnos.

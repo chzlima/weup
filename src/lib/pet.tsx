@@ -47,17 +47,20 @@ export function PetProvider({ children }: { children: ReactNode }) {
     setPet(await api.renomearPet(nome))
   }
 
+  // O nível vem do XP mostrado na tela; se já dá para evoluir, pede ao banco (que confere o XP de verdade).
   const acompanharNivel = useCallback(
     (nivel: number) => {
       if (!pet || subindo.current) return
-      const alvo = estagioDoNivel(nivel)
-      if (alvo <= pet.estagio) return // nunca regride
+      if (estagioDoNivel(nivel) <= pet.estagio) return // nada a fazer (e nunca regride)
       subindo.current = true
       api
-        .subirEstagio(alvo)
-        .then((novo) => {
-          setPet(novo)
-          setEvoluiu(novo)
+        .sincronizarPet()
+        .then((estagio) => {
+          if (estagio && estagio > pet.estagio) {
+            const novo = { ...pet, estagio }
+            setPet(novo)
+            setEvoluiu(novo)
+          }
         })
         .catch(() => {})
         .finally(() => (subindo.current = false))

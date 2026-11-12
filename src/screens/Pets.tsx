@@ -3,7 +3,7 @@ import { Pet } from '../components/Pet'
 import { Rotulo, Sheet } from '../components/Sheet'
 import { usePet } from '../lib/pet'
 import { useDados } from '../lib/useDados'
-import { especie, FRASES, NIVEL_DO_ESTAGIO, type Estagio } from '../lib/pets'
+import { ESTAGIOS, especie, FRASES, NIVEL_DO_ESTAGIO, type Estagio } from '../lib/pets'
 import { calcularNivel, xpTotalDoNivel } from '../lib/xp'
 import { concluidaHoje, diaDaSemana, hojeISO } from '../lib/tarefas'
 import { EscolherPet } from './EscolherPet'
@@ -39,7 +39,7 @@ export function Pets() {
     )
 
   const info = especie(pet.especie)
-  const proximo = pet.estagio < 3 ? ((pet.estagio + 1) as Estagio) : null
+  const proximo = pet.estagio < 5 ? ((pet.estagio + 1) as Estagio) : null
 
   // Progresso até a próxima evolução (em XP, do início do estágio atual até o nível da próxima).
   let pct = 100
@@ -92,7 +92,7 @@ export function Pets() {
         </button>
         <p className="mt-2 text-2xl font-extrabold">{pet.nome}</p>
         <p className="text-sm text-muted">
-          {info.estagios[pet.estagio - 1]} · estágio {pet.estagio} de 3
+          {info.estagios[pet.estagio - 1]} · estágio {pet.estagio} de 5
         </p>
 
         <div className="mt-4 w-full">
@@ -102,7 +102,7 @@ export function Pets() {
           <p className="mt-2 text-center text-xs text-muted">
             {proximo
               ? `Vira ${info.estagios[proximo - 1]} no nível ${NIVEL_DO_ESTAGIO[proximo]} · faltam ${faltam.toLocaleString('pt-BR')} XP`
-              : 'Estágio máximo da V1. Novas evoluções chegam depois!'}
+              : 'Forma lendária! Vocês chegaram ao último estágio juntos.'}
           </p>
         </div>
       </section>
@@ -110,18 +110,18 @@ export function Pets() {
       {/* Caminho de evolução */}
       <section>
         <h2 className="mb-2 text-sm font-bold text-muted">Evoluções</h2>
-        <div className="grid grid-cols-3 gap-2">
-          {([1, 2, 3] as Estagio[]).map((e) => {
+        <div className="grid grid-cols-5 gap-1.5">
+          {ESTAGIOS.map((e) => {
             const alcancado = e <= pet.estagio
             return (
               <div
                 key={e}
-                className={`flex flex-col items-center rounded-2xl border p-3 ${
+                className={`flex flex-col items-center rounded-2xl border px-1 py-2 ${
                   e === pet.estagio ? 'border-brand bg-brand/10' : 'border-line bg-surface'
                 }`}
               >
-                <Pet especie={pet.especie} estagio={e} silhueta={!alcancado} size={64} />
-                <p className={`mt-1 text-sm font-bold ${alcancado ? '' : 'text-muted'}`}>
+                <Pet especie={pet.especie} estagio={e} silhueta={!alcancado} size={52} />
+                <p className={`mt-1 text-center text-[11px] font-bold leading-tight ${alcancado ? '' : 'text-muted'}`}>
                   {alcancado ? info.estagios[e - 1] : '???'}
                 </p>
                 <p className="text-[11px] text-muted">Nível {NIVEL_DO_ESTAGIO[e]}</p>
