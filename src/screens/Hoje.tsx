@@ -83,7 +83,10 @@ export function Hoje() {
   const vezes = (h: Habito) => ultimos7.filter((d) => dados.feitoNoDia(h.id, d)).length
 
   // Compromissos de hoje e amanhã.
-  const proximos = dados.compromissos.filter((c) => c.data <= somarDias(1)).sort(ordemCompromisso).slice(0, 4)
+  const proximos = dados.compromissos
+    .filter((c) => c.data >= hoje && c.data <= somarDias(1))
+    .sort(ordemCompromisso)
+    .slice(0, 4)
 
   const total = deHoje.length + feitasHoje.length + habitosHoje.length
   const feitos = feitasHoje.length + habitosFeitos
@@ -400,7 +403,13 @@ export function Hoje() {
           <h2 className="mb-2 text-sm font-bold text-muted">Próximos compromissos</h2>
           <ul className="space-y-2">
             {proximos.map((c) => (
-              <LinhaCompromisso key={c.id} c={c} mostrarData onEditar={() => setCompromissoEditando(c)} />
+              <LinhaCompromisso
+                key={c.id}
+                c={c}
+                mostrarData
+                tarefa={dados.tarefas.find((t) => t.id === c.task_id)?.titulo}
+                onEditar={() => setCompromissoEditando(c)}
+              />
             ))}
           </ul>
         </section>
@@ -455,6 +464,7 @@ export function Hoje() {
       {compromissoEditando && (
         <CompromissoForm
           compromisso={compromissoEditando}
+          tarefas={dados.tarefas}
           onSalvar={(d) => dados.salvarCompromisso(d, compromissoEditando.id)}
           onExcluir={() => dados.excluirCompromisso(compromissoEditando.id)}
           onFechar={() => setCompromissoEditando(null)}

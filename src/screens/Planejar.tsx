@@ -37,6 +37,7 @@ export function Planejar() {
   // undefined = fechado · null = criando um novo · objeto = editando
   const [habito, setHabito] = useState<Habito | null | undefined>(undefined)
   const [compromisso, setCompromisso] = useState<Compromisso | null | undefined>(undefined)
+  const [dataNova, setDataNova] = useState<string | undefined>(undefined) // dia escolhido no calendário
 
   const criarNovo = () => {
     if (aba === 'tarefas') setEditor({})
@@ -87,7 +88,11 @@ export function Planejar() {
           dados={dados}
           onEditarCompromisso={setCompromisso}
           onEditarTarefa={(t) => setEditor({ tarefa: t })}
-          onNovo={() => setCompromisso(null)}
+          onEditarSerie={(s) => setEditorSerie({ serie: s })}
+          onNovo={(data) => {
+            setDataNova(data)
+            setCompromisso(null)
+          }}
         />
       )}
 
@@ -135,9 +140,14 @@ export function Planejar() {
       {compromisso !== undefined && (
         <CompromissoForm
           compromisso={compromisso ?? undefined}
+          dataInicial={dataNova}
+          tarefas={dados.tarefas}
           onSalvar={(d) => dados.salvarCompromisso(d, compromisso?.id)}
           onExcluir={compromisso ? () => dados.excluirCompromisso(compromisso.id) : undefined}
-          onFechar={() => setCompromisso(undefined)}
+          onFechar={() => {
+            setCompromisso(undefined)
+            setDataNova(undefined)
+          }}
         />
       )}
     </div>
