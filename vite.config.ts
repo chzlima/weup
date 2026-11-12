@@ -35,6 +35,13 @@ export default defineConfig({
           { src: '/pwa-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
           { src: '/pwa-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
+        // Segurar o ícone do app no celular mostra estes atalhos (ver src/lib/atalhos.ts).
+        shortcuts: [
+          { name: 'Nova tarefa', short_name: 'Nova tarefa', url: '/?acao=nova-tarefa', icons: [{ src: '/pwa-192.png', sizes: '192x192' }] },
+          { name: 'Iniciar foco', short_name: 'Foco', url: '/?acao=foco', icons: [{ src: '/pwa-192.png', sizes: '192x192' }] },
+        ],
+        // "Compartilhar → WeUp!" em outros apps (Android, com o app instalado): vira uma tarefa nova.
+        share_target: { action: '/', method: 'GET', params: { title: 'title', text: 'text', url: 'url' } },
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],

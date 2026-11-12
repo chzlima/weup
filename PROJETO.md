@@ -139,6 +139,8 @@ Precisa do **Node.js (versão LTS)** instalado.
 
 - Check-in de energia (`supabase/ciclo14-energia.sql`, `src/lib/energia.ts`, `src/components/CheckinEnergia.tsx`): tabela `daily_checkins`, uma linha por pessoa por dia. Energia baixa = dia leve (meta de 3, menores primeiro); alta = maiores primeiro. Não vale XP. Decisões: respostas "Baixa / Normal / Alta" (sem flexão de gênero) e dado opcional, citado na Privacidade por ser próximo de dado de bem-estar.
 
+- Atalhos e compartilhar (`src/lib/atalhos.ts`, `shortcuts` e `share_target` no `vite.config.ts`): o atalho ou o compartilhamento chega como `/?acao=...` ou `/?title=&text=&url=`; o app lê uma vez, guarda na sessão (sobrevive ao login), limpa o endereço e a tela Hoje abre o formulário ou o foco. Só funciona no app instalado; "Compartilhar" só no Android. O Android pode levar até um dia para atualizar os atalhos de um app já instalado.
+
 ## Como publicar uma nova versão
 
 Para versões com número, siga o checklist em `docs/RELEASE.md`.

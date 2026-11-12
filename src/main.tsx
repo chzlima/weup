@@ -4,6 +4,7 @@ import './index.css'
 import App from './App.tsx'
 import { AuthProvider } from './lib/auth'
 import './lib/instalar' // começa a escutar o aviso de "pode instalar" logo na abertura
+import './lib/atalhos' // lê "Nova tarefa", "Iniciar foco" ou algo compartilhado antes de o endereço mudar
 import { escutarErros } from './lib/erros'
 import { AvisoAtualizacao } from './components/AvisoAtualizacao'
 import { TelaDeErro } from './components/TelaDeErro'
