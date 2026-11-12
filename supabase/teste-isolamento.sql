@@ -137,6 +137,12 @@ begin
     -- 6) Usar coisas de B a partir dos próprios dados
     obt := pg_temp.tentar(format('insert into public.tasks (user_id, titulo, series_id, ocorrencia) values (%L, %L, %L, public.hoje_br() + 30)', a, 'x', sb));
     te := te || 'tasks · A cria tarefa na repetição de B'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
+    obt := pg_temp.tentar(format('insert into public.tasks (user_id, titulo, revisao_de, revisao_n) values (%L, %L, %L, 1)', a, 'x', tb));
+    te := te || 'tasks · A cria revisão de uma tarefa de B'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
+    obt := pg_temp.tentar(format('insert into public.tasks (user_id, titulo, revisao_de, revisao_n) values (%L, %L, %L, 1)', a, 'x', ta));
+    te := te || 'tasks · A cria revisão da própria tarefa'::text; es := es || 'passou (1 linhas)'::text; ob := ob || obt; ok := ok || (obt = 'passou (1 linhas)');
+    obt := pg_temp.tentar(format('insert into public.tasks (user_id, titulo, revisao_de, revisao_n) values (%L, %L, %L, 1)', a, 'x', ta));
+    te := te || 'tasks · A repete a mesma revisão (não duplica)'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
     obt := pg_temp.contar('select public.gerar_ocorrencias()');
     te := te || 'gerar_ocorrencias · cria só a tarefa da série de A'::text; es := es || '1'::text; ob := ob || obt; ok := ok || (obt = '1');
     obt := pg_temp.contar('select public.gerar_ocorrencias()');

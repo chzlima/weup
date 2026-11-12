@@ -5,6 +5,8 @@ import type { Habito } from '../lib/habitos'
 import type { Compromisso } from '../lib/agenda'
 import { descreverRegra, proximaOcorrencia, type DadosSerie, type Serie } from '../lib/series'
 import { SerieForm } from '../components/SerieForm'
+import { OfertaRevisao } from '../components/OfertaRevisao'
+import { descreverRevisao } from '../lib/revisoes'
 import { TarefaItem } from '../components/TarefaItem'
 import { TarefaForm } from '../components/TarefaForm'
 import { HabitoForm } from '../components/HabitoForm'
@@ -119,6 +121,8 @@ export function Planejar() {
 
       {novoProjeto && <ProjetoForm onSalvar={dados.criarProjeto} onFechar={() => setNovoProjeto(false)} />}
 
+      <OfertaRevisao dados={dados} />
+
       {habito !== undefined && (
         <HabitoForm
           habito={habito ?? undefined}
@@ -219,7 +223,7 @@ function ListaTarefas(props: { dados: Dados; onEditar: (e: Editor) => void; onEd
       tarefa={t}
       projeto={nomeProjeto(t.project_id)}
       mostrarData
-      nota={t.series_id ? 'repete' : undefined}
+      nota={t.series_id ? 'repete' : descreverRevisao(t)}
       onAlternar={() => dados.alternarTarefa(t)}
       onEditar={() => onEditar({ tarefa: t })}
     />

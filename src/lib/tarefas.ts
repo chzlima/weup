@@ -14,6 +14,8 @@ export type Tarefa = {
   created_at: string
   series_id?: string | null // veio de uma tarefa que se repete (ver series.ts)
   ocorrencia?: string | null // de qual dia da série ela é
+  revisao_de?: string | null // é uma revisão desta tarefa (ver revisoes.ts)
+  revisao_n?: number | null // revisão 1, 2 ou 3
 }
 
 export type Projeto = {

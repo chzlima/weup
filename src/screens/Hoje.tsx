@@ -6,6 +6,8 @@ import { HabitoForm } from '../components/HabitoForm'
 import { CompromissoForm } from '../components/CompromissoForm'
 import { Foco } from '../components/Foco'
 import { Recomecar } from '../components/Recomecar'
+import { OfertaRevisao } from '../components/OfertaRevisao'
+import { descreverRevisao } from '../lib/revisoes'
 import { IconPlus, IconRecomecar } from '../components/Icons'
 import { useAuth } from '../lib/auth'
 import { usePet } from '../lib/pet'
@@ -182,7 +184,7 @@ export function Hoje() {
                 key={t.id}
                 tarefa={t}
                 projeto={nomeProjeto(t.project_id)}
-                nota={t.series_id ? 'repete' : undefined}
+                nota={t.series_id ? 'repete' : descreverRevisao(t)}
                 onAlternar={() => dados.alternarTarefa(t)}
                 onEditar={() => setEditando(t)}
               />
@@ -295,6 +297,8 @@ export function Hoje() {
       )}
 
       {recomecando && <Recomecar dados={dados} onFechar={() => setRecomecando(false)} />}
+
+      <OfertaRevisao dados={dados} />
 
       {habitoEditando && (
         <HabitoForm
