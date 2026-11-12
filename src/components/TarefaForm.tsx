@@ -11,6 +11,7 @@ import {
   type Projeto,
   type Tarefa,
 } from '../lib/tarefas'
+import { descreverRegra, type Serie } from '../lib/series'
 
 // Formulário para criar ou editar uma tarefa (ou etapa de projeto).
 export function TarefaForm(props: {
@@ -20,6 +21,9 @@ export function TarefaForm(props: {
   onSalvar: (dados: DadosTarefa) => void
   onExcluir?: () => void
   onFechar: () => void
+  serie?: Serie // a tarefa veio de uma repetição
+  onEditarSerie?: () => void
+  onRepetir?: (dados: DadosTarefa) => void // transformar a tarefa nova numa repetição
 }) {
   const base: DadosTarefa = {
     titulo: '',
@@ -66,6 +70,40 @@ export function TarefaForm(props: {
         </label>
 
         <CampoData valor={d.data} onChange={(v) => set('data', v)} permitirSemData />
+
+        {props.serie && (
+          <p className="rounded-xl bg-surface-2 px-3 py-2 text-sm text-muted">
+            Esta tarefa se repete (<span className="font-semibold text-ink">{descreverRegra(props.serie)}</span>). O que
+            você mudar aqui vale só para esta.
+            {props.onEditarSerie && (
+              <button
+                type="button"
+                onClick={() => {
+                  props.onFechar()
+                  props.onEditarSerie!()
+                }}
+                className="ml-1 font-bold text-mint"
+              >
+                Editar repetição
+              </button>
+            )}
+          </p>
+        )}
+
+        {props.onRepetir && !d.project_id && (
+          <button
+            type="button"
+            onClick={() => {
+              const titulo = d.titulo.trim()
+              if (!titulo) return setErro('Dê um nome para a tarefa.')
+              props.onFechar()
+              props.onRepetir!({ ...d, titulo })
+            }}
+            className="text-sm font-bold text-mint"
+          >
+            Repetir esta tarefa…
+          </button>
+        )}
 
         <div>
           <Rotulo>Categoria</Rotulo>

@@ -8,6 +8,7 @@ A versão que está rodando aparece no fim da tela **Perfil** (número + commit)
 ### Adicionado
 - Seção **"De dias anteriores"** na tela Hoje: as tarefas que ficaram para trás aparecem separadas, com de quando são ("de ontem", "de 3 dias atrás") e botões para trazer para **Hoje**, deixar para **Amanhã** ou tirar a data (**Sem data**). Com mais de uma, há o atalho "Trazer tudo para hoje".
 - O mesmo grupo "De dias anteriores" na lista de tarefas do Planejar.
+- **Tarefas que se repetem** (Planejar → Tarefas → Repetições, ou "Repetir esta tarefa…" ao criar uma tarefa): todo dia, em dias da semana ou num dia do mês. No dia certo a tarefa aparece sozinha, como uma tarefa comum; editar ou apagar essa tarefa não mexe na repetição. Dias em que o app não foi aberto não geram tarefa, então nada se acumula numa pausa. Precisa rodar `supabase/ciclo12-recorrencia.sql`.
 
 ### Mudado
 - Tarefas de dias anteriores deixaram de contar no "Progresso de hoje": só entram quando a pessoa traz para hoje. O dia não começa mais devendo.

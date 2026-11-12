@@ -4,6 +4,7 @@ import { supabase } from './supabase'
 
 const TABELAS = [
   'tasks',
+  'task_series',
   'projects',
   'habits',
   'habit_logs',

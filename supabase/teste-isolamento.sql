@@ -44,11 +44,11 @@ language plpgsql as $$
 declare
   a uuid := gen_random_uuid();
   b uuid := gen_random_uuid();
-  pa uuid; pb uuid; ta uuid; tb uuid; ha uuid; hb uuid; fb uuid;
+  pa uuid; pb uuid; ta uuid; tb uuid; ha uuid; hb uuid; fb uuid; sb uuid;
   t text;
   obt text;
   tabelas text[] := array['tasks', 'projects', 'habits', 'habit_logs', 'events',
-                          'xp_transactions', 'user_pets', 'focus_sessions', 'restarts', 'app_errors'];
+                          'xp_transactions', 'user_pets', 'focus_sessions', 'restarts', 'app_errors', 'task_series'];
   te text[] := '{}';
   es text[] := '{}';
   ob text[] := '{}';
@@ -75,6 +75,8 @@ begin
     insert into public.focus_sessions (user_id, minutos) values (a, 25);
     insert into public.focus_sessions (user_id, minutos) values (b, 25) returning id into fb;
     insert into public.restarts (user_id, motivo) values (a, 'outro'), (b, 'outro');
+    insert into public.task_series (user_id, titulo, tipo) values (a, 'Série A', 'diaria');
+    insert into public.task_series (user_id, titulo, tipo) values (b, 'Série B', 'diaria') returning id into sb;
     insert into public.app_errors (user_id, origem, mensagem, versao, commit) values (a, 'erro', 'Erro A', '0', 'teste'), (b, 'erro', 'Erro B', '0', 'teste');
 
     -- 3) A partir daqui, age como a conta A, igual ao app
@@ -129,7 +131,16 @@ begin
     obt := pg_temp.tentar(format('insert into public.app_errors (user_id, origem, mensagem, versao, commit) values (%L, %L, %L, %L, %L)', b, 'erro', 'x', '0', 'teste'));
     te := te || 'app_errors · A registra erro em nome de B'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
 
+    obt := pg_temp.tentar(format('insert into public.task_series (user_id, titulo, tipo) values (%L, %L, %L)', b, 'x', 'diaria'));
+    te := te || 'task_series · A cria repetição em nome de B'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
+
     -- 6) Usar coisas de B a partir dos próprios dados
+    obt := pg_temp.tentar(format('insert into public.tasks (user_id, titulo, series_id, ocorrencia) values (%L, %L, %L, public.hoje_br() + 30)', a, 'x', sb));
+    te := te || 'tasks · A cria tarefa na repetição de B'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
+    obt := pg_temp.contar('select public.gerar_ocorrencias()');
+    te := te || 'gerar_ocorrencias · cria só a tarefa da série de A'::text; es := es || '1'::text; ob := ob || obt; ok := ok || (obt = '1');
+    obt := pg_temp.contar('select public.gerar_ocorrencias()');
+    te := te || 'gerar_ocorrencias · chamar de novo não duplica'::text; es := es || '0'::text; ob := ob || obt; ok := ok || (obt = '0');
     obt := pg_temp.tentar(format('insert into public.habit_logs (user_id, habit_id, dia) values (%L, %L, public.hoje_br() - 1)', a, hb));
     te := te || 'habit_logs · A marca o hábito de B'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
     obt := pg_temp.tentar(format('insert into public.tasks (user_id, titulo, project_id) values (%L, %L, %L)', a, 'x', pb));
