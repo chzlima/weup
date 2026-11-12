@@ -8,6 +8,7 @@ const TABELAS = [
   'daily_checkins',
   'weekly_reviews',
   'pet_memories',
+  'exams',
   'projects',
   'habits',
   'habit_logs',

@@ -17,6 +17,7 @@ export type Tarefa = {
   ocorrencia?: string | null // de qual dia da série ela é
   revisao_de?: string | null // é uma revisão desta tarefa (ver revisoes.ts)
   revisao_n?: number | null // revisão 1, 2 ou 3
+  exam_id?: string | null // tarefa de estudo de uma prova (ver provas.ts)
 }
 
 export type Projeto = {

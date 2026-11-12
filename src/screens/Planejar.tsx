@@ -11,6 +11,8 @@ import { TarefaItem } from '../components/TarefaItem'
 import { TarefaForm } from '../components/TarefaForm'
 import { HabitoForm } from '../components/HabitoForm'
 import { CompromissoForm } from '../components/CompromissoForm'
+import { ProvaForm } from '../components/ProvaForm'
+import type { Prova } from '../lib/provas'
 import { Opcoes, Rotulo, Sheet } from '../components/Sheet'
 import { IconCheck, IconChevron, IconPlus } from '../components/Icons'
 import { ListaHabitos } from './planejar/Habitos'
@@ -38,6 +40,7 @@ export function Planejar() {
   const [habito, setHabito] = useState<Habito | null | undefined>(undefined)
   const [compromisso, setCompromisso] = useState<Compromisso | null | undefined>(undefined)
   const [dataNova, setDataNova] = useState<string | undefined>(undefined) // dia escolhido no calendário
+  const [prova, setProva] = useState<{ prova?: Prova; data?: string } | null>(null) // modo prova
 
   const criarNovo = () => {
     if (aba === 'tarefas') setEditor({})
@@ -93,6 +96,8 @@ export function Planejar() {
             setDataNova(data)
             setCompromisso(null)
           }}
+          onNovaProva={(data) => setProva({ data })}
+          onVerProva={(p) => setProva({ prova: p })}
         />
       )}
 
@@ -121,6 +126,17 @@ export function Planejar() {
           onSalvar={(d) => dados.salvarSerie(d, editorSerie.serie?.id)}
           onExcluir={editorSerie.serie ? () => dados.excluirSerie(editorSerie.serie!.id) : undefined}
           onFechar={() => setEditorSerie(null)}
+        />
+      )}
+
+      {prova && (
+        <ProvaForm
+          prova={prova.prova}
+          dataInicial={prova.data}
+          tarefas={dados.tarefas}
+          onCriar={dados.criarProva}
+          onExcluir={prova.prova ? () => dados.excluirProva(prova.prova!.id) : undefined}
+          onFechar={() => setProva(null)}
         />
       )}
 

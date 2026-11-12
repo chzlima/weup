@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Tabelas conferidas no backup. Toda tabela nova do app precisa entrar aqui.
 TABELAS="auth.users public.tasks public.projects public.habits public.habit_logs public.events
-public.xp_transactions public.user_pets public.focus_sessions public.restarts public.app_errors public.task_series public.daily_checkins public.weekly_reviews public.pet_memories"
+public.xp_transactions public.user_pets public.focus_sessions public.restarts public.app_errors public.task_series public.daily_checkins public.weekly_reviews public.pet_memories public.exams"
 
 # contar <endereço do banco>: escreve "tabela quantidade" para cada tabela.
 contar() {
