@@ -151,6 +151,8 @@ Precisa do **Node.js (versão LTS)** instalado.
 
 - 0.4: foco com pausa e duração livre (`supabase/ciclo17-foco.sql`): `focus_sessions` ganha `pausada_em` e `pausa_segundos`; pausar e continuar só pelas funções `pausar_foco`/`retomar_foco` (a tabela continua sem permissão de alterar). `concluir_foco` desconta as pausas, recusa sessão pausada e só dá XP a partir de 15 min (`MIN_MINUTOS_XP`). Duração de 5 a 120 min. A pausa curta de 5 min depois da sessão fica só no aparelho.
 
+- 0.4: revisão semanal (`supabase/ciclo18-revisao-semanal.sql`, `src/lib/revisaoSemanal.ts`, `src/components/RevisaoSemanal.tsx`). A tabela `weekly_reviews` guarda só as 4 respostas (uma linha por semana, marcada pela segunda-feira); os números da semana são calculados na hora. No domingo revisa a semana que termina, na segunda a que acabou ontem (`semanaRevisada`). A carta do pet é montada por regra (`cartaDoPet`), sem IA, e nunca fala do que faltou.
+
 ## Como publicar uma nova versão
 
 Para versões com número, siga o checklist em `docs/RELEASE.md`.

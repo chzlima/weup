@@ -6,6 +6,7 @@ const TABELAS = [
   'tasks',
   'task_series',
   'daily_checkins',
+  'weekly_reviews',
   'projects',
   'habits',
   'habit_logs',

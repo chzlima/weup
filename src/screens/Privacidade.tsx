@@ -43,7 +43,7 @@ export function Privacidade({ onFechar }: { onFechar: () => void }) {
               <li>
                 <b className="text-ink">O que você cria:</b> tarefas, projetos, hábitos e os dias em que foram feitos,
                 compromissos, sessões de foco, os recomeços (com o motivo que você escolheu) e, se você responder, o
-                check-in de energia de cada dia (baixa, normal ou alta).
+                check-in de energia de cada dia (baixa, normal ou alta) e as respostas da revisão semanal.
               </li>
               <li>
                 <b className="text-ink">O que o app calcula:</b> XP, nível e o seu companheiro (espécie, nome e estágio).

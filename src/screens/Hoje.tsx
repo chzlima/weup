@@ -9,6 +9,7 @@ import { Recomecar } from '../components/Recomecar'
 import { OfertaRevisao } from '../components/OfertaRevisao'
 import { acaoPendente, limparAcaoPendente } from '../lib/atalhos'
 import { CheckinEnergia } from '../components/CheckinEnergia'
+import { EntradaRevisao } from '../components/RevisaoSemanal'
 import { META_DIA_LEVE, ordenarPorEnergia, progressoDoDia, separarDiaLeve, usePlanoDeHoje } from '../lib/energia'
 import {
   MAX_PRIORIDADES, alternarPrioridade, moverPrioridade, prazoChegando, separarPrioridades,
@@ -192,6 +193,9 @@ export function Hoje() {
       {dados.erro && <Aviso>{dados.erro}</Aviso>}
 
       {/* Check-in de energia (opcional, um toque por dia) */}
+      {/* Domingo e segunda: lembrete da revisão da semana (some depois de feita) */}
+      {!dados.carregando && <EntradaRevisao />}
+
       {plano.disponivel && !dados.carregando && <CheckinEnergia energia={energia} onEscolher={plano.escolher} />}
       {plano.erro && <Aviso>{plano.erro}</Aviso>}
 
