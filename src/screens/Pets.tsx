@@ -3,14 +3,25 @@ import { Pet } from '../components/Pet'
 import { Rotulo, Sheet } from '../components/Sheet'
 import { usePet } from '../lib/pet'
 import { useDados } from '../lib/useDados'
-import { ESTAGIOS, especie, FRASES, NIVEL_DO_ESTAGIO, type Estagio } from '../lib/pets'
+import { usePlanoDeHoje } from '../lib/energia'
+import { ESTAGIOS, especie, NIVEL_DO_ESTAGIO, type Especie, type Estagio } from '../lib/pets'
 import { calcularNivel, xpTotalDoNivel } from '../lib/xp'
-import { concluidaHoje, diaDaSemana, hojeISO } from '../lib/tarefas'
+import { contextoDoMomento, escolherFala, expressaoDoMomento, NOME_EXPRESSAO } from '../pets/humor'
+import { momentoDoDia } from '../pets/momento'
 import { EscolherPet } from './EscolherPet'
 
+type Aba = 'companheiro' | 'evolucao'
+
+// Cor do "palco" de cada espécie (o habitat de verdade chega num ciclo próprio).
+const PALCO: Record<Especie, string> = { broto: '#14b87a', faisca: '#f0a35e', gota: '#5cb8e4' }
+
+// Aba Pets: o pet é o protagonista. Em cima, o palco com o pet, a fala e o nome;
+// embaixo, duas abas discretas: Companheiro (interações) e Evolução (o caminho das formas).
 export function Pets() {
   const { pet, escolher, renomear, acompanharNivel } = usePet()
   const dados = useDados()
+  const plano = usePlanoDeHoje()
+  const [aba, setAba] = useState<Aba>('companheiro')
   const [fala, setFala] = useState<string | null>(null)
   const [pulando, setPulando] = useState(0)
   const [renomeando, setRenomeando] = useState(false)
@@ -24,6 +35,7 @@ export function Pets() {
   }, [nivel, dados.carregando, acompanharNivel])
 
   if (!pet) return null
+
   if (trocando)
     return (
       <div className="fixed inset-0 z-50 overflow-y-auto bg-bg">
@@ -39,131 +51,166 @@ export function Pets() {
     )
 
   const info = especie(pet.especie)
-  const proximo = pet.estagio < 5 ? ((pet.estagio + 1) as Estagio) : null
+  const momento = momentoDoDia(dados, plano)
+  const expressao = dados.carregando ? 'feliz' : expressaoDoMomento(momento)
 
-  // Progresso até a próxima evolução (em XP, do início do estágio atual até o nível da próxima).
-  let pct = 100
-  let faltam = 0
-  if (proximo) {
-    const inicio = xpTotalDoNivel(NIVEL_DO_ESTAGIO[pet.estagio])
-    const fim = xpTotalDoNivel(NIVEL_DO_ESTAGIO[proximo])
-    pct = Math.min(100, Math.max(0, Math.round(((total - inicio) / (fim - inicio)) * 100)))
-    faltam = Math.max(0, fim - total)
-  }
-
-  // Humor do dia (só para escolher a frase; o pet nunca fica triste).
-  const hoje = hojeISO()
-  const pendentes =
-    dados.tarefas.filter((t) => !t.concluida_em && t.data && t.data <= hoje).length +
-    dados.habitos.filter((h) => h.dias.includes(diaDaSemana(hoje)) && !dados.feitoNoDia(h.id, hoje)).length
-  const feitos =
-    dados.tarefas.filter(concluidaHoje).length + dados.registros.filter((r) => r.dia === hoje).length
-  const frases = feitos === 0 ? FRASES.semNada : pendentes === 0 ? FRASES.completo : FRASES.andamento
-
-  const tocar = () => {
+  const acariciar = () => {
     setPulando((n) => n + 1)
-    setFala(frases[Math.floor(Math.random() * frases.length)])
+    setFala((anterior) => escolherFala(pet.especie, contextoDoMomento(momento), anterior ?? undefined))
   }
 
   return (
     <div className="space-y-5">
-      <header>
-        <h1 className="text-2xl font-extrabold">Companheiro</h1>
-        <p className="text-sm text-muted">Ele cresce junto com você.</p>
-      </header>
-
-      {/* Pet ativo */}
-      <section className="flex flex-col items-center rounded-3xl border border-line bg-surface p-6">
-        <div className="flex min-h-12 items-end">
+      {/* Palco: o pet em destaque */}
+      <section
+        className="relative overflow-hidden rounded-[2rem] border border-line px-5 pt-5 pb-6"
+        style={{ background: `radial-gradient(120% 70% at 50% 100%, ${PALCO[pet.especie]}33 0%, transparent 60%), var(--color-surface)` }}
+      >
+        <div className="flex min-h-16 items-end justify-center">
           {fala && (
-            <p role="status" className="relative rounded-2xl bg-surface-2 px-4 py-2 text-center text-sm">
+            <p
+              key={fala}
+              role="status"
+              className="relative max-w-[85%] animate-[aparecer_0.25s_ease-out] rounded-2xl bg-surface-2 px-4 py-2.5 text-center text-sm"
+            >
               {fala}
               <span className="absolute -bottom-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 bg-surface-2" />
             </p>
           )}
         </div>
-        <button
-          key={pulando}
-          onClick={tocar}
-          aria-label={`Fazer carinho em ${pet.nome}`}
-          className={`mt-2 rounded-full ${pulando ? 'animate-[pulinho_0.6s_ease-in-out]' : ''}`}
-        >
-          <Pet especie={pet.especie} estagio={pet.estagio} feliz={feitos > 0} size={170} nome={pet.nome} />
-        </button>
-        <p className="mt-2 text-2xl font-extrabold">{pet.nome}</p>
-        <p className="text-sm text-muted">
-          {info.estagios[pet.estagio - 1]} · estágio {pet.estagio} de 5
-        </p>
-
-        <div className="mt-4 w-full">
-          <div className="h-2 overflow-hidden rounded-full bg-brand/20">
-            <div className="h-full rounded-full bg-brand transition-all duration-700" style={{ width: `${pct}%` }} />
-          </div>
-          <p className="mt-2 text-center text-xs text-muted">
-            {proximo
-              ? `Vira ${info.estagios[proximo - 1]} no nível ${NIVEL_DO_ESTAGIO[proximo]} · faltam ${faltam.toLocaleString('pt-BR')} XP`
-              : 'Forma lendária! Vocês chegaram ao último estágio juntos.'}
+        <div className="flex justify-center">
+          <button
+            key={pulando}
+            onClick={acariciar}
+            aria-label={`Fazer carinho em ${pet.nome}`}
+            className={`rounded-full ${pulando ? 'animate-[pulinho_0.6s_ease-in-out]' : ''}`}
+          >
+            <Pet especie={pet.especie} estagio={pet.estagio} expressao={expressao} size={200} nome={pet.nome} />
+          </button>
+        </div>
+        <div className="mt-1 text-center">
+          <h1 className="text-2xl font-extrabold">{pet.nome}</h1>
+          <p className="text-sm text-muted">
+            {info.estagios[pet.estagio - 1]} · {info.nome}
+            {!dados.carregando && <> · {NOME_EXPRESSAO[expressao]}</>}
           </p>
         </div>
+        {!fala && <p className="mt-3 text-center text-xs text-muted">Toque em {pet.nome} para conversar.</p>}
       </section>
 
-      {/* Caminho de evolução */}
-      <section>
-        <h2 className="mb-2 text-sm font-bold text-muted">Evoluções</h2>
-        <div className="grid grid-cols-5 gap-1.5">
-          {ESTAGIOS.map((e) => {
-            const alcancado = e <= pet.estagio
-            return (
-              <div
-                key={e}
-                className={`flex flex-col items-center rounded-2xl border px-1 py-2 ${
-                  e === pet.estagio ? 'border-brand bg-brand/10' : 'border-line bg-surface'
-                }`}
-              >
-                <Pet especie={pet.especie} estagio={e} silhueta={!alcancado} parado size={52} />
-                <p className={`mt-1 text-center text-[11px] font-bold leading-tight ${alcancado ? '' : 'text-muted'}`}>
-                  {alcancado ? info.estagios[e - 1] : '???'}
-                </p>
-                <p className="text-[11px] text-muted">Nível {NIVEL_DO_ESTAGIO[e]}</p>
-              </div>
-            )
-          })}
-        </div>
-      </section>
-
-      <div className="flex gap-2">
-        <button
-          onClick={() => setRenomeando(true)}
-          className="flex-1 rounded-2xl border border-line py-2.5 text-sm font-bold hover:bg-surface"
-        >
-          Mudar nome
-        </button>
-        <button
-          onClick={() => setTrocando(true)}
-          className="flex-1 rounded-2xl border border-line py-2.5 text-sm font-bold hover:bg-surface"
-        >
-          Trocar espécie
-        </button>
+      {/* Abas */}
+      <div role="tablist" className="flex gap-1 rounded-2xl bg-surface p-1">
+        {(
+          [
+            ['companheiro', 'Companheiro'],
+            ['evolucao', 'Evolução'],
+          ] as [Aba, string][]
+        ).map(([id, nome]) => (
+          <button
+            key={id}
+            role="tab"
+            aria-selected={aba === id}
+            onClick={() => setAba(id)}
+            className={`flex-1 rounded-xl py-2 text-sm font-bold transition-colors ${
+              aba === id ? 'bg-surface-2 text-ink' : 'text-muted hover:text-ink'
+            }`}
+          >
+            {nome}
+          </button>
+        ))}
       </div>
 
-      <p className="text-center text-xs text-muted">
-        Arte provisória. A coleção completa, com raridades e habitat, chega na Etapa 2.
-      </p>
-
-      {renomeando && (
-        <Renomear
-          atual={pet.nome}
-          onSalvar={renomear}
-          onFechar={() => setRenomeando(false)}
-        />
+      {aba === 'companheiro' ? (
+        <section className="space-y-4">
+          <p className="text-sm text-muted">{info.descricao}</p>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => setRenomeando(true)}
+              className="rounded-2xl border border-line py-2.5 text-sm font-bold hover:bg-surface"
+            >
+              Mudar nome
+            </button>
+            <button
+              onClick={() => setTrocando(true)}
+              className="rounded-2xl border border-line py-2.5 text-sm font-bold hover:bg-surface"
+            >
+              Trocar espécie
+            </button>
+          </div>
+          <p className="text-center text-xs text-muted">
+            Em breve: laço com {pet.nome}, novas interações, visual e diário de memórias.
+          </p>
+        </section>
+      ) : (
+        <Evolucao especie={pet.especie} estagio={pet.estagio} total={total} />
       )}
+
+      {renomeando && <Renomear atual={pet.nome} onSalvar={renomear} onFechar={() => setRenomeando(false)} />}
     </div>
+  )
+}
+
+// O caminho das 5 formas, de cima para baixo, com o progresso até a próxima.
+function Evolucao({ especie: esp, estagio, total }: { especie: Especie; estagio: Estagio; total: number }) {
+  const info = especie(esp)
+  const proximo = estagio < 5 ? ((estagio + 1) as Estagio) : null
+  let pct = 100
+  let faltam = 0
+  if (proximo) {
+    const inicio = xpTotalDoNivel(NIVEL_DO_ESTAGIO[estagio])
+    const fim = xpTotalDoNivel(NIVEL_DO_ESTAGIO[proximo])
+    pct = Math.min(100, Math.max(0, Math.round(((total - inicio) / (fim - inicio)) * 100)))
+    faltam = Math.max(0, fim - total)
+  }
+
+  return (
+    <section>
+      <ol className="relative space-y-3 before:absolute before:top-6 before:bottom-6 before:left-[31px] before:w-0.5 before:bg-line">
+        {ESTAGIOS.map((e) => {
+          const alcancado = e <= estagio
+          const atual = e === estagio
+          return (
+            <li key={e} className="relative flex items-center gap-3">
+              <span
+                className={`relative z-10 flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border ${
+                  atual ? 'border-brand bg-brand/15' : 'border-line bg-surface'
+                }`}
+              >
+                <Pet especie={esp} estagio={e} silhueta={!alcancado} parado size={52} />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className={`block font-bold ${alcancado ? '' : 'text-muted'}`}>
+                  {alcancado ? info.estagios[e - 1] : 'Forma misteriosa'}
+                </span>
+                <span className="block text-xs text-muted">
+                  Nível {NIVEL_DO_ESTAGIO[e]}
+                  {e === 4 && ' · no futuro, aqui você escolhe um caminho'}
+                  {atual && ' · forma atual'}
+                </span>
+                {atual && proximo && (
+                  <span className="mt-2 block">
+                    <span className="block h-1.5 overflow-hidden rounded-full bg-brand/20">
+                      <span className="block h-full rounded-full bg-brand transition-all duration-700" style={{ width: `${pct}%` }} />
+                    </span>
+                    <span className="mt-1 block text-xs text-muted">
+                      Faltam {faltam.toLocaleString('pt-BR')} XP para a próxima forma
+                    </span>
+                  </span>
+                )}
+              </span>
+            </li>
+          )
+        })}
+      </ol>
+      {!proximo && <p className="mt-4 text-center text-sm text-gold">Forma lendária! Vocês chegaram ao topo juntos.</p>}
+    </section>
   )
 }
 
 function Renomear(props: { atual: string; onSalvar: (nome: string) => Promise<void>; onFechar: () => void }) {
   const [nome, setNome] = useState(props.atual)
   const [erro, setErro] = useState('')
+
   const enviar = async (e: FormEvent) => {
     e.preventDefault()
     if (!nome.trim()) return
@@ -174,6 +221,7 @@ function Renomear(props: { atual: string; onSalvar: (nome: string) => Promise<vo
       setErro('Não foi possível salvar. Tente de novo.')
     }
   }
+
   return (
     <Sheet titulo="Mudar nome" onFechar={props.onFechar}>
       <form onSubmit={enviar} className="space-y-4">
