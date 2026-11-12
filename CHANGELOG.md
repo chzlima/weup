@@ -14,6 +14,8 @@ A versão que está rodando aparece no fim da tela **Perfil** (número + commit)
 - Registro de erros: quando o app falha com a pessoa logada, os detalhes técnicos vão para a tabela `app_errors` (sem serviço de terceiros, sem conteúdo digitado; e-mails e chaves são removidos). Aparece em "Baixar meus dados" e está descrito na Privacidade. Precisa rodar `supabase/ciclo11-erros.sql`.
 - Tela "Algo não saiu como esperado" com botão Recarregar no lugar da tela em branco quando uma tela quebra.
 
+- Backup semanal automático do banco (domingo, 03:00): criptografado, com teste de restauração a cada execução e guardado por 90 dias. Como configurar e restaurar: `docs/BACKUP.md`. A Privacidade passou a citar o backup.
+
 ### Mudado
 - O service worker deixou de se atualizar sozinho em silêncio: agora espera o "Atualizar" ou o app ser fechado.
 

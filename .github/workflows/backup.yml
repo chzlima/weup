@@ -1,0 +1,81 @@
+name: Backup semanal
+
+# Todo domingo de madrugada: copia o banco, criptografa, prova que restaura e guarda o arquivo por 90 dias.
+# Também roda quando estes scripts mudam (para não descobrir no dia do aperto que o backup quebrou)
+# e à mão: aba Actions → Backup semanal → Run workflow.
+on:
+  schedule:
+    - cron: '0 6 * * 0' # domingo, 03:00 no horário de Brasília
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - .github/workflows/backup.yml
+      - scripts/backup/**
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    services:
+      teste:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: teste
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+      BANCO_DE_TESTE: postgresql://postgres:teste@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Conferir se os segredos existem
+        run: |
+          faltam=""
+          [ -n "$SUPABASE_DB_URL" ] || faltam="$faltam SUPABASE_DB_URL"
+          [ -n "$BACKUP_PASSPHRASE" ] || faltam="$faltam BACKUP_PASSPHRASE"
+          if [ -n "$faltam" ]; then
+            echo "::error::Faltam segredos no repositório:$faltam. Veja docs/BACKUP.md."
+            exit 1
+          fi
+
+      - name: Instalar as ferramentas do Postgres 17
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y -q postgresql-client-17
+          echo "/usr/lib/postgresql/17/bin" >> "$GITHUB_PATH"
+
+      - name: Fazer o backup
+        run: bash scripts/backup/backup.sh
+
+      - name: Testar a restauração
+        run: bash scripts/backup/teste-restauracao.sh
+
+      - name: Resumo
+        if: always()
+        run: |
+          {
+            echo "### Backup do WeUp!"
+            echo '```'
+            cat backup/contagem.txt 2>/dev/null || echo "sem contagem (o backup não chegou a ser feito)"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Guardar o backup criptografado
+        uses: actions/upload-artifact@v4
+        with:
+          name: weup-backup-${{ github.run_id }}
+          path: backup/*.dump.gpg
+          retention-days: 90
+          if-no-files-found: error

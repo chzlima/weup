@@ -18,7 +18,7 @@ Vale para versões com número (0.2.0, 0.3.0…). Correções pequenas do dia a 
    - [ ] a função nova da versão, do jeito que uma pessoa usaria
 4. **Isolamento entre contas.** Se mudou tabela ou regra de segurança: incluir a tabela na lista `tabelas` de
    `supabase/teste-isolamento.sql`, rodar no SQL Editor e conferir que tudo dá "ok".
-5. **Backup.** Antes de qualquer SQL que altere ou apague dados existentes, fazer um backup (ver `PROJETO.md`).
+5. **Backup.** Antes de qualquer SQL que altere ou apague dados existentes, rodar um backup à mão (ver `docs/BACKUP.md`).
 
 ## Lançar
 

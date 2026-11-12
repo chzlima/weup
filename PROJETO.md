@@ -119,6 +119,8 @@ Precisa do **Node.js (versão LTS)** instalado.
 
 - 0.2: registro de erros próprio, sem serviço de terceiros (`src/lib/erros.ts`, `src/components/TelaDeErro.tsx`, `supabase/ciclo11-erros.sql`). Erros que acontecem com a pessoa logada vão para a tabela `app_errors` (só detalhes técnicos, com e-mails e chaves removidos; no máximo 5 por abertura do app e 30 por conta por dia). **Para ver os erros:** Supabase → Table Editor → `app_errors`, ordenar por `created_at`. Se uma tela quebrar, aparece "Algo não saiu como esperado" com o botão Recarregar em vez de tela em branco.
 
+- 0.2: backup semanal automático pelo GitHub (`.github/workflows/backup.yml`, `scripts/backup/`), criptografado e com teste de restauração. Depende dos segredos `SUPABASE_DB_URL` e `BACKUP_PASSPHRASE` no repositório. Tudo em `docs/BACKUP.md`. **Toda tabela nova precisa entrar também em `scripts/backup/tabelas.sh`.**
+
 ## Como publicar uma nova versão
 
 Para versões com número, siga o checklist em `docs/RELEASE.md`.
