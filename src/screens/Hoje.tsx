@@ -180,6 +180,7 @@ export function Hoje() {
           especie={pet?.especie}
           estagio={pet?.estagio}
           caminho={pet?.caminho}
+          visual={pet ?? undefined}
           expressao={dados.carregando ? 'feliz' : expressaoDoMomento(momentoDoDia(dados, plano))}
           size={88}
           nome={pet?.nome}

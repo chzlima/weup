@@ -34,6 +34,11 @@ A versão que está rodando aparece no fim da tela **Perfil** (número + commit)
 - As memórias são criadas só pelo banco, a partir do histórico, uma vez cada; quem já usava o app ganha o passado reconstruído. O diário é privado.
 - Política de privacidade: passa a citar o diário. Precisa rodar `supabase/ciclo22-memorias.sql`.
 
+### Pet Rework — ciclo 7 (visual)
+- **Aba Visual** em Pets: 12 itens em três espaços. **Chapéu:** boina, coroa de folhas, capelo e coroa. **Acessório:** estetoscópio, flor, laço de fita e medalha. **Efeito:** brilhos, vaga-lumes, estrelas e corações, que flutuam em volta do pet. Dá para experimentar no pet antes de usar.
+- Cada item se desbloqueia por uma memória do diário (laço, nível, primeira tarefa, primeiro hábito, primeira revisão…). Sem loja, sem moeda e sem vantagem de produtividade. O banco recusa item bloqueado ou no lugar errado.
+- O pet aparece vestido em todo o app. Precisa rodar `supabase/ciclo23-visual.sql` **antes** do merge.
+
 - **Corrigido:** o teste de isolamento (`supabase/teste-isolamento.sql`) tinha sido esvaziado sem querer na revisão semanal; foi restaurado, com as verificações da revisão semanal e do pet.
 
 ### Adicionado

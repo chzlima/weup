@@ -160,6 +160,13 @@ begin
     -- Laço (ciclo20): conta só os dias de A (A tem 1 dia com ação, sem cuidado registrado)
     obt := pg_temp.contar('select pontos from public.laco_do_pet()');
     te := te || 'laco_do_pet · A vê só o próprio laço'::text; es := es || '1'::text; ob := ob || obt; ok := ok || (obt = '1');
+    -- Visual (ciclo23): só item desbloqueado (A tem a memória "pet", que libera a boina)
+    obt := pg_temp.tentar(format('update public.user_pets set chapeu = %L where user_id = %L', 'coroa', a));
+    te := te || 'user_pets · A usa um item bloqueado'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
+    obt := pg_temp.tentar(format('update public.user_pets set acessorio = %L where user_id = %L', 'boina', a));
+    te := te || 'user_pets · A põe um item no espaço errado'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
+    obt := pg_temp.tentar(format('update public.user_pets set chapeu = %L where user_id = %L', 'boina', a));
+    te := te || 'user_pets · A usa um item desbloqueado'::text; es := es || 'passou (1 linhas)'::text; ob := ob || obt; ok := ok || (obt = 'passou (1 linhas)');
 
     -- 6) Usar coisas de B a partir dos próprios dados
     obt := pg_temp.tentar(format('insert into public.tasks (user_id, titulo, series_id, ocorrencia) values (%L, %L, %L, public.hoje_br() + 30)', a, 'x', sb));

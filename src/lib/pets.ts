@@ -4,7 +4,15 @@ import { checar } from './tarefas'
 export type Especie = 'broto' | 'faisca' | 'gota'
 export type Estagio = 1 | 2 | 3 | 4 | 5
 
-export type MeuPet = { especie: Especie; nome: string; estagio: Estagio; caminho: 'conhecimento' | 'saude' | 'organizacao' | null }
+export type MeuPet = {
+  especie: Especie
+  nome: string
+  estagio: Estagio
+  caminho: 'conhecimento' | 'saude' | 'organizacao' | null
+  chapeu: string | null
+  acessorio: string | null
+  efeito: string | null
+}
 
 // Estágios 4 e 5: nomes provisórios até o ciclo dos caminhos (no estágio 4 a pessoa escolhe um caminho).
 export const ESPECIES: { id: Especie; nome: string; descricao: string; estagios: [string, string, string, string, string] }[] = [
@@ -53,12 +61,12 @@ export const FRASES = {
 // ---------- Banco ----------
 
 export async function buscarPet() {
-  return checar<MeuPet | null>(await supabase.from('user_pets').select('especie, nome, estagio, caminho').maybeSingle())
+  return checar<MeuPet | null>(await supabase.from('user_pets').select('especie, nome, estagio, caminho, chapeu, acessorio, efeito').maybeSingle())
 }
 
 export async function salvarPet(dados: { especie: Especie; nome: string }) {
   return checar<MeuPet>(
-    await supabase.from('user_pets').upsert(dados, { onConflict: 'user_id' }).select('especie, nome, estagio, caminho').single(),
+    await supabase.from('user_pets').upsert(dados, { onConflict: 'user_id' }).select('especie, nome, estagio, caminho, chapeu, acessorio, efeito').single(),
   )
 }
 
@@ -69,6 +77,6 @@ export async function sincronizarPet() {
 
 export async function renomearPet(nome: string) {
   return checar<MeuPet>(
-    await supabase.from('user_pets').update({ nome }).not('user_id', 'is', null).select('especie, nome, estagio, caminho').single(),
+    await supabase.from('user_pets').update({ nome }).not('user_id', 'is', null).select('especie, nome, estagio, caminho, chapeu, acessorio, efeito').single(),
   )
 }

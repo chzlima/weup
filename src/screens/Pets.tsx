@@ -11,13 +11,14 @@ import { momentoDoDia } from '../pets/momento'
 import { EscolherPet } from './EscolherPet'
 import { EscolherCaminho } from '../pets/EscolherCaminho'
 import { Diario } from '../pets/Diario'
+import { AbaVisual } from '../pets/AbaVisual'
 import { caminhoSugerido, nomeDaForma, type Caminho } from '../pets/caminhos'
 import { useAuth } from '../lib/auth'
 import { hojeISO, somarDias } from '../lib/tarefas'
 import { ordemCompromisso } from '../lib/agenda'
 import { INTERACOES, assuntosDoDia, progressoDoLaco, useLaco } from '../pets/laco'
 
-type Aba = 'companheiro' | 'evolucao' | 'diario'
+type Aba = 'companheiro' | 'evolucao' | 'visual' | 'diario'
 
 // Cor do "palco" de cada espécie (o habitat de verdade chega num ciclo próprio).
 const PALCO: Record<Especie, string> = { broto: '#14b87a', faisca: '#f0a35e', gota: '#5cb8e4' }
@@ -25,7 +26,7 @@ const PALCO: Record<Especie, string> = { broto: '#14b87a', faisca: '#f0a35e', go
 // Aba Pets: o pet é o protagonista. Em cima, o palco com o pet, a fala e o nome;
 // embaixo, duas abas discretas: Companheiro (interações) e Evolução (o caminho das formas).
 export function Pets() {
-  const { pet, escolher, escolherCaminho, renomear, acompanharNivel } = usePet()
+  const { pet, escolher, escolherCaminho, vestir, renomear, acompanharNivel } = usePet()
   const dados = useDados()
   const plano = usePlanoDeHoje()
   const { nome } = useAuth()
@@ -122,7 +123,7 @@ export function Pets() {
             aria-label={`Fazer carinho em ${pet.nome}`}
             className={`rounded-full ${pulando ? 'animate-[pulinho_0.6s_ease-in-out]' : ''}`}
           >
-            <Pet especie={pet.especie} estagio={pet.estagio} caminho={pet.caminho} expressao={expressao} size={200} nome={pet.nome} />
+            <Pet especie={pet.especie} estagio={pet.estagio} caminho={pet.caminho} visual={pet} expressao={expressao} size={200} nome={pet.nome} />
           </button>
         </div>
         <div className="mt-1 text-center">
@@ -158,6 +159,7 @@ export function Pets() {
           [
             ['companheiro', 'Companheiro'],
             ['evolucao', 'Evolução'],
+            ['visual', 'Visual'],
             ['diario', 'Diário'],
           ] as [Aba, string][]
         ).map(([id, nome]) => (
@@ -232,11 +234,13 @@ export function Pets() {
             </button>
           </div>
           <p className="text-center text-xs text-muted">
-            Em breve: brincar e o visual de {pet.nome}.
+            Em breve: brincar e o habitat de {pet.nome}.
           </p>
         </section>
       ) : aba === 'evolucao' ? (
         <Evolucao especie={pet.especie} estagio={pet.estagio} caminho={pet.caminho} total={total} />
+      ) : aba === 'visual' ? (
+        <AbaVisual pet={pet} onVestir={vestir} />
       ) : (
         <Diario pet={pet} />
       )}
@@ -249,7 +253,7 @@ export function Pets() {
           className="fixed inset-0 z-50 flex animate-[aparecer_0.4s_ease-out] items-center justify-center"
           style={{ background: `radial-gradient(90% 60% at 50% 70%, ${PALCO[pet.especie]}40 0%, var(--color-bg) 70%)` }}
         >
-          <Pet especie={pet.especie} estagio={pet.estagio} caminho={pet.caminho} expressao="tranquilo" size={260} nome={pet.nome} />
+          <Pet especie={pet.especie} estagio={pet.estagio} caminho={pet.caminho} visual={pet} expressao="tranquilo" size={260} nome={pet.nome} />
         </button>
       )}
 

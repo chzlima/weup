@@ -118,7 +118,7 @@ export function RevisaoSemanal({ semana, onFechar }: { semana: string; onFechar:
             {/* A carta do pet */}
             <section className="flex gap-3 rounded-3xl border border-line bg-surface p-4">
               <div className="shrink-0">
-                <Pet especie={pet?.especie} estagio={pet?.estagio} caminho={pet?.caminho} feliz size={64} nome={pet?.nome} />
+                <Pet especie={pet?.especie} estagio={pet?.estagio} caminho={pet?.caminho} visual={pet ?? undefined} feliz size={64} nome={pet?.nome} />
               </div>
               <div className="space-y-2 text-sm">
                 {cartaDoPet(fatos, nome, pet?.nome ?? 'Seu companheiro').map((p, i, todos) => (
