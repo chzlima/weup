@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import { checar, hojeISO } from './tarefas'
+import { checar, somarDias } from './tarefas'
 
 export type Compromisso = {
   id: string
@@ -11,7 +11,7 @@ export type Compromisso = {
   created_at: string
 }
 
-export type DadosCompromisso = Pick<Compromisso, 'titulo' | 'data' | 'hora' | 'hora_fim'>
+export type DadosCompromisso = Pick<Compromisso, 'titulo' | 'data' | 'hora' | 'hora_fim' | 'task_id'>
 
 export const formatarHora = (h: string | null) => (h ? h.slice(0, 5) : 'Dia todo')
 
@@ -45,9 +45,9 @@ export function validarHorario(hora: string, hora_fim: string) {
 export const ordemCompromisso = (a: Compromisso, b: Compromisso) =>
   a.data.localeCompare(b.data) || (a.hora ?? '').localeCompare(b.hora ?? '')
 
-// Só interessa o que ainda vai acontecer (de hoje em diante).
+// Das duas últimas semanas em diante (o calendário deixa voltar algumas semanas).
 export async function buscarCompromissos() {
-  return checar<Compromisso[]>(await supabase.from('events').select('*').gte('data', hojeISO()))
+  return checar<Compromisso[]>(await supabase.from('events').select('*').gte('data', somarDias(-14)))
 }
 
 export async function inserirCompromisso(dados: DadosCompromisso) {

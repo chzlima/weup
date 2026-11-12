@@ -1,11 +1,14 @@
+import { useState } from 'react'
 import type { Dados } from '../../lib/useDados'
-import { descreverFim, formatarHora, ordemCompromisso, type Compromisso } from '../../lib/agenda'
+import { descreverFim, formatarHora, type Compromisso } from '../../lib/agenda'
 import { hojeISO, somarDias, type Tarefa } from '../../lib/tarefas'
+import { descreverRegra, type Serie } from '../../lib/series'
+import { diasDaSemana, itensDoDia, outraSemana, totalDoDia } from '../../lib/calendario'
+import { descreverSemana, segundaDaSemana } from '../../lib/revisaoSemanal'
 import { TarefaItem } from '../../components/TarefaItem'
-import { IconMais } from '../../components/Icons'
-import { Vazio } from './Vazio'
+import { IconChevron, IconMais } from '../../components/Icons'
 
-const DIAS = 14
+const LETRAS = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S']
 
 export function nomeDoDia(iso: string) {
   const [a, m, d] = iso.split('-').map(Number)
@@ -16,76 +19,143 @@ export function nomeDoDia(iso: string) {
   return curto.charAt(0).toUpperCase() + curto.slice(1)
 }
 
-// Aba Agenda: próximos 14 dias, com compromissos e as tarefas marcadas para cada dia.
+// Aba Agenda: calendário da semana (segunda a domingo) e o dia escolhido em detalhe:
+// compromissos do dia todo, blocos de horário (com a tarefa ligada), tarefas e repetições previstas.
 export function Agenda(props: {
   dados: Dados
   onEditarCompromisso: (c: Compromisso) => void
   onEditarTarefa: (t: Tarefa) => void
-  onNovo: () => void
+  onEditarSerie: (s: Serie) => void
+  onNovo: (data: string) => void
 }) {
   const { dados } = props
-  const dias = Array.from({ length: DIAS }, (_, i) => somarDias(i))
-  const limite = dias[dias.length - 1]
+  const hoje = hojeISO()
+  const [semana, setSemana] = useState(segundaDaSemana(hoje))
+  const [dia, setDia] = useState(hoje)
+  const dias = diasDaSemana(semana)
+  const fonte = { compromissos: dados.compromissos, tarefas: dados.tarefas, series: dados.series }
+  const itens = itensDoDia(dia, hoje, fonte)
   const nomeProjeto = (id: string | null) => dados.projetos.find((p) => p.id === id)?.titulo
+  const nomeTarefa = (id?: string | null) => (id ? dados.tarefas.find((t) => t.id === id)?.titulo : undefined)
 
-  const blocos = dias
-    .map((dia) => ({
-      dia,
-      compromissos: dados.compromissos.filter((c) => c.data === dia).sort(ordemCompromisso),
-      tarefas: dados.tarefas.filter((t) => t.data === dia),
-    }))
-    .filter((b) => b.compromissos.length + b.tarefas.length > 0)
-
-  const depois = dados.compromissos.filter((c) => c.data > limite).sort(ordemCompromisso)
-
-  if (blocos.length === 0 && depois.length === 0) {
-    return (
-      <Vazio>
-        Sua agenda está livre. Adicione provas, aulas ou consultas para vê-las aqui e na tela Hoje.
-        <button onClick={props.onNovo} className="mt-3 block w-full font-bold text-mint">
-          Adicionar compromisso
-        </button>
-      </Vazio>
-    )
+  const irPara = (delta: number) => {
+    const nova = outraSemana(semana, delta)
+    setSemana(nova)
+    setDia(nova === segundaDaSemana(hoje) ? hoje : nova)
   }
 
   return (
-    <div className="space-y-5">
-      {blocos.map((b) => (
-        <section key={b.dia}>
-          <h2 className="mb-2 text-sm font-bold text-muted">{nomeDoDia(b.dia)}</h2>
+    <div className="space-y-4">
+      {/* Semana */}
+      <section className="rounded-3xl border border-line bg-surface p-3">
+        <div className="mb-2 flex items-center justify-between">
+          <button onClick={() => irPara(-1)} aria-label="Semana anterior" className="rounded-xl p-2 text-muted hover:text-ink">
+            <IconChevron className="h-5 w-5 rotate-180" />
+          </button>
+          <button
+            onClick={() => {
+              setSemana(segundaDaSemana(hoje))
+              setDia(hoje)
+            }}
+            className="text-sm font-bold"
+          >
+            {descreverSemana(semana)}
+          </button>
+          <button onClick={() => irPara(1)} aria-label="Próxima semana" className="rounded-xl p-2 text-muted hover:text-ink">
+            <IconChevron className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="grid grid-cols-7 gap-1">
+          {dias.map((d) => {
+            const n = totalDoDia(itensDoDia(d, hoje, fonte))
+            const escolhido = d === dia
+            const [, , dd] = d.split('-').map(Number)
+            const letra = LETRAS[new Date(`${d}T12:00`).getDay()]
+            return (
+              <button
+                key={d}
+                onClick={() => setDia(d)}
+                aria-pressed={escolhido}
+                aria-label={`${nomeDoDia(d)}${n ? `, ${n} ${n === 1 ? 'item' : 'itens'}` : ''}`}
+                className={`flex flex-col items-center gap-0.5 rounded-xl py-2 text-xs transition-colors ${
+                  escolhido ? 'bg-brand text-bg' : d === hoje ? 'bg-brand/15 text-mint' : 'text-muted hover:bg-surface-2'
+                }`}
+              >
+                <span className="font-semibold">{letra}</span>
+                <span className="text-base font-bold">{dd}</span>
+                <span className={`h-1.5 w-1.5 rounded-full ${n ? (escolhido ? 'bg-bg' : 'bg-mint') : 'bg-transparent'}`} />
+              </button>
+            )
+          })}
+        </div>
+      </section>
+
+      {/* Dia escolhido */}
+      <section>
+        <div className="mb-2 flex items-baseline justify-between gap-3">
+          <h2 className="text-sm font-bold text-muted">{nomeDoDia(dia)}</h2>
+          <button onClick={() => props.onNovo(dia)} className="text-xs font-bold text-mint">
+            + Compromisso
+          </button>
+        </div>
+
+        {totalDoDia(itens) === 0 ? (
+          <p className="rounded-2xl border border-dashed border-line p-5 text-center text-sm text-muted">
+            Dia livre.{' '}
+            <button onClick={() => props.onNovo(dia)} className="font-bold text-mint">
+              Adicionar compromisso
+            </button>
+          </p>
+        ) : (
           <ul className="space-y-2">
-            {b.compromissos.map((c) => (
-              <LinhaCompromisso key={c.id} c={c} onEditar={() => props.onEditarCompromisso(c)} />
+            {[...itens.diaTodo, ...itens.blocos].map((c) => (
+              <LinhaCompromisso key={c.id} c={c} tarefa={nomeTarefa(c.task_id)} onEditar={() => props.onEditarCompromisso(c)} />
             ))}
-            {b.tarefas.map((t) => (
+            {itens.tarefas.map((t) => (
               <TarefaItem
                 key={t.id}
                 tarefa={t}
                 projeto={nomeProjeto(t.project_id)}
+                nota={t.series_id ? 'repete' : undefined}
                 onAlternar={() => dados.alternarTarefa(t)}
                 onEditar={() => props.onEditarTarefa(t)}
               />
             ))}
-          </ul>
-        </section>
-      ))}
-
-      {depois.length > 0 && (
-        <section>
-          <h2 className="mb-2 text-sm font-bold text-muted">Mais adiante</h2>
-          <ul className="space-y-2">
-            {depois.map((c) => (
-              <LinhaCompromisso key={c.id} c={c} mostrarData onEditar={() => props.onEditarCompromisso(c)} />
+            {itens.previstas.map((s) => (
+              <li key={s.id}>
+                <button
+                  onClick={() => props.onEditarSerie(s)}
+                  className="flex w-full items-center gap-3 rounded-2xl border border-dashed border-line px-4 py-3 text-left transition-colors hover:bg-surface-2"
+                >
+                  <span className="h-6 w-6 shrink-0 rounded-full border-2 border-dashed border-line" aria-hidden />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-semibold text-muted">{s.titulo}</span>
+                    <span className="block truncate text-xs text-muted">Prevista · {descreverRegra(s)}</span>
+                  </span>
+                </button>
+              </li>
             ))}
           </ul>
-        </section>
-      )}
+        )}
+        {itens.previstas.length > 0 && (
+          <p className="mt-2 text-xs text-muted">As previstas viram tarefa no próprio dia, quando você abrir o app.</p>
+        )}
+      </section>
     </div>
   )
 }
 
-export function LinhaCompromisso({ c, onEditar, mostrarData }: { c: Compromisso; onEditar: () => void; mostrarData?: boolean }) {
+export function LinhaCompromisso({
+  c,
+  onEditar,
+  mostrarData,
+  tarefa,
+}: {
+  c: Compromisso
+  onEditar: () => void
+  mostrarData?: boolean
+  tarefa?: string // título da tarefa ligada ao bloco
+}) {
   return (
     <li>
       <button
@@ -97,8 +167,10 @@ export function LinhaCompromisso({ c, onEditar, mostrarData }: { c: Compromisso;
         </span>
         <span className="min-w-0 flex-1">
           <span className="block truncate font-semibold">{c.titulo}</span>
-          <span className="block text-xs text-muted">
-            {[mostrarData ? nomeDoDia(c.data) : 'Compromisso', descreverFim(c)].filter(Boolean).join(' · ')}
+          <span className="block truncate text-xs text-muted">
+            {[mostrarData ? nomeDoDia(c.data) : 'Compromisso', descreverFim(c), tarefa && `tarefa: ${tarefa}`]
+              .filter(Boolean)
+              .join(' · ')}
           </span>
         </span>
         <IconMais className="h-5 w-5 shrink-0 text-muted" />

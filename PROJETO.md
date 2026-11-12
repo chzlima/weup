@@ -153,6 +153,8 @@ Precisa do **Node.js (versão LTS)** instalado.
 
 - 0.4: revisão semanal (`supabase/ciclo18-revisao-semanal.sql`, `src/lib/revisaoSemanal.ts`, `src/components/RevisaoSemanal.tsx`). A tabela `weekly_reviews` guarda só as 4 respostas (uma linha por semana, marcada pela segunda-feira); os números da semana são calculados na hora. No domingo revisa a semana que termina, na segunda a que acabou ontem (`semanaRevisada`). A carta do pet é montada por regra (`cartaDoPet`), sem IA, e nunca fala do que faltou.
 
+- 0.4: calendário na aba Agenda (`src/screens/planejar/Agenda.tsx`, regras em `src/lib/calendario.ts`): semana de segunda a domingo + dia em detalhe. Repetições aparecem como "previstas" nos dias futuros, calculadas por `serieCaiEm` (não são criadas no banco). Compromissos passam a ser lidos desde 14 dias atrás. Formulário de compromisso liga o bloco a uma tarefa (`task_id`). Modo prova e semana de plantão ficam para a próxima etapa.
+
 - **Pet Rework** (proposta completa no cofre: "Pet Rework — proposta"). Ciclo 1 (`supabase/ciclo19-pet-fundacao.sql`): o banco calcula o nível (`nivel_do_xp`, mesma curva de `xp.ts`, com teste de paridade) e o estágio (`estagio_do_nivel`: 1/5/10/15/25). O app só pode gravar `especie` e `nome` em `user_pets` (permissão por coluna); a evolução passa por `sincronizar_pet()`. **Toda mudança na curva de XP precisa ser feita nos dois lados.**
 
 - **Atenção (12/11/2026):** o `teste-isolamento.sql` foi esvaziado sem querer antes do commit da revisão semanal e foi restaurado no ciclo 1 do Pet Rework. Antes de commitar, conferir o `git diff --stat`: arquivo que perde centenas de linhas sem motivo é sinal de problema.

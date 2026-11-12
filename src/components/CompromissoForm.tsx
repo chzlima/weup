@@ -3,18 +3,23 @@ import { Rotulo, Sheet } from './Sheet'
 import { CampoData } from './CampoData'
 import { hojeISO } from '../lib/tarefas'
 import { descreverFim, validarHorario, type Compromisso, type DadosCompromisso } from '../lib/agenda'
+import type { Tarefa } from '../lib/tarefas'
 
 export function CompromissoForm(props: {
   compromisso?: Compromisso
+  dataInicial?: string // dia escolhido no calendário
+  tarefas?: Tarefa[] // tarefas abertas que podem ser ligadas ao bloco
   onSalvar: (dados: DadosCompromisso) => void
   onExcluir?: () => void
   onFechar: () => void
 }) {
   const c = props.compromisso
   const [titulo, setTitulo] = useState(c?.titulo ?? '')
-  const [data, setData] = useState<string>(c?.data ?? hojeISO())
+  const [data, setData] = useState<string>(c?.data ?? props.dataInicial ?? hojeISO())
   const [hora, setHora] = useState(c?.hora?.slice(0, 5) ?? '')
   const [horaFim, setHoraFim] = useState(c?.hora_fim?.slice(0, 5) ?? '')
+  const [taskId, setTaskId] = useState(c?.task_id ?? '')
+  const abertas = (props.tarefas ?? []).filter((t) => !t.concluida_em || t.id === c?.task_id)
   const [erro, setErro] = useState('')
 
   const enviar = (e: FormEvent) => {
@@ -22,7 +27,13 @@ export function CompromissoForm(props: {
     if (!titulo.trim()) return setErro('Dê um nome para o compromisso.')
     const problema = validarHorario(hora, horaFim)
     if (problema) return setErro(problema)
-    const dados: DadosCompromisso = { titulo: titulo.trim(), data, hora: hora || null, hora_fim: (hora && horaFim) || null }
+    const dados: DadosCompromisso = {
+      titulo: titulo.trim(),
+      data,
+      hora: hora || null,
+      hora_fim: (hora && horaFim) || null,
+      task_id: taskId || null,
+    }
     // Sem fim num compromisso novo: não manda o campo (assim funciona mesmo antes do ciclo15-agenda.sql).
     if (!dados.hora_fim && !(c && 'hora_fim' in c)) delete dados.hora_fim
     props.onSalvar(dados)
@@ -83,6 +94,25 @@ export function CompromissoForm(props: {
             {horaFim && (
               <span className="mt-1 block text-xs text-muted">{descreverFim({ hora, hora_fim: horaFim })}</span>
             )}
+          </label>
+        )}
+
+        {abertas.length > 0 && (
+          <label className="block">
+            <Rotulo>O que vai fazer nesse horário? (opcional)</Rotulo>
+            <select
+              value={taskId}
+              onChange={(e) => setTaskId(e.target.value)}
+              aria-label="Tarefa ligada ao compromisso"
+              className="w-full rounded-xl border border-line bg-surface-2 px-3 py-2.5 outline-none focus:border-brand"
+            >
+              <option value="">Nenhuma tarefa</option>
+              {abertas.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.titulo}
+                </option>
+              ))}
+            </select>
           </label>
         )}
 
