@@ -9,6 +9,8 @@ import { calcularNivel, xpTotalDoNivel } from '../lib/xp'
 import { contextoDoMomento, escolherFala, expressaoDoMomento, NOME_EXPRESSAO } from '../pets/humor'
 import { momentoDoDia } from '../pets/momento'
 import { EscolherPet } from './EscolherPet'
+import { EscolherCaminho } from '../pets/EscolherCaminho'
+import { caminhoSugerido, nomeDaForma, type Caminho } from '../pets/caminhos'
 import { useAuth } from '../lib/auth'
 import { hojeISO, somarDias } from '../lib/tarefas'
 import { ordemCompromisso } from '../lib/agenda'
@@ -22,12 +24,13 @@ const PALCO: Record<Especie, string> = { broto: '#14b87a', faisca: '#f0a35e', go
 // Aba Pets: o pet é o protagonista. Em cima, o palco com o pet, a fala e o nome;
 // embaixo, duas abas discretas: Companheiro (interações) e Evolução (o caminho das formas).
 export function Pets() {
-  const { pet, escolher, renomear, acompanharNivel } = usePet()
+  const { pet, escolher, escolherCaminho, renomear, acompanharNivel } = usePet()
   const dados = useDados()
   const plano = usePlanoDeHoje()
   const { nome } = useAuth()
   const { laco, cuidar } = useLaco()
   const [observando, setObservando] = useState(false)
+  const [escolhendoCaminho, setEscolhendoCaminho] = useState(false)
   const [aba, setAba] = useState<Aba>('companheiro')
   const [fala, setFala] = useState<string | null>(null)
   const [pulando, setPulando] = useState(0)
@@ -118,18 +121,35 @@ export function Pets() {
             aria-label={`Fazer carinho em ${pet.nome}`}
             className={`rounded-full ${pulando ? 'animate-[pulinho_0.6s_ease-in-out]' : ''}`}
           >
-            <Pet especie={pet.especie} estagio={pet.estagio} expressao={expressao} size={200} nome={pet.nome} />
+            <Pet especie={pet.especie} estagio={pet.estagio} caminho={pet.caminho} expressao={expressao} size={200} nome={pet.nome} />
           </button>
         </div>
         <div className="mt-1 text-center">
           <h1 className="text-2xl font-extrabold">{pet.nome}</h1>
           <p className="text-sm text-muted">
-            {info.estagios[pet.estagio - 1]} · {info.nome}
+            {nomeDaForma(pet.especie, pet.estagio, pet.caminho)} · {info.nome}
             {!dados.carregando && <> · {NOME_EXPRESSAO[expressao]}</>}
           </p>
         </div>
         {!fala && <p className="mt-3 text-center text-xs text-muted">Toque em {pet.nome} para conversar.</p>}
       </section>
+
+      {/* Estágio 4 sem caminho: a escolha fica em destaque até ser feita */}
+      {pet.estagio >= 4 && !pet.caminho && (
+        <button
+          onClick={() => setEscolhendoCaminho(true)}
+          className="flex w-full items-center gap-3 rounded-2xl border border-gold/50 bg-surface px-4 py-3 text-left"
+        >
+          <span aria-hidden className="text-2xl">
+            ✨
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block font-bold">Hora de escolher um caminho</span>
+            <span className="block text-xs text-muted">{pet.nome} chegou ao estágio 4. Para onde vocês vão crescer?</span>
+          </span>
+          <span className="text-sm font-bold text-gold">Escolher</span>
+        </button>
+      )}
 
       {/* Abas */}
       <div role="tablist" className="flex gap-1 rounded-2xl bg-surface p-1">
@@ -214,7 +234,7 @@ export function Pets() {
           </p>
         </section>
       ) : (
-        <Evolucao especie={pet.especie} estagio={pet.estagio} total={total} />
+        <Evolucao especie={pet.especie} estagio={pet.estagio} caminho={pet.caminho} total={total} />
       )}
 
       {/* Observar: um momento de calma, só o pet, sem texto. Toque para sair. */}
@@ -225,8 +245,17 @@ export function Pets() {
           className="fixed inset-0 z-50 flex animate-[aparecer_0.4s_ease-out] items-center justify-center"
           style={{ background: `radial-gradient(90% 60% at 50% 70%, ${PALCO[pet.especie]}40 0%, var(--color-bg) 70%)` }}
         >
-          <Pet especie={pet.especie} estagio={pet.estagio} expressao="tranquilo" size={260} nome={pet.nome} />
+          <Pet especie={pet.especie} estagio={pet.estagio} caminho={pet.caminho} expressao="tranquilo" size={260} nome={pet.nome} />
         </button>
+      )}
+
+      {escolhendoCaminho && (
+        <EscolherCaminho
+          pet={pet}
+          sugerido={caminhoSugerido(dados.resumoXP)}
+          onEscolher={escolherCaminho}
+          onFechar={() => setEscolhendoCaminho(false)}
+        />
       )}
 
       {renomeando && <Renomear atual={pet.nome} onSalvar={renomear} onFechar={() => setRenomeando(false)} />}
@@ -235,8 +264,8 @@ export function Pets() {
 }
 
 // O caminho das 5 formas, de cima para baixo, com o progresso até a próxima.
-function Evolucao({ especie: esp, estagio, total }: { especie: Especie; estagio: Estagio; total: number }) {
-  const info = especie(esp)
+function Evolucao(props: { especie: Especie; estagio: Estagio; caminho: Caminho | null; total: number }) {
+  const { especie: esp, estagio, caminho, total } = props
   const proximo = estagio < 5 ? ((estagio + 1) as Estagio) : null
   let pct = 100
   let faltam = 0
@@ -260,15 +289,15 @@ function Evolucao({ especie: esp, estagio, total }: { especie: Especie; estagio:
                   atual ? 'border-brand bg-brand/15' : 'border-line bg-surface'
                 }`}
               >
-                <Pet especie={esp} estagio={e} silhueta={!alcancado} parado size={52} />
+                <Pet especie={esp} estagio={e} caminho={caminho} silhueta={!alcancado} parado size={52} />
               </span>
               <span className="min-w-0 flex-1">
                 <span className={`block font-bold ${alcancado ? '' : 'text-muted'}`}>
-                  {alcancado ? info.estagios[e - 1] : 'Forma misteriosa'}
+                  {alcancado ? nomeDaForma(esp, e, caminho) : 'Forma misteriosa'}
                 </span>
                 <span className="block text-xs text-muted">
                   Nível {NIVEL_DO_ESTAGIO[e]}
-                  {e === 4 && ' · no futuro, aqui você escolhe um caminho'}
+                  {e === 4 && !caminho && ' · aqui você escolhe um caminho'}
                   {atual && ' · forma atual'}
                 </span>
                 {atual && proximo && (

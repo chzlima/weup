@@ -1,8 +1,10 @@
 import { useId } from 'react'
 import type { Especie, Estagio } from '../lib/pets'
 import {
-  ALTURA_ROSTO, CHAO, CorpoBroto, CorpoFaisca, CorpoGota, ESCALA, RostoPet, type Expressao, type Rosto,
+  ALTURA_ROSTO, CHAO, CorpoBroto, CorpoFaisca, CorpoGota, DetalheCaminho, ESCALA, RostoPet, type Expressao, type Rosto,
 } from '../pets/arte'
+
+const COR_DO_CAMINHO = { conhecimento: '#9b8cff', saude: '#ff8fa3', organizacao: '#7fd6e8' } as const
 
 // O pet desenhado em camadas (ver src/pets/arte.tsx): aura, sombra, corpo da espécie e rosto da expressão.
 // Parado, cada espécie tem o seu movimento: o Broto balança, a Faísca tremula e a Gota flutua.
@@ -11,6 +13,7 @@ export function Pet(props: {
   especie?: Especie
   estagio?: Estagio
   expressao?: Expressao
+  caminho?: 'conhecimento' | 'saude' | 'organizacao' | null // estágios 4 e 5
   feliz?: boolean // atalho antigo: feliz = expressão "feliz"; sem nada, o rosto neutro
   silhueta?: boolean // estágio ainda bloqueado: só a sombra
   parado?: boolean // sem animação (miniaturas e silhuetas)
@@ -22,6 +25,7 @@ export function Pet(props: {
   const s = ESCALA[estagio]
   const animado = !props.parado && !silhueta
   const id = useId().replace(/:/g, '')
+  const corAura = props.caminho && estagio >= 4 ? COR_DO_CAMINHO[props.caminho] : '#d8b45a'
 
   return (
     <svg
@@ -37,8 +41,8 @@ export function Pet(props: {
         <>
           <defs>
             <radialGradient id={`aura-${id}`}>
-              <stop offset="0%" stopColor="#d8b45a" stopOpacity={estagio === 5 ? 0.45 : 0.25} />
-              <stop offset="100%" stopColor="#d8b45a" stopOpacity="0" />
+              <stop offset="0%" stopColor={corAura} stopOpacity={estagio === 5 ? 0.45 : 0.25} />
+              <stop offset="100%" stopColor={corAura} stopOpacity="0" />
             </radialGradient>
           </defs>
           <circle cx="60" cy="62" r="60" fill={`url(#aura-${id})`} className={animado ? 'pet-aura' : undefined} />
@@ -50,6 +54,7 @@ export function Pet(props: {
           {especie === 'broto' && <CorpoBroto estagio={estagio} />}
           {especie === 'faisca' && <CorpoFaisca estagio={estagio} />}
           {especie === 'gota' && <CorpoGota estagio={estagio} />}
+          {props.caminho && estagio >= 4 && !silhueta && <DetalheCaminho caminho={props.caminho} estagio={estagio} />}
           <RostoPet y={ALTURA_ROSTO[especie]} rosto={rosto} />
         </g>
       </g>
