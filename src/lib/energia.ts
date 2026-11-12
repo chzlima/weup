@@ -53,35 +53,55 @@ export function progressoDoDia(feitos: number, total: number, energia: Energia |
 const faltaOBanco = (e: { message: string; code?: string } | null) =>
   !!e && (e.code === '42P01' || e.code === 'PGRST205' || /could not find/i.test(e.message))
 
-export async function buscarEnergia(dia: string) {
-  const res = await supabase.from('daily_checkins').select('energia').eq('dia', dia).maybeSingle()
-  if (faltaOBanco(res.error)) return { energia: null, disponivel: false }
-  const linha = checar<{ energia: Energia } | null>(res)
-  return { energia: linha?.energia ?? null, disponivel: true }
+type LinhaDoDia = { energia: Energia | null; prioridades?: string[] }
+
+// Lê o registro do dia: energia e prioridades. Antes do ciclo16 a coluna de prioridades não existe:
+// aí lê só a energia e as prioridades ficam escondidas.
+export async function buscarDia(dia: string) {
+  const vazio = { energia: null, prioridades: [] as string[], disponivel: false, temPrioridades: false }
+  const comPrioridades = await supabase.from('daily_checkins').select('energia, prioridades').eq('dia', dia).maybeSingle()
+  if (!comPrioridades.error) {
+    const linha = comPrioridades.data as LinhaDoDia | null
+    return { energia: linha?.energia ?? null, prioridades: linha?.prioridades ?? [], disponivel: true, temPrioridades: true }
+  }
+  if (faltaOBanco(comPrioridades.error)) return vazio
+  const soEnergia = await supabase.from('daily_checkins').select('energia').eq('dia', dia).maybeSingle()
+  if (faltaOBanco(soEnergia.error)) return vazio
+  const linha = checar<LinhaDoDia | null>(soEnergia)
+  return { ...vazio, energia: linha?.energia ?? null, disponivel: true }
 }
 
-// Responder de novo no mesmo dia troca a resposta (uma linha por pessoa por dia).
-export async function salvarEnergia(dia: string, energia: Energia) {
+async function salvarDia(dia: string, campos: Partial<LinhaDoDia>) {
   const { data } = await supabase.auth.getSession()
   const user_id = data.session?.user.id
   if (!user_id) throw new Error('Entre de novo para continuar.')
-  checar(await supabase.from('daily_checkins').upsert({ user_id, dia, energia }, { onConflict: 'user_id,dia' }))
+  // Só os campos enviados mudam: salvar a energia não apaga as prioridades, e vice-versa.
+  checar(await supabase.from('daily_checkins').upsert({ user_id, dia, ...campos }, { onConflict: 'user_id,dia' }))
 }
 
-// A energia de hoje, para a tela Hoje. A tela muda na hora; se o servidor recusar, volta e mostra o erro.
-export function useEnergiaDeHoje() {
+// Responder de novo no mesmo dia troca a resposta (uma linha por pessoa por dia).
+export const salvarEnergia = (dia: string, energia: Energia) => salvarDia(dia, { energia })
+export const salvarPrioridades = (dia: string, prioridades: string[]) => salvarDia(dia, { prioridades })
+
+// O plano de hoje (energia e prioridades), para a tela Hoje.
+// A tela muda na hora; se o servidor recusar, volta e mostra o erro.
+export function usePlanoDeHoje() {
   const hoje = hojeISO()
   const [energia, setEnergia] = useState<Energia | null>(null)
+  const [prioridades, setPrioridades] = useState<string[]>([])
   const [disponivel, setDisponivel] = useState(false)
+  const [temPrioridades, setTemPrioridades] = useState(false)
   const [erro, setErro] = useState('')
 
   useEffect(() => {
     let ativo = true
-    buscarEnergia(hoje)
+    buscarDia(hoje)
       .then((r) => {
         if (!ativo) return
         setEnergia(r.energia)
+        setPrioridades(r.prioridades)
         setDisponivel(r.disponivel)
+        setTemPrioridades(r.temPrioridades)
       })
       .catch(() => {
         /* sem conexão: o check-in só não aparece */
@@ -103,5 +123,17 @@ export function useEnergiaDeHoje() {
     }
   }
 
-  return { energia, disponivel, erro, escolher }
+  const definirPrioridades = async (novas: string[]) => {
+    const antes = prioridades
+    setPrioridades(novas)
+    try {
+      await salvarPrioridades(hoje, novas)
+      setErro('')
+    } catch (e) {
+      setPrioridades(antes)
+      setErro((e as Error).message)
+    }
+  }
+
+  return { energia, prioridades, disponivel, temPrioridades, erro, escolher, definirPrioridades }
 }

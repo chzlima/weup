@@ -9,7 +9,10 @@ import { Recomecar } from '../components/Recomecar'
 import { OfertaRevisao } from '../components/OfertaRevisao'
 import { acaoPendente, limparAcaoPendente } from '../lib/atalhos'
 import { CheckinEnergia } from '../components/CheckinEnergia'
-import { META_DIA_LEVE, ordenarPorEnergia, progressoDoDia, separarDiaLeve, useEnergiaDeHoje } from '../lib/energia'
+import { META_DIA_LEVE, ordenarPorEnergia, progressoDoDia, separarDiaLeve, usePlanoDeHoje } from '../lib/energia'
+import {
+  MAX_PRIORIDADES, alternarPrioridade, moverPrioridade, prazoChegando, separarPrioridades,
+} from '../lib/prioridades'
 import { descreverRevisao } from '../lib/revisoes'
 import { IconPlus, IconRecomecar } from '../components/Icons'
 import { useAuth } from '../lib/auth'
@@ -58,8 +61,8 @@ export function Hoje() {
     acao?.tipo === 'nova-tarefa' ? { titulo: acao.titulo, data: hojeISO() } : null,
   )
   useEffect(() => limparAcaoPendente(), [])
-  const energiaDia = useEnergiaDeHoje()
-  const energia = energiaDia.energia
+  const plano = usePlanoDeHoje()
+  const energia = plano.energia
   const [verTodas, setVerTodas] = useState(false) // dia leve: mostrar também as tarefas guardadas
   const [verAnteriores, setVerAnteriores] = useState(false) // dia leve: abrir "De dias anteriores"
 
@@ -84,10 +87,30 @@ export function Hoje() {
   const total = deHoje.length + feitasHoje.length + habitosHoje.length
   const feitos = feitasHoje.length + habitosFeitos
 
+  // Prioridades do dia: até 3 tarefas do dia, numa seção própria e na ordem escolhida.
+  const doDia = [...deHoje, ...feitasHoje]
+  const { prioridades } = separarPrioridades(doDia, plano.prioridades)
+  const idsPrioridades = prioridades.map((t) => t.id)
+  const ehPrioridade = (t: Tarefa) => idsPrioridades.includes(t.id)
+  const prioridadesAbertas = prioridades.filter((t) => !t.concluida_em).length
+  const estrela = (t: Tarefa) =>
+    plano.temPrioridades
+      ? {
+          prioridade: ehPrioridade(t),
+          podeMarcar: idsPrioridades.length < MAX_PRIORIDADES,
+          onPrioridade: () => plano.definirPrioridades(alternarPrioridade(idsPrioridades, t.id)),
+        }
+      : {}
+  const mover = (t: Tarefa, delta: -1 | 1) => plano.definirPrioridades(moverPrioridade(idsPrioridades, t.id, delta))
+
+  // Prazo até amanhã em tarefas planejadas para outro dia (ou sem data).
+  const chegando = prazoChegando(dados.tarefas, hoje)
+
   // Check-in de energia: baixa = dia leve (só 3 coisas, menores primeiro); alta = maiores primeiro.
-  const ordenadas = ordenarPorEnergia(deHoje, energia)
-  const { visiveis, guardadas } = separarDiaLeve(ordenadas, energia, feitos)
-  const lista = [...(verTodas ? ordenadas : visiveis), ...feitasHoje]
+  // No dia leve, as prioridades abertas já ocupam vagas das 3.
+  const ordenadas = ordenarPorEnergia(deHoje.filter((t) => !ehPrioridade(t)), energia)
+  const { visiveis, guardadas } = separarDiaLeve(ordenadas, energia, feitos + prioridadesAbertas)
+  const lista = [...(verTodas ? ordenadas : visiveis), ...feitasHoje.filter((t) => !ehPrioridade(t))]
   const escondidas = verTodas ? [] : guardadas
   const progresso = progressoDoDia(feitos, total, energia)
   const anterioresRecolhidas = energia === 'baixa' && !verAnteriores
@@ -169,10 +192,44 @@ export function Hoje() {
       {dados.erro && <Aviso>{dados.erro}</Aviso>}
 
       {/* Check-in de energia (opcional, um toque por dia) */}
-      {energiaDia.disponivel && !dados.carregando && (
-        <CheckinEnergia energia={energia} onEscolher={energiaDia.escolher} />
+      {plano.disponivel && !dados.carregando && <CheckinEnergia energia={energia} onEscolher={plano.escolher} />}
+      {plano.erro && <Aviso>{plano.erro}</Aviso>}
+
+      {/* Prioridades do dia: até 3, na ordem escolhida */}
+      {plano.temPrioridades && !dados.carregando && doDia.length > 0 && (
+        <section>
+          <h2 className="mb-2 text-sm font-bold text-muted">
+            Prioridades de hoje · {prioridades.length}/{MAX_PRIORIDADES}
+          </h2>
+          {prioridades.length === 0 ? (
+            <p className="rounded-2xl border border-dashed border-line p-4 text-center text-sm text-muted">
+              Toque na ☆ de até 3 tarefas para marcar o que mais importa hoje.
+            </p>
+          ) : (
+            <ul className="space-y-2">
+              {prioridades.map((t, i) => (
+                <TarefaItem
+                  key={t.id}
+                  tarefa={t}
+                  projeto={nomeProjeto(t.project_id)}
+                  nota={t.series_id ? 'repete' : descreverRevisao(t)}
+                  onAlternar={() => dados.alternarTarefa(t)}
+                  onEditar={() => setEditando(t)}
+                  {...estrela(t)}
+                  acoes={
+                    prioridades.length > 1 ? (
+                      <>
+                        {i > 0 && <BotaoReagendar onClick={() => mover(t, -1)}>↑ Subir</BotaoReagendar>}
+                        {i < prioridades.length - 1 && <BotaoReagendar onClick={() => mover(t, 1)}>↓ Descer</BotaoReagendar>}
+                      </>
+                    ) : undefined
+                  }
+                />
+              ))}
+            </ul>
+          )}
+        </section>
       )}
-      {energiaDia.erro && <Aviso>{energiaDia.erro}</Aviso>}
 
       {/* Tarefas do dia */}
       <section>
@@ -199,7 +256,7 @@ export function Hoje() {
 
         {dados.carregando ? (
           <p className="py-6 text-center text-sm text-muted">Carregando…</p>
-        ) : lista.length === 0 && escondidas.length === 0 ? (
+        ) : doDia.length === 0 ? (
           <p className="rounded-2xl border border-dashed border-line p-5 text-center text-sm text-muted">
             Nada planejado para hoje. Que tal uma tarefa pequena?
           </p>
@@ -213,6 +270,7 @@ export function Hoje() {
                 nota={t.series_id ? 'repete' : descreverRevisao(t)}
                 onAlternar={() => dados.alternarTarefa(t)}
                 onEditar={() => setEditando(t)}
+                {...estrela(t)}
               />
             ))}
           </ul>
@@ -231,6 +289,27 @@ export function Hoje() {
           </button>
         )}
       </section>
+
+      {/* Prazo chegando: planejadas para outro dia (ou sem data), mas o prazo é até amanhã */}
+      {!dados.carregando && chegando.length > 0 && (
+        <section>
+          <h2 className="mb-1 text-sm font-bold text-muted">Prazo chegando · {chegando.length}</h2>
+          <p className="mb-2 text-xs text-muted">Planejadas para outro dia ou sem data, mas o prazo é até amanhã.</p>
+          <ul className="space-y-2">
+            {chegando.map((t) => (
+              <TarefaItem
+                key={t.id}
+                tarefa={t}
+                projeto={nomeProjeto(t.project_id)}
+                mostrarData
+                onAlternar={() => dados.alternarTarefa(t)}
+                onEditar={() => setEditando(t)}
+                acoes={<BotaoReagendar onClick={() => dados.reagendarTarefas([t.id], hoje)}>Fazer hoje</BotaoReagendar>}
+              />
+            ))}
+          </ul>
+        </section>
+      )}
 
       {/* O que ficou de dias anteriores: a pessoa decide o que fazer, sem cobrança */}
       {!dados.carregando && anteriores.length > 0 && anterioresRecolhidas && (

@@ -9,6 +9,8 @@ A versão que está rodando aparece no fim da tela **Perfil** (número + commit)
 - **Prazo nas tarefas** (opcional): "até quando precisa estar pronta", separado do dia em que você planeja fazer. Aparece na lista como "prazo hoje", "prazo amanhã", "prazo em 3 dias"; prazo passado vira só "o prazo era 10 de nov.", sem cobrança.
 - **Horário de fim nos compromissos** (opcional): "das 08:00 até 10:00". Fim antes do início atravessa a meia-noite ("até 07:00 do dia seguinte"), para plantões noturnos.
 - Base para o calendário: um compromisso pode ficar ligado a uma tarefa (a tela para isso vem com o calendário). Precisa rodar `supabase/ciclo15-agenda.sql`.
+- **Prioridades de hoje** na tela Hoje: toque na ☆ de até 3 tarefas do dia para marcar o que mais importa. Elas sobem para uma seção própria, na ordem escolhida (↑ Subir / ↓ Descer). Amanhã a lista começa vazia. No dia leve, as prioridades contam nas 3 coisas do dia.
+- **Prazo chegando** na tela Hoje: tarefas planejadas para outro dia (ou sem data) cujo prazo é até amanhã, com o botão "Fazer hoje". Precisa rodar `supabase/ciclo16-prioridades.sql`.
 
 ## 0.3.1 — Pronto para o teste (12/11/2026)
 

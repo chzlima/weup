@@ -72,6 +72,12 @@ export const IconChevron = ({ className }: P) => (
   </svg>
 )
 
+export const IconEstrela = ({ className, cheia }: P & { cheia?: boolean }) => (
+  <svg viewBox="0 0 24 24" className={className} {...base} fill={cheia ? 'currentColor' : 'none'}>
+    <path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.8l-5.2 2.8 1-5.8-4.3-4.1 5.9-.9z" />
+  </svg>
+)
+
 export const IconOlho = ({ className }: P) => (
   <svg viewBox="0 0 24 24" className={className} {...base}>
     <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" />
