@@ -9,6 +9,7 @@ import { Recomecar } from '../components/Recomecar'
 import { OfertaRevisao } from '../components/OfertaRevisao'
 import { acaoPendente, limparAcaoPendente } from '../lib/atalhos'
 import { CheckinEnergia } from '../components/CheckinEnergia'
+import { progressoDoPlantao, separarPlantao, usePlantoes } from '../lib/plantao'
 import { EntradaRevisao } from '../components/RevisaoSemanal'
 import { expressaoDoMomento } from '../pets/humor'
 import { momentoDoDia } from '../pets/momento'
@@ -68,8 +69,12 @@ export function Hoje() {
   const energia = plano.energia
   const [verTodas, setVerTodas] = useState(false) // dia leve: mostrar também as tarefas guardadas
   const [verAnteriores, setVerAnteriores] = useState(false) // dia leve: abrir "De dias anteriores"
+  const [verHabitos, setVerHabitos] = useState(false) // plantão: abrir os hábitos
 
   const hoje = hojeISO()
+  // Dia de plantão (marcado na Agenda): só tarefas pequenas, até 3, e os hábitos podem esperar.
+  const plantao = usePlantoes(hoje, hoje)
+  const ehPlantao = plantao.dias.has(hoje)
   // Para hoje = o que está planejado para hoje + o que foi concluído hoje.
   // O que ficou de dias anteriores aparece numa seção própria e não pesa no progresso do dia.
   const { deHoje, anteriores } = separarPendentes(dados.tarefas, hoje)
@@ -114,12 +119,20 @@ export function Hoje() {
 
   // Check-in de energia: baixa = dia leve (só 3 coisas, menores primeiro); alta = maiores primeiro.
   // No dia leve, as prioridades abertas já ocupam vagas das 3.
-  const ordenadas = ordenarPorEnergia(deHoje.filter((t) => !ehPrioridade(t)), energia)
-  const { visiveis, guardadas } = separarDiaLeve(ordenadas, energia, feitos + prioridadesAbertas)
+  // No plantão vale a mesma ideia, mais apertada: só as pequenas aparecem.
+  const ordenadas = ordenarPorEnergia(deHoje.filter((t) => !ehPrioridade(t)), ehPlantao ? 'baixa' : energia)
+  const { visiveis, guardadas } = ehPlantao
+    ? separarPlantao(ordenadas, feitos + prioridadesAbertas)
+    : separarDiaLeve(ordenadas, energia, feitos + prioridadesAbertas)
   const lista = [...(verTodas ? ordenadas : visiveis), ...feitasHoje.filter((t) => !ehPrioridade(t))]
   const escondidas = verTodas ? [] : guardadas
-  const progresso = progressoDoDia(feitos, total, energia)
-  const anterioresRecolhidas = energia === 'baixa' && !verAnteriores
+  // No plantão os hábitos só entram na conta se foram feitos.
+  const progresso = ehPlantao
+    ? progressoDoPlantao(feitos, deHoje.length + feitasHoje.length + habitosFeitos)
+    : progressoDoDia(feitos, total, energia)
+  const diaAliviado = ehPlantao || energia === 'baixa'
+  const anterioresRecolhidas = diaAliviado && !verAnteriores
+  const habitosRecolhidos = ehPlantao && !verHabitos
   const nomeProjeto = (id: string | null) => dados.projetos.find((p) => p.id === id)?.titulo
 
   // XP de verdade, vindo do registro do banco.
@@ -211,7 +224,21 @@ export function Hoje() {
       {/* Domingo e segunda: lembrete da revisão da semana (some depois de feita) */}
       {!dados.carregando && <EntradaRevisao />}
 
-      {plano.disponivel && !dados.carregando && <CheckinEnergia energia={energia} onEscolher={plano.escolher} />}
+      {ehPlantao && !dados.carregando ? (
+        <div className="flex items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-2.5">
+          <span aria-hidden className="text-xl">🩺</span>
+          <p className="min-w-0 flex-1 text-sm">
+            <span className="font-bold">Dia de plantão</span>
+            <span className="text-muted"> · só tarefas pequenas, e os hábitos podem esperar</span>
+          </p>
+          <button onClick={() => plantao.alternar(hoje)} className="text-xs font-bold text-mint">
+            Desmarcar
+          </button>
+        </div>
+      ) : (
+        plano.disponivel && !dados.carregando && <CheckinEnergia energia={energia} onEscolher={plano.escolher} />
+      )}
+      {plantao.erro && <Aviso>{plantao.erro}</Aviso>}
       {plano.erro && <Aviso>{plano.erro}</Aviso>}
 
       {/* Prioridades do dia: até 3, na ordem escolhida */}
@@ -301,7 +328,13 @@ export function Hoje() {
             onClick={() => setVerTodas(true)}
             className="mt-2 w-full rounded-2xl border border-dashed border-line px-4 py-3 text-sm text-muted transition-colors hover:text-ink"
           >
-            {feitos >= META_DIA_LEVE ? 'Dia leve cumprido. Quer fazer mais? ' : 'O dia leve guardou o resto. '}
+            {ehPlantao
+              ? feitos >= META_DIA_LEVE
+                ? 'Plantão cumprido. Quer fazer mais? '
+                : 'No plantão, só as pequenas aparecem. '
+              : feitos >= META_DIA_LEVE
+                ? 'Dia leve cumprido. Quer fazer mais? '
+                : 'O dia leve guardou o resto. '}
             <span className="font-bold text-mint">
               Ver mais {escondidas.length} {escondidas.length === 1 ? 'tarefa' : 'tarefas'}
             </span>
@@ -334,8 +367,8 @@ export function Hoje() {
       {!dados.carregando && anteriores.length > 0 && anterioresRecolhidas && (
         <section className="flex items-center justify-between gap-3 rounded-2xl border border-dashed border-line px-4 py-3">
           <p className="text-sm text-muted">
-            {anteriores.length} {anteriores.length === 1 ? 'tarefa' : 'tarefas'} de dias anteriores. Hoje é dia leve:
-            pode esperar.
+            {anteriores.length} {anteriores.length === 1 ? 'tarefa' : 'tarefas'} de dias anteriores. Hoje é{' '}
+            {ehPlantao ? 'dia de plantão' : 'dia leve'}: pode esperar.
           </p>
           <button onClick={() => setVerAnteriores(true)} className="shrink-0 text-xs font-bold text-mint">
             Ver
@@ -389,7 +422,17 @@ export function Hoje() {
       )}
 
       {/* Hábitos de hoje */}
-      {!dados.carregando && habitosHoje.length > 0 && (
+      {!dados.carregando && habitosHoje.length > 0 && habitosRecolhidos && (
+        <section className="flex items-center justify-between gap-3 rounded-2xl border border-dashed border-line px-4 py-3">
+          <p className="text-sm text-muted">
+            {habitosHoje.length} {habitosHoje.length === 1 ? 'hábito' : 'hábitos'} hoje. Dia de plantão: podem esperar.
+          </p>
+          <button onClick={() => setVerHabitos(true)} className="shrink-0 text-xs font-bold text-mint">
+            Ver
+          </button>
+        </section>
+      )}
+      {!dados.carregando && habitosHoje.length > 0 && !habitosRecolhidos && (
         <section>
           <h2 className="mb-2 text-sm font-bold text-muted">
             Hábitos de hoje · {habitosFeitos}/{habitosHoje.length}
