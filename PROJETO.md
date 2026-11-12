@@ -157,6 +157,8 @@ Precisa do **Node.js (versão LTS)** instalado.
 
 - **Atenção (12/11/2026):** o `teste-isolamento.sql` foi esvaziado sem querer antes do commit da revisão semanal e foi restaurado no ciclo 1 do Pet Rework. Antes de commitar, conferir o `git diff --stat`: arquivo que perde centenas de linhas sem motivo é sinal de problema.
 
+- Pet Rework, ciclo 2: arte em camadas em `src/pets/arte.tsx` (corpos por espécie e estágio, `RostoPet` com 6 expressões, `encaixes()` para os cosméticos). `src/components/Pet.tsx` só monta as camadas (props novas: `expressao`, `parado`). Animações em `index.css` (`pet-parado-*`, `pet-piscar`, `pet-aura`). **Galeria de desenvolvimento:** `npm run dev` e abrir `/?galeria` mostra todas as formas e expressões (não vai para o app publicado).
+
 ## Como publicar uma nova versão
 
 Para versões com número, siga o checklist em `docs/RELEASE.md`.

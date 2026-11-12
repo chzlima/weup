@@ -8,6 +8,12 @@ A versão que está rodando aparece no fim da tela **Perfil** (número + commit)
 ### Pet Rework — ciclo 1 (fundação)
 - O pet passa a ter **5 estágios**: níveis 1, 5 e 10 (como antes), **15** e **25**. Os estágios 4 e 5 usam por enquanto o desenho do 3 com uma aura dourada; a arte nova vem no próximo ciclo.
 - **Segurança:** o estágio do pet passa a ser decidido só pelo banco, a partir do XP de verdade (função `sincronizar_pet`). Antes o app gravava o estágio direto. Precisa rodar `supabase/ciclo19-pet-fundacao.sql`.
+### Pet Rework — ciclo 2 (arte em camadas)
+- **Formas novas** para os estágios 4 e 5 das três espécies (Bosque e Árvore Lendária, Fênix Real e Fênix Lendária, Tempestade e Céu Lendário), com aura dourada.
+- **6 expressões**: feliz, animado, curioso, tranquilo, orgulhoso e pensativo (as telas passam a usá-las no próximo ciclo).
+- **O pet se mexe parado:** o Broto balança, a Faísca tremula, a Gota flutua, e todos piscam. Quem ativa "reduzir movimento" no aparelho vê o pet parado.
+- A arte agora é feita em camadas (corpo, rosto e pontos de encaixe para acessórios), pronta para chapéus e acessórios e para trocar por arte de ilustrador no futuro.
+
 - **Corrigido:** o teste de isolamento (`supabase/teste-isolamento.sql`) tinha sido esvaziado sem querer na revisão semanal; foi restaurado, com as verificações da revisão semanal e do pet.
 
 ### Adicionado

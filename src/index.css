@@ -35,6 +35,55 @@ body {
   60% { transform: translateY(0) scale(1.05, 0.95); }
 }
 
+/* Pet parado: cada espécie se mexe de um jeito (src/components/Pet.tsx) */
+.pet-parado-broto,
+.pet-parado-faisca,
+.pet-parado-gota,
+.pet-piscar,
+.pet-aura {
+  transform-box: fill-box;
+}
+.pet-parado-broto {
+  transform-origin: 50% 100%;
+  animation: pet-balanca 4.5s ease-in-out infinite;
+}
+.pet-parado-faisca {
+  transform-origin: 50% 100%;
+  animation: pet-tremula 1.8s ease-in-out infinite;
+}
+.pet-parado-gota {
+  animation: pet-flutua 3.2s ease-in-out infinite;
+}
+.pet-piscar {
+  transform-origin: 50% 50%;
+  animation: pet-pisca 5s ease-in-out infinite;
+}
+.pet-aura {
+  transform-origin: 50% 50%;
+  animation: pet-pulsa 4s ease-in-out infinite;
+}
+@keyframes pet-balanca {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+@keyframes pet-tremula {
+  0%, 100% { transform: scale(1, 1); }
+  30% { transform: scale(0.99, 1.025); }
+  60% { transform: scale(1.01, 0.985); }
+}
+@keyframes pet-flutua {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+@keyframes pet-pisca {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+@keyframes pet-pulsa {
+  0%, 100% { transform: scale(0.94); opacity: 0.8; }
+  50% { transform: scale(1.04); opacity: 1; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; }
 }

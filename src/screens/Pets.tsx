@@ -120,7 +120,7 @@ export function Pets() {
                   e === pet.estagio ? 'border-brand bg-brand/10' : 'border-line bg-surface'
                 }`}
               >
-                <Pet especie={pet.especie} estagio={e} silhueta={!alcancado} size={52} />
+                <Pet especie={pet.especie} estagio={e} silhueta={!alcancado} parado size={52} />
                 <p className={`mt-1 text-center text-[11px] font-bold leading-tight ${alcancado ? '' : 'text-muted'}`}>
                   {alcancado ? info.estagios[e - 1] : '???'}
                 </p>
