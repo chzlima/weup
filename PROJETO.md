@@ -127,6 +127,8 @@ Precisa do **Node.js (versão LTS)** instalado.
 
 - **0.2.0 lançada em 11/11/2026** (tag `v0.2.0`). Próxima: 0.3 (Productivity Core).
 
+- 0.3 (em andamento): seção "De dias anteriores" na tela Hoje e no Planejar, com reagendar em um toque (`separarPendentes` e `descreverAnterior` em `src/lib/tarefas.ts`). Decisão de produto: o nome é "De dias anteriores", não "Atrasadas", e essas tarefas não pesam no progresso do dia (princípio 1: sem punição).
+
 ## Como publicar uma nova versão
 
 Para versões com número, siga o checklist em `docs/RELEASE.md`.

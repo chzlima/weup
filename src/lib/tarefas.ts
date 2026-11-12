@@ -62,6 +62,33 @@ export function diaDaSemana(iso: string) {
 }
 export const concluidaHoje = (t: Tarefa) => !!t.concluida_em && diaISO(new Date(t.concluida_em)) === hojeISO()
 
+// Tarefas abertas e com data: as de hoje e as que ficaram de dias anteriores (as mais antigas primeiro).
+export function separarPendentes(tarefas: Tarefa[], hoje = hojeISO()) {
+  const abertas = tarefas.filter((t) => !t.concluida_em && t.data)
+  return {
+    deHoje: abertas.filter((t) => t.data === hoje),
+    anteriores: abertas.filter((t) => t.data! < hoje).sort((a, b) => a.data!.localeCompare(b.data!)),
+  }
+}
+
+// Quantos dias há entre duas datas 'AAAA-MM-DD' (positivo se "ate" vem depois de "de").
+export function diasEntre(de: string, ate: string) {
+  const dia = (iso: string) => {
+    const [a, m, d] = iso.split('-').map(Number)
+    return new Date(a, m - 1, d).getTime()
+  }
+  return Math.round((dia(ate) - dia(de)) / 86_400_000)
+}
+
+// De quando é uma tarefa que ficou para trás. Sem cobrança: só informa.
+export function descreverAnterior(data: string, hoje = hojeISO()) {
+  const n = diasEntre(data, hoje)
+  if (n === 1) return 'de ontem'
+  if (n < 7) return `de ${n} dias atrás`
+  const [a, m, d] = data.split('-').map(Number)
+  return `de ${new Date(a, m - 1, d).toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' })}`
+}
+
 export function formatarData(iso: string | null) {
   if (!iso) return 'Sem data'
   if (iso === hojeISO()) return 'Hoje'

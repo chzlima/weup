@@ -129,7 +129,8 @@ function ListaTarefas({ dados, onEditar }: { dados: Dados; onEditar: (e: Editor)
   const abertas = dados.tarefas.filter((t) => !t.concluida_em)
   const porData = (a: Tarefa, b: Tarefa) => (a.data ?? '').localeCompare(b.data ?? '')
   const grupos: { titulo: string; itens: Tarefa[] }[] = [
-    { titulo: 'Para hoje', itens: abertas.filter((t) => t.data && t.data <= hoje).sort(porData) },
+    { titulo: 'De dias anteriores', itens: abertas.filter((t) => t.data && t.data < hoje).sort(porData) },
+    { titulo: 'Para hoje', itens: abertas.filter((t) => t.data === hoje) },
     { titulo: 'Próximos dias', itens: abertas.filter((t) => t.data && t.data > hoje).sort(porData) },
     { titulo: 'Sem data', itens: abertas.filter((t) => !t.data) },
   ]

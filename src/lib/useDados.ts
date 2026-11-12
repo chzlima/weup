@@ -101,6 +101,13 @@ export function useDados() {
         }
       }),
 
+    // Muda o dia de uma ou mais tarefas de uma vez ("trazer para hoje", "deixar para amanhã").
+    reagendarTarefas: (ids: string[], data: string | null) =>
+      tentar(async () => {
+        setTarefas((l) => l.map((t) => (ids.includes(t.id) ? { ...t, data } : t)))
+        for (const id of ids) trocar(setTarefas, await db.editarTarefa(id, { data }))
+      }),
+
     // Cria e devolve a tarefa (o Recomeçar precisa dela para marcar como feita depois).
     criarTarefa: async (dados: DadosTarefa): Promise<Tarefa | null> => {
       try {
