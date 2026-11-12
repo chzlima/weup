@@ -179,6 +179,7 @@ export function Hoje() {
         <Pet
           especie={pet?.especie}
           estagio={pet?.estagio}
+          caminho={pet?.caminho}
           expressao={dados.carregando ? 'feliz' : expressaoDoMomento(momentoDoDia(dados, plano))}
           size={88}
           nome={pet?.nome}

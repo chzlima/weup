@@ -24,6 +24,11 @@ A versão que está rodando aparece no fim da tela **Perfil** (número + commit)
 - **Interações:** Acariciar (como antes, e o primeiro carinho do dia conta para o laço); **Conversar** (laço 2): o pet comenta o seu dia de verdade, como o compromisso de hoje, a prioridade aberta, um prazo ou o que você já fez; **Observar** (laço 3): só o pet, em tela cheia, num momento de calma.
 - Política de privacidade: passa a citar o laço com o pet. Precisa rodar `supabase/ciclo20-laco.sql`.
 
+### Pet Rework — ciclo 5 (caminhos e transformação)
+- **Caminhos de evolução:** no estágio 4 (nível 15) o pet segue um de três caminhos (conhecimento, saúde ou organização), cada um com forma própria e forma lendária. São 18 formas nas três espécies, como Árvore do Saber, Fênix Vital e Cristal de Gelo. A pessoa escolhe numa cena especial; o app marca "Combina com você" no atributo em que ela mais evoluiu. A escolha é uma vez só e o banco confere.
+- **Nova cena de evolução:** a forma antiga brilha, um clarão, e a nova aparece com o nome.
+- Precisa rodar `supabase/ciclo21-caminhos.sql` **antes** do merge (o app passa a ler a coluna `caminho`).
+
 - **Corrigido:** o teste de isolamento (`supabase/teste-isolamento.sql`) tinha sido esvaziado sem querer na revisão semanal; foi restaurado, com as verificações da revisão semanal e do pet.
 
 ### Adicionado

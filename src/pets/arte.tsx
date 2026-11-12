@@ -142,6 +142,46 @@ export function RostoPet({ y, rosto }: { y: number; rosto: Rosto }) {
   }
 }
 
+// ---------- Detalhe do caminho (estágios 4 e 5) ----------
+// Uma insígnia na cor do caminho, por cima do corpo: estrelas (conhecimento),
+// coração e folhas (saúde) ou cristais (organização). A forma lendária ganha mais brilho.
+export function DetalheCaminho({ caminho, estagio }: { caminho: 'conhecimento' | 'saude' | 'organizacao'; estagio: Estagio }) {
+  const lendaria = estagio === 5
+  if (caminho === 'conhecimento')
+    return (
+      <g>
+        <path d="M95.0 45.0L97.0 50.2L102.6 50.5L98.2 54.1L99.7 59.5L95.0 56.4L90.3 59.5L91.8 54.1L87.4 50.5L93.0 50.2z" fill="#9b8cff" stroke="#b8adff" strokeWidth="1.2" strokeLinejoin="round" />
+        {[
+          [24, 44],
+          [98, 30],
+          ...(lendaria ? [[14, 60], [108, 64], [60, 4]] : []),
+        ].map(([x, y]) => (
+          <path key={`${x}-${y}`} d={`M${x} ${y - 4}l1.3 2.7 2.7 1.3-2.7 1.3-1.3 2.7-1.3-2.7-2.7-1.3 2.7-1.3z`} fill="#d6cfff" />
+        ))}
+      </g>
+    )
+  if (caminho === 'saude')
+    return (
+      <g>
+        <path d="M95 52c-3-5-11-3-9 3 1 3 5 6 9 9 4-3 8-6 9-9 2-6-6-8-9-3z" fill="#ff8fa3" />
+        <path d="M18 56c4-6 10-6 12-2-4 4-8 4-12 2z" fill="#7ee8b8" />
+        {lendaria && <path d="M24 40c-3-5-11-3-9 3 1 3 5 6 9 9 4-3 8-6 9-9 2-6-6-8-9-3z" fill="#ffb3c1" />}
+      </g>
+    )
+  return (
+    <g>
+      <path d="M96 44l6 8-6 10-6-10z" fill="#7fd6e8" />
+      <path d="M96 44l6 8h-12z" fill="#b6ecf6" />
+      {lendaria && (
+        <>
+          <path d="M20 48l4 6-4 7-4-7z" fill="#7fd6e8" />
+          <path d="M60 2l4 6-4 7-4-7z" fill="#b6ecf6" />
+        </>
+      )}
+    </g>
+  )
+}
+
 // ---------- Corpos ----------
 
 export function CorpoBroto({ estagio }: { estagio: Estagio }) {

@@ -163,6 +163,8 @@ Precisa do **Node.js (versão LTS)** instalado.
 
 - Pet Rework, ciclo 4: laço (`supabase/ciclo20-laco.sql`, `src/pets/laco.ts`). `laco_do_pet()` (security invoker) soma por dia: dia com ação no livro-razão, dia com 3+ ações e `daily_checkins.cuidou_do_pet`. Níveis em `MINIMOS_LACO` = `nivel_do_laco` no banco (teste de paridade). Interações em `INTERACOES` (Acariciar 1, Conversar 2, Observar 3); a conversa usa `assuntosDoDia` (só fatos do dia).
 
+- Pet Rework, ciclo 5: caminhos (`supabase/ciclo21-caminhos.sql`, `src/pets/caminhos.ts`). `user_pets.caminho` só muda por `escolher_caminho()` (estágio 4+, uma vez). Nomes em `FORMAS`, sugestão em `caminhoSugerido` (atributo com mais XP). Cenas: `src/pets/EscolherCaminho.tsx` e `src/pets/Transformacao.tsx` (substituiu a comemoração antiga). A galeria (`/?galeria`) tem prévias das duas cenas. **Decisão:** a pessoa escolhe o caminho, com sugestão (recomendado no plano; não houve objeção).
+
 ## Como publicar uma nova versão
 
 Para versões com número, siga o checklist em `docs/RELEASE.md`.

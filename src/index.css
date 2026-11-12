@@ -41,6 +41,23 @@ body {
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+/* Transformação do pet (src/pets/Transformacao.tsx) */
+@keyframes tremor {
+  0%, 100% { transform: translateX(0) scale(1); }
+  25% { transform: translateX(-2px) scale(1.01); }
+  75% { transform: translateX(2px) scale(0.99); }
+}
+@keyframes clarao {
+  from { opacity: 0; transform: scale(0.3); }
+  50% { opacity: 1; }
+  to { opacity: 0; transform: scale(1.4); }
+}
+@keyframes surgir {
+  from { opacity: 0; transform: scale(0.6); }
+  70% { transform: scale(1.06); }
+  to { opacity: 1; transform: scale(1); }
+}
+
 /* Pet parado: cada espécie se mexe de um jeito (src/components/Pet.tsx) */
 .pet-parado-broto,
 .pet-parado-faisca,

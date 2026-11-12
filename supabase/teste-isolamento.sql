@@ -147,6 +147,11 @@ begin
     te := te || 'user_pets · A renomeia o próprio pet'::text; es := es || 'passou (1 linhas)'::text; ob := ob || obt; ok := ok || (obt = 'passou (1 linhas)');
     obt := pg_temp.contar('select coalesce(public.sincronizar_pet(), 0)');
     te := te || 'sincronizar_pet · A sincroniza o próprio pet'::text; es := es || '1'::text; ob := ob || obt; ok := ok || (obt = '1');
+    -- Caminho (ciclo21): só a partir do estágio 4, e o app não grava o caminho direto
+    obt := pg_temp.tentar('select public.escolher_caminho(''saude'')');
+    te := te || 'escolher_caminho · A escolhe caminho antes do estágio 4'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
+    obt := pg_temp.tentar(format('update public.user_pets set caminho = %L where user_id = %L', 'saude', a));
+    te := te || 'user_pets · A grava o próprio caminho direto'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
     -- Laço (ciclo20): conta só os dias de A (A tem 1 dia com ação, sem cuidado registrado)
     obt := pg_temp.contar('select pontos from public.laco_do_pet()');
     te := te || 'laco_do_pet · A vê só o próprio laço'::text; es := es || '1'::text; ob := ob || obt; ok := ok || (obt = '1');

@@ -202,7 +202,7 @@ export function Foco(props: { tarefas: Tarefa[]; sessoesHoje: number; onConcluiu
             </p>
           </div>
           <Anel fracao={estado === 'pausado' || Number.isFinite(fim) ? 1 - restante / (sessao.minutos * 60) : 0}>
-            <Pet especie={pet?.especie} estagio={pet?.estagio} size={110} nome={pet?.nome} />
+            <Pet especie={pet?.especie} estagio={pet?.estagio} caminho={pet?.caminho} size={110} nome={pet?.nome} />
             <p className="mt-1 text-4xl font-extrabold tabular-nums" aria-live="off">
               {estado === 'concluindo'
                 ? '00:00'
@@ -247,7 +247,7 @@ export function Foco(props: { tarefas: Tarefa[]; sessoesHoje: number; onConcluiu
       {estado === 'fim' && (
         <TelaCheia>
           <div className="animate-[pulinho_0.8s_ease-in-out_2]">
-            <Pet especie={pet?.especie} estagio={pet?.estagio} feliz size={140} nome={pet?.nome} />
+            <Pet especie={pet?.especie} estagio={pet?.estagio} caminho={pet?.caminho} feliz size={140} nome={pet?.nome} />
           </div>
           <p className="text-2xl font-extrabold">Sessão concluída!</p>
           {xpGanho ? (
@@ -283,7 +283,7 @@ export function Foco(props: { tarefas: Tarefa[]; sessoesHoje: number; onConcluiu
 
       {estado === 'intervalo' && (
         <TelaCheia>
-          <Pet especie={pet?.especie} estagio={pet?.estagio} feliz size={110} nome={pet?.nome} />
+          <Pet especie={pet?.especie} estagio={pet?.estagio} caminho={pet?.caminho} feliz size={110} nome={pet?.nome} />
           <p className="text-xl font-extrabold">Pausa</p>
           <p className="text-4xl font-extrabold tabular-nums">
             {formatar(Math.max(0, Math.ceil((fimIntervalo - agora) / 1000)))}
