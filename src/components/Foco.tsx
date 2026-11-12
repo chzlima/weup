@@ -8,7 +8,7 @@ import type { Tarefa } from '../lib/tarefas'
 type Estado = 'parado' | 'rodando' | 'concluindo' | 'fim'
 
 // Cartão "Foco" da tela Hoje + a tela cheia com a contagem regressiva.
-export function Foco(props: { tarefas: Tarefa[]; sessoesHoje: number; onConcluiu: () => void }) {
+export function Foco(props: { tarefas: Tarefa[]; sessoesHoje: number; onConcluiu: () => void; abrir?: boolean }) {
   const { pet } = usePet()
   const [estado, setEstado] = useState<Estado>('parado')
   const [sessao, setSessao] = useState<SessaoFoco | null>(null)
@@ -22,7 +22,11 @@ export function Foco(props: { tarefas: Tarefa[]; sessoesHoje: number; onConcluiu
   useEffect(() => {
     buscarFocoAtivo()
       .then((s) => {
-        if (!s) return
+        // Veio do atalho "Iniciar foco": sem sessão rodando, já abre a escolha da duração.
+        if (!s) {
+          if (props.abrir) setConfigurando(true)
+          return
+        }
         setSessao(s)
         // O início vem do relógio do servidor. Converte para o relógio do celular usando a diferença
         // medida quando a sessão começou, e nunca deixa o fim passar de "agora + duração".

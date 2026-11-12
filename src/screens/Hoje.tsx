@@ -7,6 +7,7 @@ import { CompromissoForm } from '../components/CompromissoForm'
 import { Foco } from '../components/Foco'
 import { Recomecar } from '../components/Recomecar'
 import { OfertaRevisao } from '../components/OfertaRevisao'
+import { acaoPendente, limparAcaoPendente } from '../lib/atalhos'
 import { CheckinEnergia } from '../components/CheckinEnergia'
 import { META_DIA_LEVE, ordenarPorEnergia, progressoDoDia, separarDiaLeve, useEnergiaDeHoje } from '../lib/energia'
 import { descreverRevisao } from '../lib/revisoes'
@@ -15,7 +16,8 @@ import { useAuth } from '../lib/auth'
 import { usePet } from '../lib/pet'
 import { useDados } from '../lib/useDados'
 import {
-  amanhaISO, concluidaHoje, descreverAnterior, diaDaSemana, hojeISO, separarPendentes, somarDias, type Tarefa,
+  amanhaISO, concluidaHoje, descreverAnterior, diaDaSemana, hojeISO, separarPendentes, somarDias, type DadosTarefa,
+  type Tarefa,
 } from '../lib/tarefas'
 import type { Habito } from '../lib/habitos'
 import { calcularNivel } from '../lib/xp'
@@ -50,6 +52,12 @@ export function Hoje() {
   const [compromissoEditando, setCompromissoEditando] = useState<Compromisso | null>(null)
   const [rapida, setRapida] = useState('')
   const [recomecando, setRecomecando] = useState(false)
+  // Atalho do ícone ou algo compartilhado de outro app: abre a tarefa nova ou o foco uma vez só.
+  const [acao] = useState(acaoPendente)
+  const [novaTarefa, setNovaTarefa] = useState<Partial<DadosTarefa> | null>(
+    acao?.tipo === 'nova-tarefa' ? { titulo: acao.titulo, data: hojeISO() } : null,
+  )
+  useEffect(() => limparAcaoPendente(), [])
   const energiaDia = useEnergiaDeHoje()
   const energia = energiaDia.energia
   const [verTodas, setVerTodas] = useState(false) // dia leve: mostrar também as tarefas guardadas
@@ -278,6 +286,7 @@ export function Hoje() {
           tarefas={pendentes}
           sessoesHoje={lancHoje.filter((l) => l.tipo === 'foco').length}
           onConcluiu={dados.recarregarXP}
+          abrir={acao?.tipo === 'foco'}
         />
       )}
 
@@ -326,6 +335,15 @@ export function Hoje() {
           <span className="text-xs text-muted">Travou? Um passo pequeno de cada vez.</span>
         </span>
       </button>
+
+      {novaTarefa && (
+        <TarefaForm
+          inicial={novaTarefa}
+          projetos={dados.projetos}
+          onSalvar={(d) => dados.salvarTarefa(d)}
+          onFechar={() => setNovaTarefa(null)}
+        />
+      )}
 
       {editando && (
         <TarefaForm
