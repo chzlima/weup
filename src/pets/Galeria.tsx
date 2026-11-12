@@ -5,6 +5,7 @@ import { EXPRESSOES } from './arte'
 import { CAMINHOS, FORMAS } from './caminhos'
 import { EscolherCaminho } from './EscolherCaminho'
 import { ITENS } from './visual'
+import { CenaHabitat } from './CenaHabitat'
 import { Transformacao } from './Transformacao'
 
 // Galeria só de desenvolvimento (npm run dev → http://localhost:5173/?galeria):
@@ -24,6 +25,22 @@ export function Galeria() {
           Prévia: transformação
         </button>
       </header>
+
+      <section className="space-y-3">
+        <h2 className="text-lg font-bold">Habitats</h2>
+        {ESPECIES.map((e) => (
+          <div key={e.id} className="grid grid-cols-3 gap-2">
+            {([[1, 'manha'], [3, 'tarde'], [5, 'noite']] as const).map(([estagio, periodo]) => (
+              <div key={estagio} className="relative isolate flex h-44 items-end justify-center overflow-hidden rounded-2xl pb-2">
+                <div className="absolute inset-0 -z-10">
+                  <CenaHabitat especie={e.id} estagio={estagio} periodo={periodo} decoracoes={estagio === 5 ? ['vaso', 'lanterna', 'trofeu', 'almofada'] : []} />
+                </div>
+                <Pet especie={e.id} estagio={estagio} expressao="feliz" size={90} />
+              </div>
+            ))}
+          </div>
+        ))}
+      </section>
 
       <section className="space-y-3">
         <h2 className="text-lg font-bold">Itens do visual</h2>
