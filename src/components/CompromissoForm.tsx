@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Rotulo, Sheet } from './Sheet'
 import { CampoData } from './CampoData'
 import { hojeISO } from '../lib/tarefas'
-import type { Compromisso, DadosCompromisso } from '../lib/agenda'
+import { descreverFim, validarHorario, type Compromisso, type DadosCompromisso } from '../lib/agenda'
 
 export function CompromissoForm(props: {
   compromisso?: Compromisso
@@ -14,12 +14,18 @@ export function CompromissoForm(props: {
   const [titulo, setTitulo] = useState(c?.titulo ?? '')
   const [data, setData] = useState<string>(c?.data ?? hojeISO())
   const [hora, setHora] = useState(c?.hora?.slice(0, 5) ?? '')
+  const [horaFim, setHoraFim] = useState(c?.hora_fim?.slice(0, 5) ?? '')
   const [erro, setErro] = useState('')
 
   const enviar = (e: FormEvent) => {
     e.preventDefault()
     if (!titulo.trim()) return setErro('Dê um nome para o compromisso.')
-    props.onSalvar({ titulo: titulo.trim(), data, hora: hora || null })
+    const problema = validarHorario(hora, horaFim)
+    if (problema) return setErro(problema)
+    const dados: DadosCompromisso = { titulo: titulo.trim(), data, hora: hora || null, hora_fim: (hora && horaFim) || null }
+    // Sem fim num compromisso novo: não manda o campo (assim funciona mesmo antes do ciclo15-agenda.sql).
+    if (!dados.hora_fim && !(c && 'hora_fim' in c)) delete dados.hora_fim
+    props.onSalvar(dados)
     props.onFechar()
   }
 
@@ -50,12 +56,35 @@ export function CompromissoForm(props: {
               className="min-w-0 flex-1 rounded-xl border border-line bg-surface-2 px-3 py-2.5 outline-none [color-scheme:dark] focus:border-brand"
             />
             {hora && (
-              <button type="button" onClick={() => setHora('')} className="rounded-xl px-3 text-sm font-semibold text-muted">
+              <button
+                type="button"
+                onClick={() => {
+                  setHora('')
+                  setHoraFim('')
+                }}
+                className="rounded-xl px-3 text-sm font-semibold text-muted"
+              >
                 Dia todo
               </button>
             )}
           </div>
         </label>
+
+        {hora && (
+          <label className="block">
+            <Rotulo>Até (opcional)</Rotulo>
+            <input
+              type="time"
+              value={horaFim}
+              onChange={(e) => setHoraFim(e.target.value)}
+              aria-label="Horário de fim"
+              className="w-full rounded-xl border border-line bg-surface-2 px-3 py-2.5 outline-none [color-scheme:dark] focus:border-brand"
+            />
+            {horaFim && (
+              <span className="mt-1 block text-xs text-muted">{descreverFim({ hora, hora_fim: horaFim })}</span>
+            )}
+          </label>
+        )}
 
         {erro && <p className="text-sm text-red-300">{erro}</p>}
 

@@ -142,6 +142,8 @@ begin
     te := te || 'tasks · A cria tarefa na repetição de B'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
     obt := pg_temp.tentar(format('insert into public.tasks (user_id, titulo, revisao_de, revisao_n) values (%L, %L, %L, 1)', a, 'x', tb));
     te := te || 'tasks · A cria revisão de uma tarefa de B'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
+    obt := pg_temp.tentar(format('insert into public.events (user_id, titulo, data, task_id) values (%L, %L, public.hoje_br(), %L)', a, 'x', tb));
+    te := te || 'events · A liga um compromisso a uma tarefa de B'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
     obt := pg_temp.tentar(format('insert into public.tasks (user_id, titulo, revisao_de, revisao_n) values (%L, %L, %L, 1)', a, 'x', ta));
     te := te || 'tasks · A cria revisão da própria tarefa'::text; es := es || 'passou (1 linhas)'::text; ob := ob || obt; ok := ok || (obt = 'passou (1 linhas)');
     obt := pg_temp.tentar(format('insert into public.tasks (user_id, titulo, revisao_de, revisao_n) values (%L, %L, %L, 1)', a, 'x', ta));

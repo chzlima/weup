@@ -145,6 +145,8 @@ Precisa do **Node.js (versão LTS)** instalado.
 
 - **Teste com estudantes cancelado em 12/11/2026** (decisão do Carlos e do Matheus). A 0.4 começa direto; as decisões de produto ficam com a dupla.
 
+- 0.4 (em andamento): modelo de agenda (`supabase/ciclo15-agenda.sql`). Tarefa tem três datas que não se confundem: `data` (dia planejado), `prazo` (até quando precisa estar pronta) e `concluida_em`. Compromisso vira bloco: `hora`, `hora_fim` e `task_id` opcional. **Horário local, sem fuso:** 08:00 é 08:00 em qualquer aparelho (o Brasil não tem mais horário de verão); fim menor que o início = atravessa a meia-noite. Regras em `src/lib/agenda.ts` (`duracaoMinutos`, `descreverFim`, `validarHorario`).
+
 ## Como publicar uma nova versão
 
 Para versões com número, siga o checklist em `docs/RELEASE.md`.

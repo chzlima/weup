@@ -3,6 +3,13 @@
 O que mudou em cada versão. A mais nova fica no topo.
 A versão que está rodando aparece no fim da tela **Perfil** (número + commit).
 
+## Não lançado (a caminho da 0.4.0 — Smart Planning)
+
+### Adicionado
+- **Prazo nas tarefas** (opcional): "até quando precisa estar pronta", separado do dia em que você planeja fazer. Aparece na lista como "prazo hoje", "prazo amanhã", "prazo em 3 dias"; prazo passado vira só "o prazo era 10 de nov.", sem cobrança.
+- **Horário de fim nos compromissos** (opcional): "das 08:00 até 10:00". Fim antes do início atravessa a meia-noite ("até 07:00 do dia seguinte"), para plantões noturnos.
+- Base para o calendário: um compromisso pode ficar ligado a uma tarefa (a tela para isso vem com o calendário). Precisa rodar `supabase/ciclo15-agenda.sql`.
+
 ## 0.3.1 — Pronto para o teste (12/11/2026)
 
 Três melhorias antes do teste com estudantes da saúde, mais o botão de ver a senha. Os números de versão seguem as fases do plano; esta leva ainda faz parte da 0.3.
