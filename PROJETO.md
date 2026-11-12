@@ -149,6 +149,8 @@ Precisa do **Node.js (versão LTS)** instalado.
 
 - 0.4: tela Hoje com **prioridades do dia** (`supabase/ciclo16-prioridades.sql`, `src/lib/prioridades.ts`): até 3 ids de tarefas, em ordem, na coluna `daily_checkins.prioridades` (o registro do dia; a energia passou a ser opcional). Amanhã começa vazio. E **prazo chegando**: tarefas com prazo até amanhã planejadas para outro dia ou sem data.
 
+- 0.4: foco com pausa e duração livre (`supabase/ciclo17-foco.sql`): `focus_sessions` ganha `pausada_em` e `pausa_segundos`; pausar e continuar só pelas funções `pausar_foco`/`retomar_foco` (a tabela continua sem permissão de alterar). `concluir_foco` desconta as pausas, recusa sessão pausada e só dá XP a partir de 15 min (`MIN_MINUTOS_XP`). Duração de 5 a 120 min. A pausa curta de 5 min depois da sessão fica só no aparelho.
+
 ## Como publicar uma nova versão
 
 Para versões com número, siga o checklist em `docs/RELEASE.md`.
