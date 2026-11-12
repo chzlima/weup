@@ -62,6 +62,7 @@ A versão que está rodando aparece no fim da tela **Perfil** (número + commit)
 - **Revisão semanal** (Evoluir, e lembrete na tela Hoje no domingo e na segunda): os fatos da semana (tarefas, hábitos, tempo de foco e XP), uma **carta do pet** que reconhece o que aconteceu sem cobrar o que faltou, e quatro perguntas opcionais: o que avançou, o que travou, o que muda e as prioridades da próxima semana. Dá para editar até a semana virar. Precisa rodar `supabase/ciclo18-revisao-semanal.sql`.
 - Política de privacidade: passa a citar as respostas da revisão semanal.
 - **Calendário** na aba Planejar → Agenda: a semana de segunda a domingo (com setas para navegar e um ponto nos dias que têm algo) e o dia escolhido em detalhe: compromissos do dia todo, blocos de horário, tarefas e as **repetições previstas** para os próximos dias. "+ Compromisso" já vem com o dia escolhido.
+- **Semana de plantão:** na Agenda, um toque marca o dia como plantão ou estágio (de hoje em diante; aparece um 🩺 na semana). Nesse dia a tela Hoje mostra só tarefas pequenas, até 3, e os hábitos ficam recolhidos ("podem esperar"); o resto fica atrás de um "ver mais". Não vale XP. Precisa rodar `supabase/ciclo24-plantao.sql`.
 - **Compromisso ligado a uma tarefa:** no formulário, "O que vai fazer nesse horário?" liga o bloco a uma tarefa aberta (ex.: "Estudo · 14:00 até 16:00 · tarefa: Revisar renal").
 
 ## 0.3.1 — Pronto para o teste (12/11/2026)

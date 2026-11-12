@@ -7,6 +7,8 @@ import { diasDaSemana, itensDoDia, outraSemana, totalDoDia } from '../../lib/cal
 import { descreverSemana, segundaDaSemana } from '../../lib/revisaoSemanal'
 import { TarefaItem } from '../../components/TarefaItem'
 import { IconChevron, IconMais } from '../../components/Icons'
+import { usePlantoes } from '../../lib/plantao'
+import { Aviso } from './Vazio'
 
 const LETRAS = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S']
 
@@ -37,6 +39,9 @@ export function Agenda(props: {
   const itens = itensDoDia(dia, hoje, fonte)
   const nomeProjeto = (id: string | null) => dados.projetos.find((p) => p.id === id)?.titulo
   const nomeTarefa = (id?: string | null) => (id ? dados.tarefas.find((t) => t.id === id)?.titulo : undefined)
+  // Dias de plantão ou estágio da semana à vista (só dá para marcar de hoje em diante).
+  const plantao = usePlantoes(dias[0], dias[6])
+  const ehPlantao = plantao.dias.has(dia)
 
   const irPara = (delta: number) => {
     const nova = outraSemana(semana, delta)
@@ -76,13 +81,18 @@ export function Agenda(props: {
                 key={d}
                 onClick={() => setDia(d)}
                 aria-pressed={escolhido}
-                aria-label={`${nomeDoDia(d)}${n ? `, ${n} ${n === 1 ? 'item' : 'itens'}` : ''}`}
+                aria-label={`${nomeDoDia(d)}${plantao.dias.has(d) ? ', plantão' : ''}${n ? `, ${n} ${n === 1 ? 'item' : 'itens'}` : ''}`}
                 className={`flex flex-col items-center gap-0.5 rounded-xl py-2 text-xs transition-colors ${
                   escolhido ? 'bg-brand text-bg' : d === hoje ? 'bg-brand/15 text-mint' : 'text-muted hover:bg-surface-2'
                 }`}
               >
                 <span className="font-semibold">{letra}</span>
                 <span className="text-base font-bold">{dd}</span>
+                {plantao.dias.has(d) && (
+                  <span aria-hidden className="-my-0.5 text-[10px] leading-none">
+                    🩺
+                  </span>
+                )}
                 <span className={`h-1.5 w-1.5 rounded-full ${n ? (escolhido ? 'bg-bg' : 'bg-mint') : 'bg-transparent'}`} />
               </button>
             )
@@ -98,6 +108,30 @@ export function Agenda(props: {
             + Compromisso
           </button>
         </div>
+
+        {/* Plantão ou estágio: nesse dia a tela Hoje pede só tarefas pequenas e não espera os hábitos */}
+        {plantao.disponivel && dia >= hoje && (
+          <button
+            onClick={() => plantao.alternar(dia)}
+            aria-pressed={ehPlantao}
+            className={`mb-2 flex w-full items-center gap-3 rounded-2xl border px-4 py-2.5 text-left text-sm transition-colors ${
+              ehPlantao ? 'border-brand bg-brand/15' : 'border-dashed border-line hover:bg-surface-2'
+            }`}
+          >
+            <span aria-hidden className="text-lg">
+              🩺
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className={`block font-bold ${ehPlantao ? 'text-mint' : ''}`}>
+                {ehPlantao ? 'Dia de plantão ou estágio' : 'Marcar como plantão ou estágio'}
+              </span>
+              <span className="block text-xs text-muted">
+                {ehPlantao ? 'Só tarefas pequenas, e os hábitos podem esperar. Toque para desmarcar.' : 'O dia pede só tarefas pequenas e não espera os hábitos.'}
+              </span>
+            </span>
+          </button>
+        )}
+        {plantao.erro && <Aviso>{plantao.erro}</Aviso>}
 
         {totalDoDia(itens) === 0 ? (
           <p className="rounded-2xl border border-dashed border-line p-5 text-center text-sm text-muted">
