@@ -14,7 +14,8 @@ import { Diario } from '../pets/Diario'
 import { AbaVisual } from '../pets/AbaVisual'
 import { CenaHabitat } from '../pets/CenaHabitat'
 import { decoracoesDe, periodoDoDia } from '../pets/habitat'
-import { buscarMemorias } from '../pets/memorias'
+import { buscarMemorias, textoDaMemoria, type Memoria } from '../pets/memorias'
+import { BRINQUEDO, jaTeveSurpresaHoje, marcarSurpresaHoje } from '../pets/brincar'
 import { caminhoSugerido, nomeDaForma, type Caminho } from '../pets/caminhos'
 import { useAuth } from '../lib/auth'
 import { hojeISO, somarDias } from '../lib/tarefas'
@@ -34,10 +35,12 @@ export function Pets() {
   const { laco, cuidar } = useLaco()
   const [observando, setObservando] = useState(false)
   const [escolhendoCaminho, setEscolhendoCaminho] = useState(false)
-  const [chaves, setChaves] = useState<string[]>([]) // memórias do diário: decoram o habitat
+  const [memorias, setMemorias] = useState<Memoria[]>([]) // diário: decora o habitat e alimenta a surpresa
+  const chaves = memorias.map((m) => m.chave)
+  const [brincando, setBrincando] = useState(false)
   useEffect(() => {
     buscarMemorias()
-      .then((m) => setChaves((m ?? []).map((x) => x.chave)))
+      .then((m) => setMemorias(m ?? []))
       .catch(() => {})
   }, [])
   const [aba, setAba] = useState<Aba>('companheiro')
@@ -102,7 +105,32 @@ export function Pets() {
   }
 
   const nivelLaco = laco ? progressoDoLaco(laco.pontos) : null
-  const acoes = { acariciar, conversar, observar: () => setObservando(true) }
+  // Brincar: alguns segundos correndo atrás do brinquedo da espécie. Sem pontos, sem placar.
+  const brincar = () => {
+    if (brincando) return
+    setBrincando(true)
+    setFala(null)
+    setPulando((n) => n + 1)
+    cuidar()
+    setTimeout(() => setPulando((n) => n + 1), 1300)
+    setTimeout(() => setPulando((n) => n + 1), 2600)
+    setTimeout(() => setBrincando(false), 4000)
+  }
+
+  // Surpresa: uma vez por dia, o pet lembra um momento do diário.
+  const surpresa = () => {
+    setPulando((n) => n + 1)
+    cuidar()
+    if (jaTeveSurpresaHoje()) return setFala('A surpresa de hoje já foi. Amanhã eu guardo outra!')
+    marcarSurpresaHoje()
+    if (!memorias.length) return setFala('Ainda estou juntando lembranças nossas. Amanhã eu te conto uma!')
+    const m = memorias[Math.floor(Math.random() * memorias.length)]
+    const [a, mm, d] = m.dia.split('-').map(Number)
+    const quando = new Date(a, mm - 1, d).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long' })
+    setFala(`Lembra? ${textoDaMemoria(m, pet).titulo}, em ${quando}. Eu guardei esse momento.`)
+  }
+
+  const acoes = { acariciar, conversar, observar: () => setObservando(true), brincar, surpresa }
 
   return (
     <div className="space-y-5">
@@ -132,7 +160,7 @@ export function Pets() {
             aria-label={`Fazer carinho em ${pet.nome}`}
             className={`rounded-full ${pulando ? 'animate-[pulinho_0.6s_ease-in-out]' : ''}`}
           >
-            <Pet especie={pet.especie} estagio={pet.estagio} caminho={pet.caminho} visual={pet} expressao={expressao} size={200} nome={pet.nome} />
+            <Pet especie={pet.especie} estagio={pet.estagio} caminho={pet.caminho} visual={pet} expressao={brincando ? 'animado' : expressao} size={200} nome={pet.nome} />
           </button>
         </div>
         <div className="mt-1 text-center">
@@ -142,6 +170,11 @@ export function Pets() {
             {!dados.carregando && <> · {NOME_EXPRESSAO[expressao]}</>}
           </p>
         </div>
+        {brincando && (
+          <span aria-hidden className="pointer-events-none absolute top-1/3 left-0 animate-[brinquedo_4s_ease-in-out_forwards] text-3xl">
+            {BRINQUEDO[pet.especie]}
+          </span>
+        )}
         {!fala && <p className="mt-3 text-center text-xs text-muted">Toque em {pet.nome} para conversar.</p>}
       </section>
 
@@ -243,7 +276,7 @@ export function Pets() {
             </button>
           </div>
           <p className="text-center text-xs text-muted">
-            Em breve: brincar com {pet.nome}.
+            Brincar e Surpresa se abrem com o laço. Nada aqui dá XP: é só o tempo de vocês dois.
           </p>
         </section>
       ) : aba === 'evolucao' ? (

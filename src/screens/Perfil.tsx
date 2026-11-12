@@ -195,6 +195,8 @@ export function Perfil() {
         <p className="text-sm text-muted">{user?.email}</p>
       </section>
 
+      <ModoSimples />
+
       <InstalarApp />
 
       <div className="flex items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3">
@@ -216,5 +218,49 @@ export function Perfil() {
         WeUp! versão {__APP_VERSION__} · {import.meta.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) || 'local'}
       </p>
     </EmBreve>
+  )
+}
+
+// Gamificação opcional: no modo simples o app fica só de produtividade (sem pet, XP nem comemorações).
+// Nada é apagado: o XP continua contando por baixo e o pet continua lá para quando desligar.
+function ModoSimples() {
+  const { modoSimples, definirModoSimples } = useAuth()
+  const [salvando, setSalvando] = useState(false)
+  const [erro, setErro] = useState('')
+
+  const alternar = async () => {
+    setSalvando(true)
+    setErro('')
+    try {
+      await definirModoSimples(!modoSimples)
+    } catch (e) {
+      setErro((e as Error).message)
+    } finally {
+      setSalvando(false)
+    }
+  }
+
+  return (
+    <section className="rounded-2xl border border-line bg-surface px-4 py-3">
+      <div className="flex items-center gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="font-bold">Modo simples</p>
+          <p className="text-xs text-muted">
+            Esconde o pet, o XP e as comemorações. Nada é apagado: desligue quando quiser e tudo volta.
+          </p>
+        </div>
+        <button
+          role="switch"
+          aria-checked={modoSimples}
+          aria-label="Modo simples"
+          onClick={alternar}
+          disabled={salvando}
+          className={`relative h-7 w-12 shrink-0 rounded-full transition-colors disabled:opacity-60 ${modoSimples ? 'bg-brand' : 'bg-surface-2'}`}
+        >
+          <span className={`absolute top-1 h-5 w-5 rounded-full bg-ink transition-all ${modoSimples ? 'left-6' : 'left-1'}`} />
+        </button>
+      </div>
+      {erro && <p className="mt-2 text-sm text-red-300">{erro}</p>}
+    </section>
   )
 }

@@ -69,6 +69,15 @@ body {
   50% { opacity: 1; transform: translateY(-3px) scale(1); }
 }
 
+/* Brincar: o brinquedo atravessa o palco e volta */
+@keyframes brinquedo {
+  0% { transform: translate(-10%, 0) rotate(0deg); opacity: 0; }
+  10% { opacity: 1; }
+  45% { transform: translate(260px, -30px) rotate(160deg); }
+  80% { transform: translate(60px, 10px) rotate(320deg); opacity: 1; }
+  100% { transform: translate(140px, -10px) rotate(360deg); opacity: 0; }
+}
+
 /* Pet parado: cada espécie se mexe de um jeito (src/components/Pet.tsx) */
 .pet-parado-broto,
 .pet-parado-faisca,

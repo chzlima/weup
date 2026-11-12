@@ -29,6 +29,8 @@ export const INTERACOES = [
   { id: 'acariciar', nome: 'Acariciar', emoji: '🤲', laco: 1 },
   { id: 'conversar', nome: 'Conversar', emoji: '💬', laco: 2 },
   { id: 'observar', nome: 'Observar', emoji: '🌙', laco: 3 },
+  { id: 'brincar', nome: 'Brincar', emoji: '🎈', laco: 4 },
+  { id: 'surpresa', nome: 'Surpresa', emoji: '🎁', laco: 5 },
 ] as const
 
 // "Conversar": o pet comenta o seu dia de verdade. Só fatos; nada de cobrança.

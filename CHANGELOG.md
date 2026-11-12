@@ -44,6 +44,10 @@ A versão que está rodando aparece no fim da tela **Perfil** (número + commit)
 - A luz muda com a hora: manhã, tarde e noite (com lua e estrelas).
 - **Decorações das conquistas** aparecem sozinhas: vaso de flor (primeiro hábito), lanterna (primeira revisão), troféu (1.000 XP) e almofada (laço 2). Sem montar nada e sem SQL novo.
 
+### Pet Rework — ciclo 9 (brincar, surpresa e modo simples)
+- **Brincar** (laço 4): o pet corre atrás do brinquedo da espécie (folha, faísca ou bolha) por alguns segundos. **Surpresa** (laço 5): uma vez por dia, o pet lembra um momento do diário. Nenhuma das duas dá XP.
+- **Modo simples** (Perfil): esconde o pet, o XP, o nível e as comemorações em todo o app, deixando só a produtividade. Fica na conta e vale em todo aparelho; nada é apagado e, ao desligar, tudo volta. Quem liga o modo simples logo no início nem precisa escolher um pet.
+
 - **Corrigido:** o teste de isolamento (`supabase/teste-isolamento.sql`) tinha sido esvaziado sem querer na revisão semanal; foi restaurado, com as verificações da revisão semanal e do pet.
 
 ### Adicionado

@@ -171,6 +171,8 @@ Precisa do **Node.js (versão LTS)** instalado.
 
 - Pet Rework, ciclo 8: habitat (`src/pets/habitat.ts`: `periodoDoDia`, `nivelDoHabitat`, `DECORACOES` por memória; cena em `src/pets/CenaHabitat.tsx`). Sem SQL: as decorações vêm das memórias do diário. Arquivos de componente e de regra não podem ter o mesmo nome com maiúscula diferente (Windows não distingue): por isso `CenaHabitat.tsx` e `AbaVisual.tsx`.
 
+- Pet Rework, ciclo 9 (último): Brincar e Surpresa (`src/pets/brincar.ts`, interações de laço 4 e 5) e **Modo simples** (`modo_simples` nos metadados da conta, lido por `useAuth().modoSimples`; esconde aba Pets, pet, nível, XP e comemorações; o pet evolui sem cena). **Pet Rework concluído nos 9 ciclos.**
+
 ## Como publicar uma nova versão
 
 Para versões com número, siga o checklist em `docs/RELEASE.md`.

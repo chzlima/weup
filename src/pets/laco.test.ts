@@ -51,3 +51,12 @@ describe('conversa com o pet', () => {
     expect(assuntosDoDia({ nomePessoa: 'Ana', feitos: 0 })).toEqual(['Me conta, Ana: o que seria uma coisa pequena para hoje?'])
   })
 })
+
+describe('interações', () => {
+  it('cada interação se abre num nível de laço, de 1 a 5', async () => {
+    const { INTERACOES } = await import('./laco')
+    expect(INTERACOES.map((i) => [i.id, i.laco])).toEqual([
+      ['acariciar', 1], ['conversar', 2], ['observar', 3], ['brincar', 4], ['surpresa', 5],
+    ])
+  })
+})
