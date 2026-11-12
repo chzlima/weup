@@ -3,6 +3,11 @@
 O que mudou em cada versão. A mais nova fica no topo.
 A versão que está rodando aparece no fim da tela **Perfil** (número + commit).
 
+## Não lançado
+
+### Adicionado
+- Botão de **mostrar a senha** (ícone de olho) nos campos de senha: entrar, criar conta e criar senha nova. Ajuda a corrigir um erro de digitação antes de enviar.
+
 ## 0.3.0 — Productivity Core (11/11/2026)
 
 Tarefas mais fáceis de manter em dia: o que ficou para trás aparece separado e sem cobrança, e o que é rotina se repete sozinho.

@@ -2,6 +2,7 @@ import { useState, type FormEvent, type ReactNode } from 'react'
 import { linkDoEmailInvalido, supabase } from '../lib/supabase'
 import { traduzErro } from '../lib/auth'
 import { Pet } from '../components/Pet'
+import { IconOlho, IconOlhoFechado } from '../components/Icons'
 import { acabouDeExcluirConta } from '../lib/conta'
 import { Privacidade } from './Privacidade'
 
@@ -252,17 +253,39 @@ export function Campo(props: {
   autoComplete?: string
   dica?: string
 }) {
+  // Campo de senha ganha o botão do olho: mostra o que foi digitado, para corrigir um erro antes de enviar.
+  const ehSenha = props.type === 'password'
+  const [mostrar, setMostrar] = useState(false)
+
   return (
     <label className="block">
       <span className="mb-1 block text-xs font-semibold text-muted">{props.label}</span>
-      <input
-        type={props.type ?? 'text'}
-        value={props.value}
-        onChange={(e) => props.onChange(e.target.value)}
-        autoComplete={props.autoComplete}
-        required
-        className="w-full rounded-xl border border-line bg-surface-2 px-3 py-2.5 text-ink outline-none transition-colors focus:border-brand"
-      />
+      <span className="relative block">
+        <input
+          type={ehSenha && mostrar ? 'text' : (props.type ?? 'text')}
+          value={props.value}
+          onChange={(e) => props.onChange(e.target.value)}
+          autoComplete={props.autoComplete}
+          autoCapitalize={ehSenha ? 'none' : undefined}
+          autoCorrect={ehSenha ? 'off' : undefined}
+          spellCheck={ehSenha ? false : undefined}
+          required
+          className={`w-full rounded-xl border border-line bg-surface-2 px-3 py-2.5 text-ink outline-none transition-colors focus:border-brand ${
+            ehSenha ? 'pr-11' : ''
+          }`}
+        />
+        {ehSenha && (
+          <button
+            type="button"
+            onClick={() => setMostrar((m) => !m)}
+            aria-label={mostrar ? 'Esconder a senha' : 'Mostrar a senha'}
+            aria-pressed={mostrar}
+            className="absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-r-xl text-muted transition-colors hover:text-ink"
+          >
+            {mostrar ? <IconOlhoFechado className="h-5 w-5" /> : <IconOlho className="h-5 w-5" />}
+          </button>
+        )}
+      </span>
       {props.dica && <span className="mt-1 block text-xs text-muted">{props.dica}</span>}
     </label>
   )
