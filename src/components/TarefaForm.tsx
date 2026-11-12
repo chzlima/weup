@@ -31,6 +31,7 @@ export function TarefaForm(props: {
     categoria: 'estudo',
     project_id: null,
     data: hojeISO(),
+    prazo: null,
     ...props.inicial,
     ...(props.tarefa && {
       titulo: props.tarefa.titulo,
@@ -38,6 +39,7 @@ export function TarefaForm(props: {
       categoria: props.tarefa.categoria,
       project_id: props.tarefa.project_id,
       data: props.tarefa.data,
+      prazo: props.tarefa.prazo ?? null,
     }),
   }
   const [d, setD] = useState<DadosTarefa>(base)
@@ -50,7 +52,10 @@ export function TarefaForm(props: {
     e.preventDefault()
     const titulo = d.titulo.trim()
     if (!titulo) return setErro('Dê um nome para a tarefa.')
-    props.onSalvar({ ...d, titulo })
+    const dados: DadosTarefa = { ...d, titulo }
+    // Sem prazo numa tarefa nova: não manda o campo (assim funciona mesmo antes do ciclo15-agenda.sql).
+    if (!dados.prazo && !(props.tarefa && 'prazo' in props.tarefa)) delete dados.prazo
+    props.onSalvar(dados)
     props.onFechar()
   }
 
@@ -70,6 +75,24 @@ export function TarefaForm(props: {
         </label>
 
         <CampoData valor={d.data} onChange={(v) => set('data', v)} permitirSemData />
+
+        <label className="block">
+          <Rotulo>Prazo (opcional): até quando precisa estar pronta</Rotulo>
+          <div className="flex gap-2">
+            <input
+              type="date"
+              value={d.prazo ?? ''}
+              onChange={(e) => set('prazo', e.target.value || null)}
+              aria-label="Prazo"
+              className="min-w-0 flex-1 rounded-xl border border-line bg-surface-2 px-3 py-2.5 outline-none [color-scheme:dark] focus:border-brand"
+            />
+            {d.prazo && (
+              <button type="button" onClick={() => set('prazo', null)} className="rounded-xl px-3 text-sm font-semibold text-muted">
+                Sem prazo
+              </button>
+            )}
+          </div>
+        </label>
 
         {props.serie && (
           <p className="rounded-xl bg-surface-2 px-3 py-2 text-sm text-muted">

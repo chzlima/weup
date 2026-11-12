@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { IconCheck, IconMais } from './Icons'
-import { formatarData, nomeCategoria, xpDaTarefa, type Tarefa } from '../lib/tarefas'
+import { descreverPrazo, formatarData, nomeCategoria, xpDaTarefa, type Tarefa } from '../lib/tarefas'
 import { XP_HABITO, type Habito } from '../lib/habitos'
 
 // Linha genérica: círculo para concluir + botão "…" para editar. "acoes" são botões extras embaixo da linha.
@@ -58,7 +58,8 @@ export function TarefaItem(props: {
   onEditar: () => void
 }) {
   const t = props.tarefa
-  const detalhes = [props.projeto ?? nomeCategoria(t.categoria), props.mostrarData ? formatarData(t.data) : null, props.nota]
+  const prazo = t.prazo && !t.concluida_em ? descreverPrazo(t.prazo) : null
+  const detalhes = [props.projeto ?? nomeCategoria(t.categoria), props.mostrarData ? formatarData(t.data) : null, props.nota, prazo]
     .filter(Boolean)
     .join(' · ')
   return (

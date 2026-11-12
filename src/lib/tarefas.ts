@@ -9,7 +9,8 @@ export type Tarefa = {
   dificuldade: Dificuldade
   categoria: Categoria
   project_id: string | null
-  data: string | null // 'AAAA-MM-DD'
+  data: string | null // 'AAAA-MM-DD': o dia em que a pessoa planeja fazer
+  prazo?: string | null // 'AAAA-MM-DD': até quando precisa estar pronta (opcional; existe depois do ciclo15)
   concluida_em: string | null
   created_at: string
   series_id?: string | null // veio de uma tarefa que se repete (ver series.ts)
@@ -25,7 +26,7 @@ export type Projeto = {
   created_at: string
 }
 
-export type DadosTarefa = Pick<Tarefa, 'titulo' | 'dificuldade' | 'categoria' | 'project_id' | 'data'>
+export type DadosTarefa = Pick<Tarefa, 'titulo' | 'dificuldade' | 'categoria' | 'project_id' | 'data' | 'prazo'>
 
 // XP sugerido no blueprint (ainda só exibido; passa a valer de verdade no Ciclo 5).
 export const XP_DIFICULDADE: Record<Dificuldade, number> = { pequena: 5, media: 15, complexa: 30 }
@@ -82,6 +83,20 @@ export function diasEntre(de: string, ate: string) {
     return new Date(a, m - 1, d).getTime()
   }
   return Math.round((dia(ate) - dia(de)) / 86_400_000)
+}
+
+// Prazo de uma tarefa aberta. Informa, sem cobrar: prazo passado é só "o prazo era…".
+export function descreverPrazo(prazo: string, hoje = hojeISO()) {
+  const n = diasEntre(hoje, prazo)
+  const curta = () => {
+    const [a, m, d] = prazo.split('-').map(Number)
+    return new Date(a, m - 1, d).toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' })
+  }
+  if (n < 0) return `o prazo era ${curta()}`
+  if (n === 0) return 'prazo hoje'
+  if (n === 1) return 'prazo amanhã'
+  if (n < 7) return `prazo em ${n} dias`
+  return `prazo ${curta()}`
 }
 
 // De quando é uma tarefa que ficou para trás. Sem cobrança: só informa.
