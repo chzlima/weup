@@ -147,6 +147,9 @@ begin
     te := te || 'user_pets · A renomeia o próprio pet'::text; es := es || 'passou (1 linhas)'::text; ob := ob || obt; ok := ok || (obt = 'passou (1 linhas)');
     obt := pg_temp.contar('select coalesce(public.sincronizar_pet(), 0)');
     te := te || 'sincronizar_pet · A sincroniza o próprio pet'::text; es := es || '1'::text; ob := ob || obt; ok := ok || (obt = '1');
+    -- Laço (ciclo20): conta só os dias de A (A tem 1 dia com ação, sem cuidado registrado)
+    obt := pg_temp.contar('select pontos from public.laco_do_pet()');
+    te := te || 'laco_do_pet · A vê só o próprio laço'::text; es := es || '1'::text; ob := ob || obt; ok := ok || (obt = '1');
 
     -- 6) Usar coisas de B a partir dos próprios dados
     obt := pg_temp.tentar(format('insert into public.tasks (user_id, titulo, series_id, ocorrencia) values (%L, %L, %L, public.hoje_br() + 30)', a, 'x', sb));

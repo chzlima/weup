@@ -9,6 +9,10 @@ import { calcularNivel, xpTotalDoNivel } from '../lib/xp'
 import { contextoDoMomento, escolherFala, expressaoDoMomento, NOME_EXPRESSAO } from '../pets/humor'
 import { momentoDoDia } from '../pets/momento'
 import { EscolherPet } from './EscolherPet'
+import { useAuth } from '../lib/auth'
+import { hojeISO, somarDias } from '../lib/tarefas'
+import { ordemCompromisso } from '../lib/agenda'
+import { INTERACOES, assuntosDoDia, progressoDoLaco, useLaco } from '../pets/laco'
 
 type Aba = 'companheiro' | 'evolucao'
 
@@ -21,6 +25,9 @@ export function Pets() {
   const { pet, escolher, renomear, acompanharNivel } = usePet()
   const dados = useDados()
   const plano = usePlanoDeHoje()
+  const { nome } = useAuth()
+  const { laco, cuidar } = useLaco()
+  const [observando, setObservando] = useState(false)
   const [aba, setAba] = useState<Aba>('companheiro')
   const [fala, setFala] = useState<string | null>(null)
   const [pulando, setPulando] = useState(0)
@@ -57,7 +64,33 @@ export function Pets() {
   const acariciar = () => {
     setPulando((n) => n + 1)
     setFala((anterior) => escolherFala(pet.especie, contextoDoMomento(momento), anterior ?? undefined))
+    cuidar() // o primeiro carinho do dia conta 1 ponto de laço
   }
+
+  // Conversar: o pet comenta o seu dia de verdade (compromisso, prioridade, prazo, o que já foi feito).
+  const conversar = () => {
+    const hoje = hojeISO()
+    const assuntos = assuntosDoDia({
+      nomePessoa: nome,
+      feitos: momento.feitos,
+      prioridadeAberta: plano.prioridades
+        .map((id) => dados.tarefas.find((t) => t.id === id))
+        .find((t) => t && !t.concluida_em && t.data === hoje),
+      proximoCompromisso: dados.compromissos
+        .filter((c) => c.data >= hoje && c.data <= somarDias(1))
+        .sort(ordemCompromisso)[0],
+      prazoHoje: dados.tarefas.find((t) => !t.concluida_em && t.prazo === hoje),
+    })
+    setPulando((n) => n + 1)
+    setFala((anterior) => {
+      const novos = assuntos.filter((a) => a !== anterior)
+      return (novos.length ? novos : assuntos)[Math.floor(Math.random() * (novos.length || assuntos.length))]
+    })
+    cuidar()
+  }
+
+  const nivelLaco = laco ? progressoDoLaco(laco.pontos) : null
+  const acoes = { acariciar, conversar, observar: () => setObservando(true) }
 
   return (
     <div className="space-y-5">
@@ -122,6 +155,45 @@ export function Pets() {
 
       {aba === 'companheiro' ? (
         <section className="space-y-4">
+          {nivelLaco && (
+            <div>
+              <div className="mb-1.5 flex items-baseline justify-between">
+                <p className="text-sm font-bold">Laço {nivelLaco.nivel}</p>
+                <p className="text-xs text-muted">
+                  {nivelLaco.faltam === null ? 'Laço máximo' : `faltam ${nivelLaco.faltam} para o laço ${nivelLaco.nivel + 1}`}
+                </p>
+              </div>
+              <div className="h-1.5 overflow-hidden rounded-full bg-gold/20">
+                <div className="h-full rounded-full bg-gold transition-all duration-700" style={{ width: `${nivelLaco.fracao * 100}%` }} />
+              </div>
+              <p className="mt-1.5 text-xs text-muted">
+                O laço cresce com os dias em que vocês caminham juntos. Descansar nunca diminui.
+              </p>
+            </div>
+          )}
+
+          <div className="grid grid-cols-3 gap-2">
+            {INTERACOES.map((i) => {
+              const liberada = !!nivelLaco && nivelLaco.nivel >= i.laco
+              return (
+                <button
+                  key={i.id}
+                  onClick={liberada ? acoes[i.id] : undefined}
+                  disabled={!liberada}
+                  className={`flex flex-col items-center gap-1 rounded-2xl border px-2 py-3 text-sm font-semibold transition-colors ${
+                    liberada ? 'border-line hover:bg-surface' : 'border-dashed border-line text-muted'
+                  }`}
+                >
+                  <span aria-hidden className="text-xl">
+                    {liberada ? i.emoji : '🔒'}
+                  </span>
+                  {i.nome}
+                  {!liberada && <span className="text-[11px] font-normal">Laço {i.laco}</span>}
+                </button>
+              )
+            })}
+          </div>
+
           <p className="text-sm text-muted">{info.descricao}</p>
           <div className="grid grid-cols-2 gap-2">
             <button
@@ -138,11 +210,23 @@ export function Pets() {
             </button>
           </div>
           <p className="text-center text-xs text-muted">
-            Em breve: laço com {pet.nome}, novas interações, visual e diário de memórias.
+            Em breve: brincar, visual de {pet.nome} e diário de memórias.
           </p>
         </section>
       ) : (
         <Evolucao especie={pet.especie} estagio={pet.estagio} total={total} />
+      )}
+
+      {/* Observar: um momento de calma, só o pet, sem texto. Toque para sair. */}
+      {observando && (
+        <button
+          onClick={() => setObservando(false)}
+          aria-label="Parar de observar"
+          className="fixed inset-0 z-50 flex animate-[aparecer_0.4s_ease-out] items-center justify-center"
+          style={{ background: `radial-gradient(90% 60% at 50% 70%, ${PALCO[pet.especie]}40 0%, var(--color-bg) 70%)` }}
+        >
+          <Pet especie={pet.especie} estagio={pet.estagio} expressao="tranquilo" size={260} nome={pet.nome} />
+        </button>
       )}
 
       {renomeando && <Renomear atual={pet.nome} onSalvar={renomear} onFechar={() => setRenomeando(false)} />}

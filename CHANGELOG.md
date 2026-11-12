@@ -19,6 +19,11 @@ A versão que está rodando aparece no fim da tela **Perfil** (número + commit)
 - **O pet reage ao seu dia**, aqui e na tela Hoje: curioso quando o dia ainda não começou, feliz e animado conforme você faz coisas, orgulhoso quando termina tudo ou as prioridades, tranquilo no dia leve e à noite, pensativo no domingo e na segunda. Nunca triste.
 - **Cada espécie fala do seu jeito**: o Broto fala devagar sobre crescer, a Faísca é intensa, a Gota observa e pergunta. 45 falas, nenhuma de cobrança (um teste confere).
 
+### Pet Rework — ciclo 4 (laço e interações)
+- **Laço com o pet** (aba Pets → Companheiro): cresce com os **dias** em que vocês caminham juntos (dia com alguma ação, dia com 3 ou mais ações e dia em que você interagiu com o pet). Até 3 pontos por dia, então não dá para farmar. Nunca diminui por descansar e não dá XP. Níveis de 1 a 10.
+- **Interações:** Acariciar (como antes, e o primeiro carinho do dia conta para o laço); **Conversar** (laço 2): o pet comenta o seu dia de verdade, como o compromisso de hoje, a prioridade aberta, um prazo ou o que você já fez; **Observar** (laço 3): só o pet, em tela cheia, num momento de calma.
+- Política de privacidade: passa a citar o laço com o pet. Precisa rodar `supabase/ciclo20-laco.sql`.
+
 - **Corrigido:** o teste de isolamento (`supabase/teste-isolamento.sql`) tinha sido esvaziado sem querer na revisão semanal; foi restaurado, com as verificações da revisão semanal e do pet.
 
 ### Adicionado

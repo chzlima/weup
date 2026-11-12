@@ -161,6 +161,8 @@ Precisa do **Node.js (versão LTS)** instalado.
 
 - Pet Rework, ciclo 3: humor do pet em `src/pets/humor.ts` (`expressaoDoMomento`, `contextoDoMomento`, falas por espécie em `FALAS`) e `src/pets/momento.ts` (`momentoDoDia`, usado pela tela Hoje e pela aba Pets). Nova `src/screens/Pets.tsx` com palco + abas Companheiro e Evolução (as abas Visual e Diário entram nos ciclos 6 e 7).
 
+- Pet Rework, ciclo 4: laço (`supabase/ciclo20-laco.sql`, `src/pets/laco.ts`). `laco_do_pet()` (security invoker) soma por dia: dia com ação no livro-razão, dia com 3+ ações e `daily_checkins.cuidou_do_pet`. Níveis em `MINIMOS_LACO` = `nivel_do_laco` no banco (teste de paridade). Interações em `INTERACOES` (Acariciar 1, Conversar 2, Observar 3); a conversa usa `assuntosDoDia` (só fatos do dia).
+
 ## Como publicar uma nova versão
 
 Para versões com número, siga o checklist em `docs/RELEASE.md`.
