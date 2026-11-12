@@ -19,13 +19,15 @@ Vale para versões com número (0.2.0, 0.3.0…). Correções pequenas do dia a 
 4. **Isolamento entre contas.** Se mudou tabela ou regra de segurança: incluir a tabela na lista `tabelas` de
    `supabase/teste-isolamento.sql`, rodar no SQL Editor e conferir que tudo dá "ok".
 5. **Backup.** Antes de qualquer SQL que altere ou apague dados existentes, rodar um backup à mão (ver `docs/BACKUP.md`).
+6. **Privacidade.** Se o texto de `src/screens/Privacidade.tsx` mudou, atualizar `POLITICA_VERSAO` e `POLITICA_ATUALIZADA_EM` em
+   `src/lib/privacidade.ts`: é isso que faz o aviso aparecer para quem já tem conta.
 
 ## Lançar
 
-6. Atualizar o `CHANGELOG.md`: trocar "Não lançado" pelo número e a data.
-7. Subir o número em `package.json` (`"version"`). É ele que aparece no fim do Perfil.
-8. Fazer o merge do PR. A Vercel publica sozinha em ~30 s.
-9. Marcar a versão:
+7. Atualizar o `CHANGELOG.md`: trocar "Não lançado" pelo número e a data.
+8. Subir o número em `package.json` (`"version"`). É ele que aparece no fim do Perfil.
+9. Fazer o merge do PR. A Vercel publica sozinha em ~30 s.
+10. Marcar a versão:
    ```
    git checkout main
    git pull
@@ -35,9 +37,9 @@ Vale para versões com número (0.2.0, 0.3.0…). Correções pequenas do dia a 
 
 ## Depois de publicar
 
-10. Abrir o app instalado no celular: deve aparecer **Atualização disponível**. Tocar em **Atualizar** e conferir no
+11. Abrir o app instalado no celular: deve aparecer **Atualização disponível**. Tocar em **Atualizar** e conferir no
     fim do Perfil que o número e o commit mudaram.
-11. Repetir a lista do passo 3 em produção, rapidamente.
+12. Repetir a lista do passo 3 em produção, rapidamente.
 
 ## Se der errado (rollback)
 

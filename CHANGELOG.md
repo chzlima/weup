@@ -3,7 +3,10 @@
 O que mudou em cada versão. A mais nova fica no topo.
 A versão que está rodando aparece no fim da tela **Perfil** (número + commit).
 
-## Não lançado (a caminho da 0.2.0)
+## 0.2.0 — Stability & Trust (11/11/2026)
+
+Versão de segurança e estabilidade: nada muda no jeito de usar o app, mas agora ele avisa quando há atualização,
+tem backup, testes, registro de erros e isolamento entre contas comprovado.
 
 ### Adicionado
 - Aviso **"Atualização disponível"** quando sai uma versão nova: a pessoa escolhe a hora de atualizar ("Atualizar" ou "Depois"). O app procura versão nova sempre que volta para a tela e a cada hora.
@@ -15,6 +18,7 @@ A versão que está rodando aparece no fim da tela **Perfil** (número + commit)
 - Tela "Algo não saiu como esperado" com botão Recarregar no lugar da tela em branco quando uma tela quebra.
 
 - Backup semanal automático do banco (domingo, 03:00): criptografado, com teste de restauração a cada execução e guardado por 90 dias. Como configurar e restaurar: `docs/BACKUP.md`. A Privacidade passou a citar o backup.
+- Aviso **"Atualizamos a política de privacidade"** na tela Hoje, uma vez por aparelho, para quem já tinha conta quando o texto mudou.
 
 ### Mudado
 - O service worker deixou de se atualizar sozinho em silêncio: agora espera o "Atualizar" ou o app ser fechado.
