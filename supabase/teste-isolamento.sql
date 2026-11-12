@@ -48,7 +48,7 @@ declare
   t text;
   obt text;
   tabelas text[] := array['tasks', 'projects', 'habits', 'habit_logs', 'events',
-                          'xp_transactions', 'user_pets', 'focus_sessions', 'restarts', 'app_errors', 'task_series'];
+                          'xp_transactions', 'user_pets', 'focus_sessions', 'restarts', 'app_errors', 'task_series', 'daily_checkins'];
   te text[] := '{}';
   es text[] := '{}';
   ob text[] := '{}';
@@ -77,6 +77,7 @@ begin
     insert into public.restarts (user_id, motivo) values (a, 'outro'), (b, 'outro');
     insert into public.task_series (user_id, titulo, tipo) values (a, 'Série A', 'diaria');
     insert into public.task_series (user_id, titulo, tipo) values (b, 'Série B', 'diaria') returning id into sb;
+    insert into public.daily_checkins (user_id, dia, energia) values (a, public.hoje_br(), 'normal'), (b, public.hoje_br(), 'baixa');
     insert into public.app_errors (user_id, origem, mensagem, versao, commit) values (a, 'erro', 'Erro A', '0', 'teste'), (b, 'erro', 'Erro B', '0', 'teste');
 
     -- 3) A partir daqui, age como a conta A, igual ao app
@@ -133,6 +134,8 @@ begin
 
     obt := pg_temp.tentar(format('insert into public.task_series (user_id, titulo, tipo) values (%L, %L, %L)', b, 'x', 'diaria'));
     te := te || 'task_series · A cria repetição em nome de B'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
+    obt := pg_temp.tentar(format('insert into public.daily_checkins (user_id, dia, energia) values (%L, public.hoje_br() - 1, %L)', b, 'alta'));
+    te := te || 'daily_checkins · A responde o check-in em nome de B'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
 
     -- 6) Usar coisas de B a partir dos próprios dados
     obt := pg_temp.tentar(format('insert into public.tasks (user_id, titulo, series_id, ocorrencia) values (%L, %L, %L, public.hoje_br() + 30)', a, 'x', sb));

@@ -8,6 +8,10 @@ A versão que está rodando aparece no fim da tela **Perfil** (número + commit)
 ### Adicionado
 - Botão de **mostrar a senha** (ícone de olho) nos campos de senha: entrar, criar conta e criar senha nova. Ajuda a corrigir um erro de digitação antes de enviar.
 - **Revisão espaçada:** ao concluir uma tarefa de estudo, o app pergunta "Revisar depois?". Um toque agenda três revisões rápidas (amanhã, em 7 e em 30 dias), como tarefas pequenas marcadas com "revisão 1 de 3". Não duplica e não oferece de novo para a mesma tarefa. Precisa rodar `supabase/ciclo13-revisoes.sql`.
+- **Check-in de energia:** na tela Hoje, um toque opcional por dia: energia baixa, normal ou alta. Energia baixa vira **dia leve**: a lista mostra só 3 coisas, das menores para as maiores, o progresso conta só essas 3 ("Dia leve cumprido 🌱") e "De dias anteriores" fica recolhido. Energia alta põe as tarefas maiores primeiro. Não vale XP. Precisa rodar `supabase/ciclo14-energia.sql`.
+
+### Mudado
+- Política de privacidade: passa a citar o check-in de energia. Quem já tinha conta vê o aviso "Atualizamos a política de privacidade".
 
 ## 0.3.0 — Productivity Core (11/11/2026)
 
