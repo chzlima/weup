@@ -10,6 +10,8 @@ import { OfertaRevisao } from '../components/OfertaRevisao'
 import { acaoPendente, limparAcaoPendente } from '../lib/atalhos'
 import { CheckinEnergia } from '../components/CheckinEnergia'
 import { EntradaRevisao } from '../components/RevisaoSemanal'
+import { expressaoDoMomento } from '../pets/humor'
+import { momentoDoDia } from '../pets/momento'
 import { META_DIA_LEVE, ordenarPorEnergia, progressoDoDia, separarDiaLeve, usePlanoDeHoje } from '../lib/energia'
 import {
   MAX_PRIORIDADES, alternarPrioridade, moverPrioridade, prazoChegando, separarPrioridades,
@@ -174,7 +176,13 @@ export function Hoje() {
 
       {/* Pet ativo + progresso do dia */}
       <section className="flex items-center gap-4 rounded-3xl border border-line bg-surface p-4">
-        <Pet especie={pet?.especie} estagio={pet?.estagio} feliz={feitos > 0} size={88} nome={pet?.nome} />
+        <Pet
+          especie={pet?.especie}
+          estagio={pet?.estagio}
+          expressao={dados.carregando ? 'feliz' : expressaoDoMomento(momentoDoDia(dados, plano))}
+          size={88}
+          nome={pet?.nome}
+        />
         <div className="flex-1">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted">Progresso de hoje</p>
           <p className="mt-1 text-lg font-bold">

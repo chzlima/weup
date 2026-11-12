@@ -14,6 +14,11 @@ A versão que está rodando aparece no fim da tela **Perfil** (número + commit)
 - **O pet se mexe parado:** o Broto balança, a Faísca tremula, a Gota flutua, e todos piscam. Quem ativa "reduzir movimento" no aparelho vê o pet parado.
 - A arte agora é feita em camadas (corpo, rosto e pontos de encaixe para acessórios), pronta para chapéus e acessórios e para trocar por arte de ilustrador no futuro.
 
+### Pet Rework — ciclo 3 (nova aba Pets)
+- **Aba Pets redesenhada:** o pet em destaque num palco com a cor da espécie, o balão de fala e duas abas, **Companheiro** e **Evolução**. A Evolução mostra as 5 formas em linha do tempo, com o progresso até a próxima.
+- **O pet reage ao seu dia**, aqui e na tela Hoje: curioso quando o dia ainda não começou, feliz e animado conforme você faz coisas, orgulhoso quando termina tudo ou as prioridades, tranquilo no dia leve e à noite, pensativo no domingo e na segunda. Nunca triste.
+- **Cada espécie fala do seu jeito**: o Broto fala devagar sobre crescer, a Faísca é intensa, a Gota observa e pergunta. 45 falas, nenhuma de cobrança (um teste confere).
+
 - **Corrigido:** o teste de isolamento (`supabase/teste-isolamento.sql`) tinha sido esvaziado sem querer na revisão semanal; foi restaurado, com as verificações da revisão semanal e do pet.
 
 ### Adicionado

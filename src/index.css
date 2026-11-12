@@ -35,6 +35,12 @@ body {
   60% { transform: translateY(0) scale(1.05, 0.95); }
 }
 
+/* Balão de fala do pet aparecendo */
+@keyframes aparecer {
+  from { opacity: 0; transform: translateY(4px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 /* Pet parado: cada espécie se mexe de um jeito (src/components/Pet.tsx) */
 .pet-parado-broto,
 .pet-parado-faisca,
