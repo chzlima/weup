@@ -160,6 +160,10 @@ begin
     te := te || 'focus_sessions · A foca numa tarefa de B'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
 
     -- 7) Funções do banco
+    obt := pg_temp.tentar(format('select public.pausar_foco(%L)', fb));
+    te := te || 'pausar_foco · A pausa a sessão de foco de B'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
+    obt := pg_temp.tentar(format('select public.retomar_foco(%L)', fb));
+    te := te || 'retomar_foco · A continua a sessão de foco de B'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
     obt := pg_temp.tentar(format('select public.concluir_foco(%L)', fb));
     te := te || 'concluir_foco · A conclui a sessão de foco de B'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
     obt := pg_temp.tentar(format('select public.conceder_xp(%L, %L, gen_random_uuid(), %L, null, public.hoje_br())', a, 'projeto', 'x'));

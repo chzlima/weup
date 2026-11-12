@@ -11,6 +11,9 @@ A versão que está rodando aparece no fim da tela **Perfil** (número + commit)
 - Base para o calendário: um compromisso pode ficar ligado a uma tarefa (a tela para isso vem com o calendário). Precisa rodar `supabase/ciclo15-agenda.sql`.
 - **Prioridades de hoje** na tela Hoje: toque na ☆ de até 3 tarefas do dia para marcar o que mais importa. Elas sobem para uma seção própria, na ordem escolhida (↑ Subir / ↓ Descer). Amanhã a lista começa vazia. No dia leve, as prioridades contam nas 3 coisas do dia.
 - **Prazo chegando** na tela Hoje: tarefas planejadas para outro dia (ou sem data) cujo prazo é até amanhã, com o botão "Fazer hoje". Precisa rodar `supabase/ciclo16-prioridades.sql`.
+- **Foco com pausa:** botões **Pausar** e **Continuar**; o tempo pausado não conta, e a sessão continua certa mesmo fechando e abrindo o app.
+- **Duração livre no foco:** além de 15, 25 e 50 min, "Outra" (de 5 a 120 minutos). Sessões a partir de 15 minutos valem XP; as mais curtas contam como tempo focado, sem XP.
+- **Pausa curta depois do foco:** "Pausa de 5 min", com aviso quando acaba. Precisa rodar `supabase/ciclo17-foco.sql`.
 
 ## 0.3.1 — Pronto para o teste (12/11/2026)
 

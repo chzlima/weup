@@ -2,10 +2,13 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { Opcoes, Rotulo, Sheet } from './Sheet'
 import { Pet } from './Pet'
 import { usePet } from '../lib/pet'
-import { DURACOES, XP_FOCO, buscarFocoAtivo, concluirFoco, desistirFoco, iniciarFoco, type SessaoFoco } from '../lib/foco'
+import {
+  DURACOES, INTERVALO_MIN, MAX_MINUTOS, MIN_MINUTOS, MIN_MINUTOS_XP, XP_FOCO, buscarFocoAtivo, concluirFoco,
+  desistirFoco, iniciarFoco, lerDuracao, pausarFoco, retomarFoco, tempoRestanteMs, type SessaoFoco,
+} from '../lib/foco'
 import type { Tarefa } from '../lib/tarefas'
 
-type Estado = 'parado' | 'rodando' | 'concluindo' | 'fim'
+type Estado = 'parado' | 'rodando' | 'pausado' | 'concluindo' | 'fim' | 'intervalo'
 
 // Cartão "Foco" da tela Hoje + a tela cheia com a contagem regressiva.
 export function Foco(props: { tarefas: Tarefa[]; sessoesHoje: number; onConcluiu: () => void; abrir?: boolean }) {
@@ -13,6 +16,8 @@ export function Foco(props: { tarefas: Tarefa[]; sessoesHoje: number; onConcluiu
   const [estado, setEstado] = useState<Estado>('parado')
   const [sessao, setSessao] = useState<SessaoFoco | null>(null)
   const [fim, setFim] = useState(0) // horário (no relógio do celular) em que a sessão termina
+  const [restantePausa, setRestantePausa] = useState(0) // ms que faltavam quando a sessão foi pausada
+  const [fimIntervalo, setFimIntervalo] = useState(0) // fim da pausa curta depois da sessão
   const [agora, setAgora] = useState(Date.now())
   const [configurando, setConfigurando] = useState(false)
   const [xpGanho, setXpGanho] = useState<number | null>(null)
@@ -28,19 +33,23 @@ export function Foco(props: { tarefas: Tarefa[]; sessoesHoje: number; onConcluiu
           return
         }
         setSessao(s)
-        // O início vem do relógio do servidor. Converte para o relógio do celular usando a diferença
-        // medida quando a sessão começou, e nunca deixa o fim passar de "agora + duração".
-        const dur = s.minutos * 60_000
-        const inicioLocal = Date.parse(s.inicio) - lerDiferencaRelogio()
-        setFim(Math.min(inicioLocal + dur, Date.now() + dur))
-        setEstado('rodando')
+        // Os horários vêm do relógio do servidor. Converte para o do celular usando a diferença medida
+        // quando a sessão começou. O tempo pausado não conta, e o restante nunca passa da duração.
+        const restante = tempoRestanteMs(s, Date.now() + lerDiferencaRelogio())
+        if (s.pausada_em) {
+          setRestantePausa(restante)
+          setEstado('pausado')
+        } else {
+          setFim(Date.now() + restante)
+          setEstado('rodando')
+        }
       })
       .catch(() => {})
   }, [])
 
   // Relógio: atualiza a cada segundo e também quando o app volta para a tela.
   useEffect(() => {
-    if (estado !== 'rodando') return
+    if (estado !== 'rodando' && estado !== 'intervalo') return
     const tic = () => setAgora(Date.now())
     const id = setInterval(tic, 1000)
     document.addEventListener('visibilitychange', tic)
@@ -78,8 +87,46 @@ export function Foco(props: { tarefas: Tarefa[]; sessoesHoje: number; onConcluiu
     if (estado === 'rodando' && agora >= fim) concluir()
   }, [estado, agora, fim, concluir])
 
+  // Fim da pausa curta: avisa e volta ao normal.
+  useEffect(() => {
+    if (estado === 'intervalo' && agora >= fimIntervalo) {
+      tocarSom()
+      navigator.vibrate?.([120, 80, 120])
+      setEstado('parado')
+      setSessao(null)
+    }
+  }, [estado, agora, fimIntervalo])
+
+  const pausar = async () => {
+    if (!sessao) return
+    const faltava = Math.max(0, fim - Date.now())
+    setRestantePausa(faltava)
+    setEstado('pausado')
+    try {
+      await pausarFoco(sessao.id)
+      setErro('')
+    } catch {
+      setErro('Não foi possível pausar. Verifique a internet.')
+      setEstado('rodando')
+    }
+  }
+
+  const continuar = async () => {
+    if (!sessao) return
+    setFim(Date.now() + restantePausa)
+    setAgora(Date.now())
+    setEstado('rodando')
+    try {
+      await retomarFoco(sessao.id)
+      setErro('')
+    } catch {
+      setErro('Não foi possível continuar. Verifique a internet.')
+      setEstado('pausado')
+    }
+  }
+
   // Título da aba com o tempo restante.
-  const restante = Math.max(0, Math.ceil((fim - agora) / 1000))
+  const restante = estado === 'pausado' ? Math.ceil(restantePausa / 1000) : Math.max(0, Math.ceil((fim - agora) / 1000))
   useEffect(() => {
     if (estado !== 'rodando' || !Number.isFinite(fim)) return
     const antigo = document.title
@@ -141,7 +188,7 @@ export function Foco(props: { tarefas: Tarefa[]; sessoesHoje: number; onConcluiu
         />
       )}
 
-      {(estado === 'rodando' || estado === 'concluindo') && sessao && (
+      {(estado === 'rodando' || estado === 'pausado' || estado === 'concluindo') && sessao && (
         <TelaCheia>
           <div className="flex min-h-14 items-end text-center">
             <p className="text-sm text-muted">
@@ -154,11 +201,16 @@ export function Foco(props: { tarefas: Tarefa[]; sessoesHoje: number; onConcluiu
               )}
             </p>
           </div>
-          <Anel fracao={Number.isFinite(fim) ? 1 - restante / (sessao.minutos * 60) : 0}>
+          <Anel fracao={estado === 'pausado' || Number.isFinite(fim) ? 1 - restante / (sessao.minutos * 60) : 0}>
             <Pet especie={pet?.especie} estagio={pet?.estagio} size={110} nome={pet?.nome} />
             <p className="mt-1 text-4xl font-extrabold tabular-nums" aria-live="off">
-              {estado === 'concluindo' ? '00:00' : Number.isFinite(fim) ? formatar(restante) : '--:--'}
+              {estado === 'concluindo'
+                ? '00:00'
+                : estado === 'pausado' || Number.isFinite(fim)
+                  ? formatar(restante)
+                  : '--:--'}
             </p>
+            {estado === 'pausado' && <p className="text-xs font-bold uppercase tracking-wider text-gold">Pausado</p>}
           </Anel>
           {erro ? (
             <div className="space-y-2 text-center">
@@ -169,8 +221,18 @@ export function Foco(props: { tarefas: Tarefa[]; sessoesHoje: number; onConcluiu
             </div>
           ) : (
             <p className="max-w-xs text-center text-xs text-muted">
-              Pode bloquear a tela: o tempo continua contando. {pet?.nome ?? 'Seu companheiro'} está focando junto.
+              {estado === 'pausado'
+                ? 'O tempo pausado não conta. Continue quando quiser, mesmo fechando o app.'
+                : `Pode bloquear a tela: o tempo continua contando. ${pet?.nome ?? 'Seu companheiro'} está focando junto.`}
             </p>
+          )}
+          {estado !== 'concluindo' && (
+            <button
+              onClick={estado === 'pausado' ? continuar : pausar}
+              className="rounded-2xl bg-brand px-8 py-3 font-bold text-bg"
+            >
+              {estado === 'pausado' ? 'Continuar' : 'Pausar'}
+            </button>
           )}
           <button
             onClick={desistir}
@@ -192,17 +254,49 @@ export function Foco(props: { tarefas: Tarefa[]; sessoesHoje: number; onConcluiu
             <p className="text-lg font-bold text-gold">+{xpGanho} XP</p>
           ) : (
             <p className="max-w-xs text-center text-sm text-muted">
-              Você chegou ao limite diário de XP de foco, mas o tempo focado continua valendo muito.
+              {sessao && sessao.minutos < MIN_MINUTOS_XP
+                ? `Sessões a partir de ${MIN_MINUTOS_XP} minutos valem XP. O tempo focado conta do mesmo jeito.`
+                : 'Você chegou ao limite diário de XP de foco, mas o tempo focado continua valendo muito.'}
             </p>
           )}
+          <button
+            onClick={() => {
+              setFimIntervalo(Date.now() + INTERVALO_MIN * 60_000)
+              setAgora(Date.now())
+              setEstado('intervalo')
+            }}
+            className="rounded-2xl bg-brand px-8 py-3 font-bold text-bg"
+          >
+            Pausa de {INTERVALO_MIN} min
+          </button>
           <button
             onClick={() => {
               setEstado('parado')
               setSessao(null)
             }}
-            className="rounded-2xl bg-brand px-8 py-3 font-bold text-bg"
+            className="rounded-2xl border border-line px-6 py-2.5 text-sm font-bold text-muted hover:text-ink"
           >
             Voltar
+          </button>
+        </TelaCheia>
+      )}
+
+      {estado === 'intervalo' && (
+        <TelaCheia>
+          <Pet especie={pet?.especie} estagio={pet?.estagio} feliz size={110} nome={pet?.nome} />
+          <p className="text-xl font-extrabold">Pausa</p>
+          <p className="text-4xl font-extrabold tabular-nums">
+            {formatar(Math.max(0, Math.ceil((fimIntervalo - agora) / 1000)))}
+          </p>
+          <p className="max-w-xs text-center text-sm text-muted">Levante, beba água, olhe para longe. Quando acabar, o app avisa.</p>
+          <button
+            onClick={() => {
+              setEstado('parado')
+              setSessao(null)
+            }}
+            className="rounded-2xl border border-line px-6 py-2.5 text-sm font-bold text-muted hover:text-ink"
+          >
+            Encerrar pausa
           </button>
         </TelaCheia>
       )}
@@ -215,16 +309,20 @@ function ConfigurarFoco(props: {
   onComecar: (minutos: number, taskId: string | null) => Promise<void>
   onFechar: () => void
 }) {
-  const [duracao, setDuracao] = useState<'15' | '25' | '50'>('25')
+  const [duracao, setDuracao] = useState<'15' | '25' | '50' | 'outra'>('25')
+  const [outra, setOutra] = useState('30')
   const [taskId, setTaskId] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [erro, setErro] = useState('')
 
+  const minutos = duracao === 'outra' ? lerDuracao(outra) : Number(duracao)
+
   const comecar = async () => {
+    if (!minutos) return setErro(`Escolha de ${MIN_MINUTOS} a ${MAX_MINUTOS} minutos.`)
     setEnviando(true)
     setErro('')
     try {
-      await props.onComecar(Number(duracao), taskId || null)
+      await props.onComecar(minutos, taskId || null)
       props.onFechar()
     } catch {
       setErro('Não foi possível começar. Verifique a internet.')
@@ -238,6 +336,21 @@ function ConfigurarFoco(props: {
         <div>
           <Rotulo>Duração</Rotulo>
           <Opcoes opcoes={DURACOES} valor={duracao} onChange={setDuracao} />
+          {duracao === 'outra' && (
+            <label className="mt-2 flex items-center gap-2 text-sm text-muted">
+              <input
+                type="number"
+                inputMode="numeric"
+                min={MIN_MINUTOS}
+                max={MAX_MINUTOS}
+                value={outra}
+                onChange={(e) => setOutra(e.target.value)}
+                aria-label="Minutos de foco"
+                className="w-24 rounded-xl border border-line bg-surface-2 px-3 py-2.5 text-ink outline-none focus:border-brand"
+              />
+              minutos ({MIN_MINUTOS} a {MAX_MINUTOS})
+            </label>
+          )}
         </div>
         {props.tarefas.length > 0 && (
           <label className="block">
@@ -257,8 +370,14 @@ function ConfigurarFoco(props: {
           </label>
         )}
         <p className="rounded-xl bg-surface-2 px-3 py-2 text-sm text-muted">
-          Ao terminar: <span className="font-bold text-gold">+{XP_FOCO} XP</span>. Parar antes não tira nada, só não
-          conta XP.
+          {minutos && minutos < MIN_MINUTOS_XP ? (
+            <>Sessões a partir de {MIN_MINUTOS_XP} minutos valem XP; esta conta como tempo focado. </>
+          ) : (
+            <>
+              Ao terminar: <span className="font-bold text-gold">+{XP_FOCO} XP</span>.{' '}
+            </>
+          )}
+          Dá para pausar no meio. Parar antes não tira nada, só não conta XP.
         </p>
         {erro && <p className="text-sm text-red-300">{erro}</p>}
         <button
