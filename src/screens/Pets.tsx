@@ -12,6 +12,9 @@ import { EscolherPet } from './EscolherPet'
 import { EscolherCaminho } from '../pets/EscolherCaminho'
 import { Diario } from '../pets/Diario'
 import { AbaVisual } from '../pets/AbaVisual'
+import { CenaHabitat } from '../pets/CenaHabitat'
+import { decoracoesDe, periodoDoDia } from '../pets/habitat'
+import { buscarMemorias } from '../pets/memorias'
 import { caminhoSugerido, nomeDaForma, type Caminho } from '../pets/caminhos'
 import { useAuth } from '../lib/auth'
 import { hojeISO, somarDias } from '../lib/tarefas'
@@ -20,8 +23,6 @@ import { INTERACOES, assuntosDoDia, progressoDoLaco, useLaco } from '../pets/lac
 
 type Aba = 'companheiro' | 'evolucao' | 'visual' | 'diario'
 
-// Cor do "palco" de cada espécie (o habitat de verdade chega num ciclo próprio).
-const PALCO: Record<Especie, string> = { broto: '#14b87a', faisca: '#f0a35e', gota: '#5cb8e4' }
 
 // Aba Pets: o pet é o protagonista. Em cima, o palco com o pet, a fala e o nome;
 // embaixo, duas abas discretas: Companheiro (interações) e Evolução (o caminho das formas).
@@ -33,6 +34,12 @@ export function Pets() {
   const { laco, cuidar } = useLaco()
   const [observando, setObservando] = useState(false)
   const [escolhendoCaminho, setEscolhendoCaminho] = useState(false)
+  const [chaves, setChaves] = useState<string[]>([]) // memórias do diário: decoram o habitat
+  useEffect(() => {
+    buscarMemorias()
+      .then((m) => setChaves((m ?? []).map((x) => x.chave)))
+      .catch(() => {})
+  }, [])
   const [aba, setAba] = useState<Aba>('companheiro')
   const [fala, setFala] = useState<string | null>(null)
   const [pulando, setPulando] = useState(0)
@@ -101,9 +108,11 @@ export function Pets() {
     <div className="space-y-5">
       {/* Palco: o pet em destaque */}
       <section
-        className="relative overflow-hidden rounded-[2rem] border border-line px-5 pt-5 pb-6"
-        style={{ background: `radial-gradient(120% 70% at 50% 100%, ${PALCO[pet.especie]}33 0%, transparent 60%), var(--color-surface)` }}
+        className="relative isolate overflow-hidden rounded-[2rem] border border-line px-5 pt-5 pb-6"
       >
+        <div className="absolute inset-0 -z-10">
+          <CenaHabitat especie={pet.especie} estagio={pet.estagio} periodo={periodoDoDia(new Date().getHours())} decoracoes={decoracoesDe(chaves)} />
+        </div>
         <div className="flex min-h-16 items-end justify-center">
           {fala && (
             <p
@@ -234,7 +243,7 @@ export function Pets() {
             </button>
           </div>
           <p className="text-center text-xs text-muted">
-            Em breve: brincar e o habitat de {pet.nome}.
+            Em breve: brincar com {pet.nome}.
           </p>
         </section>
       ) : aba === 'evolucao' ? (
@@ -250,9 +259,11 @@ export function Pets() {
         <button
           onClick={() => setObservando(false)}
           aria-label="Parar de observar"
-          className="fixed inset-0 z-50 flex animate-[aparecer_0.4s_ease-out] items-center justify-center"
-          style={{ background: `radial-gradient(90% 60% at 50% 70%, ${PALCO[pet.especie]}40 0%, var(--color-bg) 70%)` }}
+          className="fixed inset-0 isolate z-50 flex animate-[aparecer_0.4s_ease-out] items-center justify-center bg-bg"
         >
+          <span className="absolute inset-0 -z-10">
+            <CenaHabitat especie={pet.especie} estagio={pet.estagio} periodo={periodoDoDia(new Date().getHours())} decoracoes={decoracoesDe(chaves)} />
+          </span>
           <Pet especie={pet.especie} estagio={pet.estagio} caminho={pet.caminho} visual={pet} expressao="tranquilo" size={260} nome={pet.nome} />
         </button>
       )}

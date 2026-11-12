@@ -169,6 +169,8 @@ Precisa do **Node.js (versão LTS)** instalado.
 
 - Pet Rework, ciclo 7: visual (`supabase/ciclo23-visual.sql`, `src/pets/visual.ts`, `src/pets/itens.tsx`, `src/pets/Visual.tsx`). `user_pets.chapeu/acessorio/efeito`; desbloqueio **derivado das memórias** (sem tabela de inventário): `item_do_pet()` no banco = `ITENS` no app (teste de paridade), e o gatilho `conferir_visual_do_pet` recusa item bloqueado ou no espaço errado. Pontos de encaixe por espécie/estágio em `pontosDoCorpo`.
 
+- Pet Rework, ciclo 8: habitat (`src/pets/habitat.ts`: `periodoDoDia`, `nivelDoHabitat`, `DECORACOES` por memória; cena em `src/pets/CenaHabitat.tsx`). Sem SQL: as decorações vêm das memórias do diário. Arquivos de componente e de regra não podem ter o mesmo nome com maiúscula diferente (Windows não distingue): por isso `CenaHabitat.tsx` e `AbaVisual.tsx`.
+
 ## Como publicar uma nova versão
 
 Para versões com número, siga o checklist em `docs/RELEASE.md`.

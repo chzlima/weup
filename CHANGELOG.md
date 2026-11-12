@@ -39,6 +39,11 @@ A versão que está rodando aparece no fim da tela **Perfil** (número + commit)
 - Cada item se desbloqueia por uma memória do diário (laço, nível, primeira tarefa, primeiro hábito, primeira revisão…). Sem loja, sem moeda e sem vantagem de produtividade. O banco recusa item bloqueado ou no lugar errado.
 - O pet aparece vestido em todo o app. Precisa rodar `supabase/ciclo23-visual.sql` **antes** do merge.
 
+### Pet Rework — ciclo 8 (habitat)
+- **Habitat atrás do pet** na aba Pets e no Observar: clareira para o Broto, acampamento para a Faísca, lago para a Gota. A cena ganha mais elementos no estágio 3 e nos estágios 4–5 (árvores e flores, barraca e varal de luzes, pedras, juncos e um arco-íris).
+- A luz muda com a hora: manhã, tarde e noite (com lua e estrelas).
+- **Decorações das conquistas** aparecem sozinhas: vaso de flor (primeiro hábito), lanterna (primeira revisão), troféu (1.000 XP) e almofada (laço 2). Sem montar nada e sem SQL novo.
+
 - **Corrigido:** o teste de isolamento (`supabase/teste-isolamento.sql`) tinha sido esvaziado sem querer na revisão semanal; foi restaurado, com as verificações da revisão semanal e do pet.
 
 ### Adicionado
