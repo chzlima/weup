@@ -3,7 +3,9 @@
 O que mudou em cada versão. A mais nova fica no topo.
 A versão que está rodando aparece no fim da tela **Perfil** (número + commit).
 
-## Não lançado
+## 0.3.1 — Pronto para o teste (12/11/2026)
+
+Três melhorias antes do teste com estudantes da saúde, mais o botão de ver a senha. Os números de versão seguem as fases do plano; esta leva ainda faz parte da 0.3.
 
 ### Adicionado
 - Botão de **mostrar a senha** (ícone de olho) nos campos de senha: entrar, criar conta e criar senha nova. Ajuda a corrigir um erro de digitação antes de enviar.
