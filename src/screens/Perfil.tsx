@@ -3,6 +3,7 @@ import { checkServer } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
 import { useInstalacao } from '../lib/instalar'
 import { baixarMeusDados, excluirMinhaConta } from '../lib/conta'
+import { avisoDoSistemaSuportado, pedirAvisoDoSistema } from '../lib/lembretes'
 import { Rotulo, Sheet } from '../components/Sheet'
 import { EmBreve } from './EmBreve'
 import { Privacidade } from './Privacidade'
@@ -187,7 +188,7 @@ export function Perfil() {
     <EmBreve
       title="Perfil"
       desc="Conta, preferências e privacidade."
-      aviso="Notificações e aparência chegam numa próxima versão."
+      aviso="Notificações com o app fechado e aparência chegam numa próxima versão."
     >
       <section className="space-y-1 rounded-2xl border border-line bg-surface px-4 py-3">
         <p className="text-xs font-semibold uppercase tracking-wider text-muted">Sua conta</p>
@@ -196,6 +197,8 @@ export function Perfil() {
       </section>
 
       <ModoSimples />
+
+      <AvisosDoSistema />
 
       <InstalarApp />
 
@@ -218,6 +221,38 @@ export function Perfil() {
         WeUp! versão {__APP_VERSION__} · {import.meta.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) || 'local'}
       </p>
     </EmBreve>
+  )
+}
+
+// Lembretes como aviso do sistema. Nesta versão só chegam com o app aberto (mesmo em outra aba ou minimizado);
+// com o app fechado, vêm na próxima parte (notificações push).
+function AvisosDoSistema() {
+  const suportado = avisoDoSistemaSuportado()
+  const [permissao, setPermissao] = useState<string>(suportado ? Notification.permission : 'unsupported')
+
+  const pedir = async () => setPermissao(await pedirAvisoDoSistema())
+
+  return (
+    <section className="rounded-2xl border border-line bg-surface px-4 py-3">
+      <p className="font-bold">Avisos dos lembretes</p>
+      <p className="text-xs text-muted">
+        Os lembretes de tarefas e compromissos aparecem na tela Hoje. Permitindo, também chegam como aviso do sistema
+        enquanto o app estiver aberto.
+      </p>
+      {permissao === 'granted' ? (
+        <p className="mt-2 text-sm font-semibold text-mint">Avisos do sistema ligados ✓</p>
+      ) : permissao === 'denied' ? (
+        <p className="mt-2 text-sm text-muted">
+          Os avisos foram bloqueados neste aparelho. Para ligar, libere as notificações do WeUp! nas configurações do navegador.
+        </p>
+      ) : permissao === 'unsupported' ? (
+        <p className="mt-2 text-sm text-muted">Este navegador não mostra avisos do sistema. Os lembretes continuam na tela Hoje.</p>
+      ) : (
+        <button onClick={pedir} className="mt-2 rounded-xl border border-line px-3 py-2 text-sm font-bold text-mint">
+          Permitir avisos do sistema
+        </button>
+      )}
+    </section>
   )
 }
 

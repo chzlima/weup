@@ -4,6 +4,7 @@ import { CampoData } from './CampoData'
 import { hojeISO } from '../lib/tarefas'
 import { descreverFim, validarHorario, type Compromisso, type DadosCompromisso } from '../lib/agenda'
 import type { Tarefa } from '../lib/tarefas'
+import { OPCOES_AVISO } from '../lib/lembretes'
 
 export function CompromissoForm(props: {
   compromisso?: Compromisso
@@ -19,6 +20,7 @@ export function CompromissoForm(props: {
   const [hora, setHora] = useState(c?.hora?.slice(0, 5) ?? '')
   const [horaFim, setHoraFim] = useState(c?.hora_fim?.slice(0, 5) ?? '')
   const [taskId, setTaskId] = useState(c?.task_id ?? '')
+  const [aviso, setAviso] = useState<number | null>(c?.lembrete_min ?? null)
   const abertas = (props.tarefas ?? []).filter((t) => !t.concluida_em || t.id === c?.task_id)
   const [erro, setErro] = useState('')
 
@@ -33,7 +35,10 @@ export function CompromissoForm(props: {
       hora: hora || null,
       hora_fim: (hora && horaFim) || null,
       task_id: taskId || null,
+      lembrete_min: hora ? aviso : null,
     }
+    // Sem aviso num compromisso novo: não manda o campo (assim funciona mesmo antes do ciclo26-lembretes.sql).
+    if (dados.lembrete_min == null && !(c && 'lembrete_min' in c)) delete dados.lembrete_min
     // Sem fim num compromisso novo: não manda o campo (assim funciona mesmo antes do ciclo15-agenda.sql).
     if (!dados.hora_fim && !(c && 'hora_fim' in c)) delete dados.hora_fim
     props.onSalvar(dados)
@@ -94,6 +99,24 @@ export function CompromissoForm(props: {
             {horaFim && (
               <span className="mt-1 block text-xs text-muted">{descreverFim({ hora, hora_fim: horaFim })}</span>
             )}
+          </label>
+        )}
+
+        {hora && (
+          <label className="block">
+            <Rotulo>Avisar (opcional)</Rotulo>
+            <select
+              value={aviso ?? ''}
+              onChange={(e) => setAviso(e.target.value === '' ? null : Number(e.target.value))}
+              aria-label="Avisar antes do compromisso"
+              className="w-full rounded-xl border border-line bg-surface-2 px-3 py-2.5 outline-none focus:border-brand"
+            >
+              {OPCOES_AVISO.map((o) => (
+                <option key={o.nome} value={o.min ?? ''}>
+                  {o.nome}
+                </option>
+              ))}
+            </select>
           </label>
         )}
 
