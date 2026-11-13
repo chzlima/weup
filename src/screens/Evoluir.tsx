@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react'
 import { contarRecomecos } from '../lib/recomecar'
 import { useDados } from '../lib/useDados'
 import { useAuth } from '../lib/auth'
-import { ATRIBUTOS, NOME_TIPO, calcularNivel, tituloDoNivel, type Lancamento } from '../lib/xp'
+import {
+  ATRIBUTOS, NOME_TIPO, buscarRegras, calcularNivel, estadoDaRegra, tituloDoNivel, usadasNoDia, type Lancamento, type Regra,
+} from '../lib/xp'
 import { diaDaSemana, formatarData, hojeISO, somarDias } from '../lib/tarefas'
 import { DIAS_SEMANA } from '../lib/habitos'
 import { Aviso } from './planejar/Vazio'
@@ -97,6 +99,8 @@ export function Evoluir() {
           <Atributos resumo={r} />
 
           <Historico lancamentos={lancamentos} />
+
+          {!modoSimples && <ComoFunciona lancamentos={lancamentos} />}
         </>
       )}
     </div>
@@ -239,6 +243,55 @@ function Historico({ lancamentos }: { lancamentos: Lancamento[] }) {
           </li>
         ))}
       </ul>
+    </section>
+  )
+}
+
+// "Por que ganhei / por que não ganhei": as regras de XP (lidas do banco) e quanto de cada uma já valeu hoje.
+function ComoFunciona({ lancamentos }: { lancamentos: Lancamento[] }) {
+  const [regras, setRegras] = useState<Regra[]>([])
+  const [aberto, setAberto] = useState(false)
+  useEffect(() => {
+    buscarRegras().then(setRegras).catch(() => {})
+  }, [])
+  if (regras.length === 0) return null
+  const hoje = hojeISO()
+
+  return (
+    <section className="rounded-3xl border border-line bg-surface p-5">
+      <button onClick={() => setAberto((a) => !a)} aria-expanded={aberto} className="flex w-full items-center justify-between text-left">
+        <span>
+          <span className="block text-sm font-bold">Como o XP funciona</span>
+          <span className="block text-xs text-muted">Quanto vale cada ação e o limite de cada dia</span>
+        </span>
+        <span className="text-xs font-bold text-mint">{aberto ? 'Fechar' : 'Ver'}</span>
+      </button>
+      {aberto && (
+        <>
+          <ul className="mt-4 divide-y divide-line">
+            {regras.map((r) => {
+              const usadas = usadasNoDia(lancamentos, r.tipo, hoje)
+              return (
+                <li key={r.tipo} className="flex items-center justify-between gap-3 py-2 text-sm">
+                  <span className="min-w-0">
+                    <span className="block font-semibold">{r.nome}</span>
+                    <span className={`block text-xs ${usadas >= r.limite_dia ? 'text-gold' : 'text-muted'}`}>
+                      {estadoDaRegra(r, usadas)}
+                    </span>
+                  </span>
+                  <span className="shrink-0 font-bold text-gold">+{r.xp}</span>
+                </li>
+              )
+            })}
+          </ul>
+          <ul className="mt-3 list-disc space-y-1 pl-4 text-xs text-muted">
+            <li>Depois do limite do dia, a ação continua contando para você, só não soma XP. No dia seguinte o limite volta.</li>
+            <li>O XP vale no dia em que você faz a ação. Concluir uma tarefa de ontem conta hoje.</li>
+            <li>Desmarcar estorna o XP; marcar de novo ganha de novo. Excluir uma tarefa já feita não tira o XP.</li>
+            <li>Criar, editar ou abrir tarefas não dá XP. XP mede o que você fez no app, não o seu valor.</li>
+          </ul>
+        </>
+      )}
     </section>
   )
 }

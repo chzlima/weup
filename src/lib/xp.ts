@@ -70,9 +70,31 @@ export function tituloDoNivel(nivel: number) {
   return 'Iniciante'
 }
 
+// ---------- Regras (vêm do banco: tabela xp_regras) ----------
+// Quanto vale cada ação e quantas valem por dia. O app só mostra; quem aplica é o banco (conceder_xp).
+
+export type Regra = { tipo: TipoXP; nome: string; xp: number; limite_dia: number; versao: number }
+
+// Quantas ações deste tipo já valeram XP hoje (desfeitas não contam; as que passaram do limite também não).
+export const usadasNoDia = (lancamentos: Lancamento[], tipo: TipoXP, dia: string) =>
+  lancamentos.filter((l) => l.tipo === tipo && l.dia === dia && !l.limitado).length
+
+// Texto curto do estado da regra hoje: "3 de 10 hoje" ou "limite de hoje atingido".
+export function estadoDaRegra(r: Pick<Regra, 'limite_dia'>, usadas: number) {
+  if (usadas >= r.limite_dia) return 'limite de hoje atingido'
+  return `${usadas} de ${r.limite_dia} hoje`
+}
+
 // ---------- Banco ----------
 
 export const DIAS_HISTORICO = 30
+
+// Antes de rodar o supabase/ciclo28-xp-regras.sql a tabela não existe: a explicação só não aparece.
+export async function buscarRegras(): Promise<Regra[]> {
+  const r = await supabase.from('xp_regras').select('tipo, nome, xp, limite_dia, versao').order('xp')
+  if (r.error) return []
+  return r.data as Regra[]
+}
 
 export async function buscarXP() {
   const [r, l] = await Promise.all([

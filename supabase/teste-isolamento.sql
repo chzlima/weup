@@ -228,6 +228,13 @@ begin
     te := te || 'estornar_xp · A estorna XP direto'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
     obt := pg_temp.contar(format('select count(*) from public.xp_resumo where user_id <> %L', a));
     te := te || 'xp_resumo · A vê o total de XP de outras contas'::text; es := es || '0'::text; ob := ob || obt; ok := ok || (obt = '0');
+    -- Motor de XP (ciclo28): regras só de leitura e nenhuma origem com dois ganhos ativos
+    obt := pg_temp.tentar('update public.xp_regras set xp = 999 where tipo = ''tarefa_media''');
+    te := te || 'xp_regras · A muda o valor de uma regra'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
+    obt := pg_temp.tentar(format('update public.tasks set concluida_em = now() where id = %L', ta));
+    obt := pg_temp.tentar(format('update public.tasks set concluida_em = now() where id = %L', ta));
+    obt := pg_temp.contar(format('select count(*) from public.xp_transactions where origem_id = %L and estornado_em is null', ta));
+    te := te || 'xp_transactions · concluir 2x a mesma tarefa dá XP uma vez'::text; es := es || '1'::text; ob := ob || obt; ok := ok || (obt = '1');
 
     -- 8) Excluir conta: A só pode apagar a si mesma
     obt := pg_temp.tentar('select public.excluir_minha_conta()');

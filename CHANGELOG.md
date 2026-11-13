@@ -3,6 +3,13 @@
 O que mudou em cada versão. A mais nova fica no topo.
 A versão que está rodando aparece no fim da tela **Perfil** (número + commit).
 
+## Não lançado (a caminho da 0.5.0 — Progression Engine)
+
+### Motor de XP auditável (ciclo 1)
+- **Como o XP funciona** (Evoluir): quanto vale cada ação, o limite de cada dia e quanto você já usou hoje ("3 de 10 hoje", "limite de hoje atingido"), com as regras escritas: XP vale no dia em que a ação é feita, desmarcar estorna, criar ou editar tarefas não dá XP.
+- **Regras no banco:** os valores e limites saem do código e viram a tabela `xp_regras`, que o app lê. Cada ganho guarda a versão da regra que valeu. Os valores não mudaram.
+- **À prova de duplicação:** o banco garante um único ganho ativo por origem; concluir duas vezes (por falha de rede, por exemplo) não duplica XP. Precisa rodar `supabase/ciclo28-xp-regras.sql`.
+
 ## 0.4.1 — Lembretes com o app fechado (12/11/2026)
 
 Os lembretes da 0.4.0 passam a chegar como notificação mesmo com o app fechado. Testado de ponta a ponta no celular.

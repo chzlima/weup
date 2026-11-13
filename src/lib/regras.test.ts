@@ -15,7 +15,7 @@ import {
   separarPendentes, somarDias, xpDaTarefa,
   type Tarefa,
 } from './tarefas'
-import regrasDoBanco from '../../supabase/ciclo7.sql?raw'
+import regrasDoBanco from '../../supabase/ciclo28-xp-regras.sql?raw'
 import fundacaoPet from '../../supabase/ciclo19-pet-fundacao.sql?raw'
 
 describe('níveis', () => {
@@ -74,8 +74,8 @@ describe('XP mostrado no app = XP concedido pelo banco', () => {
   // Quem concede o XP é a função conceder_xp do banco. O app só exibe os valores:
   // se alguém mudar um lado e esquecer o outro, este teste avisa.
   const valorNoBanco = (tipo: string) => {
-    const linhaDosValores = regrasDoBanco.match(/valor\s+int := case p_tipo([\s\S]*?) end;/)![1]
-    return Number(linhaDosValores.match(new RegExp(`when '${tipo}' then (\\d+)`))![1])
+    // Linha do insert em xp_regras: ('tarefa_pequena',  'Tarefa pequena',    5,  10),
+    return Number(regrasDoBanco.match(new RegExp(`\\('${tipo}',\\s*'[^']*',\\s*(\\d+),`))![1])
   }
 
   it('tarefas, etapas, hábitos e foco batem', () => {
