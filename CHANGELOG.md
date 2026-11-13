@@ -3,7 +3,10 @@
 O que mudou em cada versão. A mais nova fica no topo.
 A versão que está rodando aparece no fim da tela **Perfil** (número + commit).
 
-## Não lançado (a caminho da 0.4.1)
+## 0.4.1 — Lembretes com o app fechado (12/11/2026)
+
+Os lembretes da 0.4.0 passam a chegar como notificação mesmo com o app fechado. Testado de ponta a ponta no celular.
+Banco: `supabase/ciclo27-push.sql` e a função `supabase/functions/enviar-lembretes`, já em produção. Isolamento: 130 verificações ok.
 
 ### Adicionado
 - **Lembretes com o app fechado:** no Perfil, "Ligar notificações neste aparelho" faz os lembretes de tarefas e compromissos chegarem como notificação na hora, mesmo com o app fechado. Cada aparelho liga o seu. No iPhone, só com o app instalado na tela de início. Precisa rodar `supabase/ciclo27-push.sql` e publicar a função `supabase/functions/enviar-lembretes`. As chaves das notificações são geradas pelo próprio servidor (ninguém copia nem cola a chave privada).
