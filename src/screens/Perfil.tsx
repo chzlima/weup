@@ -3,7 +3,7 @@ import { checkServer } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
 import { useInstalacao } from '../lib/instalar'
 import { baixarMeusDados, excluirMinhaConta } from '../lib/conta'
-import { avisoDoSistemaSuportado, pedirAvisoDoSistema } from '../lib/lembretes'
+import { desligarPush, inscritoNesteAparelho, ligarPush, pushSuportado } from '../lib/push'
 import { Rotulo, Sheet } from '../components/Sheet'
 import { EmBreve } from './EmBreve'
 import { Privacidade } from './Privacidade'
@@ -188,7 +188,7 @@ export function Perfil() {
     <EmBreve
       title="Perfil"
       desc="Conta, preferências e privacidade."
-      aviso="Notificações com o app fechado e aparência chegam numa próxima versão."
+      aviso="Aparência chega numa próxima versão."
     >
       <section className="space-y-1 rounded-2xl border border-line bg-surface px-4 py-3">
         <p className="text-xs font-semibold uppercase tracking-wider text-muted">Sua conta</p>
@@ -224,34 +224,67 @@ export function Perfil() {
   )
 }
 
-// Lembretes como aviso do sistema. Nesta versão só chegam com o app aberto (mesmo em outra aba ou minimizado);
-// com o app fechado, vêm na próxima parte (notificações push).
+// Avisos dos lembretes. Ligando, este aparelho recebe os lembretes como notificação, mesmo com o app fechado
+// (web push, ver src/lib/push.ts). Cada aparelho liga o seu. Sem isso, os lembretes continuam na tela Hoje.
 function AvisosDoSistema() {
-  const suportado = avisoDoSistemaSuportado()
+  const suportado = pushSuportado()
   const [permissao, setPermissao] = useState<string>(suportado ? Notification.permission : 'unsupported')
+  const [inscrito, setInscrito] = useState<boolean | null>(null)
+  const [ocupado, setOcupado] = useState(false)
+  const [erro, setErro] = useState('')
 
-  const pedir = async () => setPermissao(await pedirAvisoDoSistema())
+  useEffect(() => {
+    if (suportado) inscritoNesteAparelho().then(setInscrito).catch(() => setInscrito(false))
+  }, [suportado])
+
+  const executar = async (acao: () => Promise<void>) => {
+    setOcupado(true)
+    setErro('')
+    try {
+      await acao()
+    } catch (e) {
+      setErro((e as Error).message)
+    } finally {
+      setPermissao(suportado ? Notification.permission : 'unsupported')
+      setInscrito(await inscritoNesteAparelho().catch(() => false))
+      setOcupado(false)
+    }
+  }
 
   return (
     <section className="rounded-2xl border border-line bg-surface px-4 py-3">
       <p className="font-bold">Avisos dos lembretes</p>
       <p className="text-xs text-muted">
-        Os lembretes de tarefas e compromissos aparecem na tela Hoje. Permitindo, também chegam como aviso do sistema
-        enquanto o app estiver aberto.
+        Os lembretes de tarefas e compromissos aparecem na tela Hoje. Ligando aqui, este aparelho também recebe uma
+        notificação na hora, mesmo com o app fechado.
       </p>
-      {permissao === 'granted' ? (
-        <p className="mt-2 text-sm font-semibold text-mint">Avisos do sistema ligados ✓</p>
+      {permissao === 'unsupported' ? (
+        <p className="mt-2 text-sm text-muted">
+          Este navegador não recebe notificações. No iPhone, instale o app na tela de início (Compartilhar → Adicionar à
+          Tela de Início) e abra por lá.
+        </p>
       ) : permissao === 'denied' ? (
         <p className="mt-2 text-sm text-muted">
-          Os avisos foram bloqueados neste aparelho. Para ligar, libere as notificações do WeUp! nas configurações do navegador.
+          As notificações foram bloqueadas neste aparelho. Para ligar, libere as notificações do WeUp! nas configurações do
+          navegador ou do celular.
         </p>
-      ) : permissao === 'unsupported' ? (
-        <p className="mt-2 text-sm text-muted">Este navegador não mostra avisos do sistema. Os lembretes continuam na tela Hoje.</p>
+      ) : inscrito ? (
+        <div className="mt-2 flex items-center justify-between gap-3">
+          <p className="text-sm font-semibold text-mint">Notificações ligadas neste aparelho ✓</p>
+          <button onClick={() => executar(desligarPush)} disabled={ocupado} className="text-xs font-bold text-muted disabled:opacity-50">
+            Desligar
+          </button>
+        </div>
       ) : (
-        <button onClick={pedir} className="mt-2 rounded-xl border border-line px-3 py-2 text-sm font-bold text-mint">
-          Permitir avisos do sistema
+        <button
+          onClick={() => executar(ligarPush)}
+          disabled={ocupado || inscrito === null}
+          className="mt-2 rounded-xl border border-line px-3 py-2 text-sm font-bold text-mint disabled:opacity-50"
+        >
+          {ocupado ? 'Ligando…' : 'Ligar notificações neste aparelho'}
         </button>
       )}
+      {erro && <p className="mt-2 text-sm text-red-300">{erro}</p>}
     </section>
   )
 }

@@ -81,11 +81,6 @@ export function salvarVistos(vistos: Set<string>) {
 
 export const avisoDoSistemaSuportado = () => typeof window !== 'undefined' && 'Notification' in window
 
-export async function pedirAvisoDoSistema() {
-  if (!avisoDoSistemaSuportado()) return 'unsupported' as const
-  return Notification.requestPermission()
-}
-
 export async function mostrarAvisoDoSistema(l: Lembrete) {
   if (!avisoDoSistemaSuportado() || Notification.permission !== 'granted') return
   try {

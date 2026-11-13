@@ -48,7 +48,7 @@ declare
   t text;
   obt text;
   tabelas text[] := array['tasks', 'projects', 'habits', 'habit_logs', 'events',
-                          'xp_transactions', 'user_pets', 'focus_sessions', 'restarts', 'app_errors', 'task_series', 'daily_checkins', 'weekly_reviews', 'pet_memories', 'exams'];
+                          'xp_transactions', 'user_pets', 'focus_sessions', 'restarts', 'app_errors', 'task_series', 'daily_checkins', 'weekly_reviews', 'pet_memories', 'exams', 'push_subscriptions'];
   te text[] := '{}';
   es text[] := '{}';
   ob text[] := '{}';
@@ -83,6 +83,9 @@ begin
     insert into public.pet_memories (user_id, chave, tipo, dia) values (a, 'teste', 'pet', public.hoje_br()), (b, 'teste', 'pet', public.hoje_br());
     insert into public.exams (user_id, titulo, data) values (a, 'Prova A', public.hoje_br() + 7) returning id into ea;
     insert into public.exams (user_id, titulo, data) values (b, 'Prova B', public.hoje_br() + 7) returning id into eb;
+    insert into public.push_subscriptions (user_id, endpoint, p256dh, auth)
+      values (a, 'https://push.weup.test/a', 'x', 'x'), (b, 'https://push.weup.test/b', 'x', 'x');
+    insert into public.push_enviados (chave, user_id) values ('teste-a', a), ('teste-b', b);
     insert into public.app_errors (user_id, origem, mensagem, versao, commit) values (a, 'erro', 'Erro A', '0', 'teste'), (b, 'erro', 'Erro B', '0', 'teste');
 
     -- 3) A partir daqui, age como a conta A, igual ao app
@@ -145,6 +148,18 @@ begin
     te := te || 'weekly_reviews · A escreve revisão em nome de B'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
     obt := pg_temp.tentar(format('insert into public.exams (user_id, titulo, data) values (%L, %L, public.hoje_br() + 3)', b, 'x'));
     te := te || 'exams · A cria prova em nome de B'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
+    obt := pg_temp.tentar(format('insert into public.push_subscriptions (user_id, endpoint, p256dh, auth) values (%L, %L, %L, %L)', b, 'https://push.weup.test/x', 'x', 'x'));
+    te := te || 'push_subscriptions · A inscreve um aparelho em nome de B'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
+    obt := pg_temp.contar('select count(*) from public.push_enviados');
+    te := te || 'push_enviados · A lê o registro de envios'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'erro%');
+    obt := pg_temp.tentar(format('insert into public.push_enviados (chave, user_id) values (%L, %L)', 'x', a));
+    te := te || 'push_enviados · A marca um aviso como enviado'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
+    obt := pg_temp.contar('select count(*) from public.lembretes_devidos()');
+    te := te || 'lembretes_devidos · A lista os lembretes de todos'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'erro%');
+    obt := pg_temp.contar('select count(*) from public.push_chaves');
+    te := te || 'push_chaves · A lê as chaves das notificações'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'erro%');
+    obt := pg_temp.contar('select count(*) from (select public.chave_publica_push()) x');
+    te := te || 'chave_publica_push · A pega a chave pública'::text; es := es || '1'::text; ob := ob || obt; ok := ok || (obt = '1');
     obt := pg_temp.tentar(format('insert into public.pet_memories (user_id, chave, tipo, dia) values (%L, %L, %L, public.hoje_br())', a, 'inventada', 'nivel'));
     te := te || 'pet_memories · A inventa uma memória para si'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
     obt := pg_temp.contar('select public.registrar_memorias()');
