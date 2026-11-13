@@ -9,6 +9,7 @@ const TABELAS = [
   'weekly_reviews',
   'pet_memories',
   'exams',
+  'push_subscriptions',
   'projects',
   'habits',
   'habit_logs',
