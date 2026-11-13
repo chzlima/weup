@@ -2,8 +2,8 @@
 // Chamada a cada minuto pelo agendamento (supabase/ciclo27-push.sql). Pega os lembretes que acabaram de chegar,
 // anota cada um em push_enviados (para nunca mandar duas vezes) e envia para os aparelhos inscritos da pessoa.
 //
-// Segredos (Supabase → Edge Functions → Secrets), colados à mão no painel, nunca no código:
-//   VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY
+// Chaves das notificações (VAPID): na primeira vez, a própria função gera o par e guarda em push_chaves
+// (tabela que só o servidor lê). Ninguém copia nem cola a chave privada.
 // SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY já vêm prontos no ambiente da função.
 
 import webpush from 'npm:web-push@3.6.7'
@@ -12,15 +12,30 @@ import { createClient } from 'npm:@supabase/supabase-js@2.45.4'
 type Devido = { user_id: string; chave: string; titulo: string; detalhe: string }
 type Inscricao = { id: string; endpoint: string; p256dh: string; auth: string }
 
-Deno.serve(async () => {
-  const publica = Deno.env.get('VAPID_PUBLIC_KEY')
-  const privada = Deno.env.get('VAPID_PRIVATE_KEY')
-  if (!publica || !privada) return Response.json({ erro: 'Faltam as chaves VAPID nos segredos da função.' }, { status: 500 })
-  webpush.setVapidDetails('https://weup-rose.vercel.app', publica, privada)
+type Chaves = { publica: string; privada: string }
 
+// Lê as chaves; se ainda não existem, cria. Se duas chamadas criarem juntas, vale a primeira gravada.
+async function chaves(db: ReturnType<typeof createClient>): Promise<Chaves> {
+  const lidas = await db.from('push_chaves').select('publica, privada').eq('id', 1).maybeSingle()
+  if (lidas.data) return lidas.data as Chaves
+  const novas = webpush.generateVAPIDKeys()
+  await db.from('push_chaves').upsert({ id: 1, publica: novas.publicKey, privada: novas.privateKey }, { onConflict: 'id', ignoreDuplicates: true })
+  const gravadas = await db.from('push_chaves').select('publica, privada').eq('id', 1).single()
+  if (gravadas.error) throw new Error(gravadas.error.message)
+  return gravadas.data as Chaves
+}
+
+Deno.serve(async () => {
   const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
     auth: { persistSession: false },
   })
+  let par: Chaves
+  try {
+    par = await chaves(db)
+  } catch (e) {
+    return Response.json({ erro: (e as Error).message }, { status: 500 })
+  }
+  webpush.setVapidDetails('https://weup-rose.vercel.app', par.publica, par.privada)
 
   const { data: devidos, error } = await db.rpc('lembretes_devidos')
   if (error) return Response.json({ erro: error.message }, { status: 500 })

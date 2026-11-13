@@ -4,9 +4,13 @@ import { checar } from './tarefas'
 // Lembretes com o app fechado (web push). O aparelho se inscreve aqui; quem envia é o servidor
 // (supabase/functions/enviar-lembretes, chamado a cada minuto). Ver supabase/ciclo27-push.sql.
 
-// Chave PÚBLICA das notificações (VAPID): pode ficar no código. A privada fica só nos segredos do Supabase.
-export const VAPID_PUBLICA =
-  import.meta.env.VITE_VAPID_PUBLIC_KEY || 'BC_E3wr6mricgK6GnLm5XmgIbQ2UV_ZYeAPQAHXagjWK32yeUg2qZincl48MLDO5oVDoSAtuOyzGVz8oRxndno0'
+// Chave PÚBLICA das notificações (VAPID), gerada pelo servidor. A privada nunca sai do servidor.
+async function chavePublica() {
+  const r = await supabase.rpc('chave_publica_push')
+  const chave = checar<string | null>(r)
+  if (!chave) throw new Error('As notificações ainda estão sendo preparadas no servidor. Tente de novo em 1 minuto.')
+  return chave
+}
 
 export const pushSuportado = () =>
   typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window
@@ -35,7 +39,7 @@ export async function ligarPush() {
   if (!reg) throw new Error('Abra o app instalado (ou recarregue a página) e tente de novo.')
   const inscricao =
     (await reg.pushManager.getSubscription()) ??
-    (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: chaveEmBytes(VAPID_PUBLICA) }))
+    (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: chaveEmBytes(await chavePublica()) }))
   const json = inscricao.toJSON()
   checar(
     await supabase

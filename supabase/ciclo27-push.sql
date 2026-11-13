@@ -86,3 +86,25 @@ select cron.schedule(
        body := '{}'::jsonb
      ) $$
 );
+
+-- ---------- Chaves das notificações (VAPID), geradas pelo próprio servidor ----------
+-- Na primeira vez que roda, a função enviar-lembretes cria o par de chaves e guarda aqui.
+-- Ninguém precisa copiar nem colar a chave privada: ela nunca sai do servidor (o app não lê esta tabela).
+-- O app pega só a pública, por chave_publica_push().
+create table if not exists public.push_chaves (
+  id      smallint primary key default 1 check (id = 1),
+  publica text not null,
+  privada text not null,
+  criada_em timestamptz not null default now()
+);
+
+alter table public.push_chaves enable row level security; -- sem regra: só o servidor
+revoke all on public.push_chaves from anon, authenticated;
+
+create or replace function public.chave_publica_push() returns text
+language sql stable security definer set search_path = public as $$
+  select publica from push_chaves where id = 1
+$$;
+
+revoke execute on function public.chave_publica_push() from public, anon;
+grant execute on function public.chave_publica_push() to authenticated;

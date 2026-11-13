@@ -6,7 +6,7 @@ A versão que está rodando aparece no fim da tela **Perfil** (número + commit)
 ## Não lançado (a caminho da 0.4.1)
 
 ### Adicionado
-- **Lembretes com o app fechado:** no Perfil, "Ligar notificações neste aparelho" faz os lembretes de tarefas e compromissos chegarem como notificação na hora, mesmo com o app fechado. Cada aparelho liga o seu. No iPhone, só com o app instalado na tela de início. Precisa rodar `supabase/ciclo27-push.sql`, publicar a função `supabase/functions/enviar-lembretes` e colar as chaves VAPID nos segredos do Supabase.
+- **Lembretes com o app fechado:** no Perfil, "Ligar notificações neste aparelho" faz os lembretes de tarefas e compromissos chegarem como notificação na hora, mesmo com o app fechado. Cada aparelho liga o seu. No iPhone, só com o app instalado na tela de início. Precisa rodar `supabase/ciclo27-push.sql` e publicar a função `supabase/functions/enviar-lembretes`. As chaves das notificações são geradas pelo próprio servidor (ninguém copia nem cola a chave privada).
 
 ## 0.4.0 — Smart Planning (12/11/2026)
 

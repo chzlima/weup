@@ -156,6 +156,10 @@ begin
     te := te || 'push_enviados · A marca um aviso como enviado'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
     obt := pg_temp.contar('select count(*) from public.lembretes_devidos()');
     te := te || 'lembretes_devidos · A lista os lembretes de todos'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'erro%');
+    obt := pg_temp.contar('select count(*) from public.push_chaves');
+    te := te || 'push_chaves · A lê as chaves das notificações'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'erro%');
+    obt := pg_temp.contar('select count(*) from (select public.chave_publica_push()) x');
+    te := te || 'chave_publica_push · A pega a chave pública'::text; es := es || '1'::text; ob := ob || obt; ok := ok || (obt = '1');
     obt := pg_temp.tentar(format('insert into public.pet_memories (user_id, chave, tipo, dia) values (%L, %L, %L, public.hoje_br())', a, 'inventada', 'nivel'));
     te := te || 'pet_memories · A inventa uma memória para si'::text; es := es || 'bloqueado'::text; ob := ob || obt; ok := ok || (obt like 'bloqueado%');
     obt := pg_temp.contar('select public.registrar_memorias()');
